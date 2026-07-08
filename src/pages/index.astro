@@ -375,34 +375,6 @@ const canonical = 'https://fortsprite.com/';
         </div>
       </section>
 
-      <section class="toolbar" aria-label="Checklist controls">
-        <div class="control-stack">
-          <div class="filter-group" role="tablist" aria-label="Filter sprites by status">
-            <button class="filter is-active" type="button" data-status-filter="all" aria-pressed="true">All</button>
-            <button class="filter" type="button" data-status-filter="not-found" aria-pressed="false">Not found</button>
-            <button class="filter" type="button" data-status-filter="extracted" aria-pressed="false">Extracted</button>
-            <button class="filter" type="button" data-status-filter="mastered" aria-pressed="false">Mastered</button>
-          </div>
-          <div class="filter-group" role="tablist" aria-label="Filter sprites by variant">
-            <button class="filter is-active" type="button" data-variant-filter="all" aria-pressed="true">All variants</button>
-            <button class="filter" type="button" data-variant-filter="Base" aria-pressed="false">Base</button>
-            <button class="filter" type="button" data-variant-filter="Gold" aria-pressed="false">Gold</button>
-            <button class="filter" type="button" data-variant-filter="Gummy" aria-pressed="false">Gummy</button>
-            <button class="filter" type="button" data-variant-filter="Galaxy" aria-pressed="false">Galaxy</button>
-            <button class="filter" type="button" data-variant-filter="Gem" aria-pressed="false">Gem</button>
-            <button class="filter" type="button" data-variant-filter="Holofoil" aria-pressed="false">Holofoil</button>
-            <button class="filter" type="button" data-variant-filter="Cube" aria-pressed="false">Cube</button>
-            <button class="filter" type="button" data-variant-filter="Quack" aria-pressed="false">Quack</button>
-          </div>
-          <div class="filter-group" role="tablist" aria-label="Filter sprites by availability">
-            <button class="filter is-active" type="button" data-release-filter="all" aria-pressed="true">All availability</button>
-            <button class="filter" type="button" data-release-filter="released" aria-pressed="false">Released</button>
-            <button class="filter" type="button" data-release-filter="unreleased" aria-pressed="false">Unreleased</button>
-          </div>
-        </div>
-        <button class="reset" type="button" id="reset-progress">Reset</button>
-      </section>
-
       <section class="matrix-wrap" aria-label="Sprite checklist">
         <div class="sprite-matrix">
           <div class="matrix-header sprite-type-heading">Sprite</div>
@@ -450,18 +422,12 @@ const canonical = 'https://fortsprite.com/';
     <script>
       const storageKey = 'fortsprite:v1';
       const cards = Array.from(document.querySelectorAll('[data-sprite-card]'));
-      const statusFilters = Array.from(document.querySelectorAll('[data-status-filter]'));
-      const variantFilters = Array.from(document.querySelectorAll('[data-variant-filter]'));
-      const releaseFilters = Array.from(document.querySelectorAll('[data-release-filter]'));
       const counts = {
         mastered: document.querySelector('#mastered-count'),
         extracted: document.querySelector('#extracted-count'),
         missing: document.querySelector('#missing-count')
       };
 
-      let selectedStatusFilter = 'all';
-      let selectedVariantFilter = 'all';
-      let selectedReleaseFilter = 'all';
       let state = {};
 
       try {
@@ -487,27 +453,6 @@ const canonical = 'https://fortsprite.com/';
             button.textContent = status === 'not-found' ? 'None' : status === 'extracted' ? 'Extracted' : 'Mastered';
             button.setAttribute('aria-label', `${button.getAttribute('aria-label').replace(/ status:.*/, ' status')}: ${button.textContent}`);
           }
-          const statusMatches = selectedStatusFilter === 'all' || selectedStatusFilter === status;
-          const variantMatches = selectedVariantFilter === 'all' || selectedVariantFilter === card.dataset.variant;
-          const releaseMatches =
-            selectedReleaseFilter === 'all' ||
-            (selectedReleaseFilter === 'released' && card.dataset.released === 'true') ||
-            (selectedReleaseFilter === 'unreleased' && card.dataset.released === 'false');
-          card.hidden = !statusMatches || !variantMatches || !releaseMatches;
-        });
-
-        document.querySelectorAll('[data-variant-column], [data-empty-cell]').forEach((item) => {
-          item.hidden = selectedVariantFilter !== 'all' && selectedVariantFilter !== item.dataset.variantColumn && selectedVariantFilter !== item.dataset.variant;
-        });
-
-        document.querySelectorAll('[data-sprite-row]').forEach((row) => {
-          const rowCells = [];
-          let sibling = row.nextElementSibling;
-          while (sibling && !sibling.matches('[data-sprite-row]')) {
-            if (sibling.matches('[data-sprite-card]')) rowCells.push(sibling);
-            sibling = sibling.nextElementSibling;
-          }
-          row.hidden = rowCells.every((cell) => cell.hidden);
         });
 
         counts.mastered.textContent = String(totals.mastered);
@@ -525,48 +470,6 @@ const canonical = 'https://fortsprite.com/';
           persist();
           applyState();
         });
-      });
-
-      statusFilters.forEach((button) => {
-        button.addEventListener('click', () => {
-          selectedStatusFilter = button.dataset.statusFilter;
-          statusFilters.forEach((filter) => {
-            const active = filter === button;
-            filter.classList.toggle('is-active', active);
-            filter.setAttribute('aria-pressed', String(active));
-          });
-          applyState();
-        });
-      });
-
-      variantFilters.forEach((button) => {
-        button.addEventListener('click', () => {
-          selectedVariantFilter = button.dataset.variantFilter;
-          variantFilters.forEach((filter) => {
-            const active = filter === button;
-            filter.classList.toggle('is-active', active);
-            filter.setAttribute('aria-pressed', String(active));
-          });
-          applyState();
-        });
-      });
-
-      releaseFilters.forEach((button) => {
-        button.addEventListener('click', () => {
-          selectedReleaseFilter = button.dataset.releaseFilter;
-          releaseFilters.forEach((filter) => {
-            const active = filter === button;
-            filter.classList.toggle('is-active', active);
-            filter.setAttribute('aria-pressed', String(active));
-          });
-          applyState();
-        });
-      });
-
-      document.querySelector('#reset-progress').addEventListener('click', () => {
-        state = {};
-        persist();
-        applyState();
       });
 
       applyState();
@@ -674,47 +577,6 @@ const canonical = 'https://fortsprite.com/';
   .summary small {
     color: var(--muted);
     font-weight: 700;
-  }
-
-  .toolbar {
-    display: flex;
-    justify-content: space-between;
-    gap: 16px;
-    align-items: flex-start;
-    margin: 0 0 18px;
-  }
-
-  .control-stack {
-    display: grid;
-    gap: 8px;
-  }
-
-  .filter-group {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .filter,
-  .reset {
-    min-height: 42px;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    background: rgba(23, 32, 46, 0.86);
-    color: var(--text);
-    cursor: pointer;
-    font-weight: 800;
-    padding: 0 14px;
-  }
-
-  .filter.is-active {
-    border-color: var(--green);
-    background: var(--green);
-    color: #07120d;
-  }
-
-  .reset {
-    color: var(--red);
   }
 
   .matrix-wrap {
@@ -884,14 +746,5 @@ const canonical = 'https://fortsprite.com/';
       font-size: 1.6rem;
     }
 
-    .toolbar {
-      align-items: stretch;
-      flex-direction: column;
-    }
-
-    .filter,
-    .reset {
-      flex: 1 1 auto;
-    }
   }
 </style>
