@@ -295,6 +295,7 @@ const spriteRows = [
 const title = 'fortsprite - Fortnite Sprite Checker';
 const description = 'Track every current and unreleased Fortnite Sprite variant you have extracted, mastered, or still need to find. Your checklist saves privately in your browser.';
 const canonical = 'https://fortsprite.com/';
+const previewImage = new URL('/og-image.png', canonical).toString();
 ---
 
 <!doctype html>
@@ -307,6 +308,7 @@ const canonical = 'https://fortsprite.com/';
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <link rel="canonical" href={canonical} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/og-image.png" />
     <meta name="theme-color" content="#121826" />
 
     <meta property="og:type" content="website" />
@@ -314,16 +316,25 @@ const canonical = 'https://fortsprite.com/';
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:site_name" content="fortsprite" />
+    <meta property="og:image" content={previewImage} />
+    <meta property="og:image:secure_url" content={previewImage} />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="fortsprite Fortnite Sprite checklist preview" />
 
-    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={previewImage} />
+    <meta name="twitter:image:alt" content="fortsprite Fortnite Sprite checklist preview" />
 
     <script type="application/ld+json" set:html={JSON.stringify({
       '@context': 'https://schema.org',
       '@type': 'WebApplication',
       name: 'fortsprite',
       url: canonical,
+      image: previewImage,
       applicationCategory: 'GameApplication',
       operatingSystem: 'Any',
       description

@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">fortsprite Fortnite Sprite Checklist</title>
+  <desc id="desc">A colorful preview card for fortsprite, a Fortnite Sprite checklist.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#071031"/>
+      <stop offset="0.48" stop-color="#1734a5"/>
+      <stop offset="1" stop-color="#732de0"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#28d7ff" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#ff4fd8" stop-opacity="0.24"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="20" stdDeviation="18" flood-color="#000000" flood-opacity="0.36"/>
+    </filter>
+    <filter id="title-shadow" x="-10%" y="-20%" width="120%" height="150%">
+      <feDropShadow dx="0" dy="8" stdDeviation="0" flood-color="#1230a5" flood-opacity="1"/>
+      <feDropShadow dx="0" dy="14" stdDeviation="0" flood-color="#000000" flood-opacity="0.38"/>
+      <feDropShadow dx="0" dy="0" stdDeviation="18" flood-color="#28d7ff" flood-opacity="0.5"/>
+    </filter>
+    <pattern id="stripes" width="42" height="42" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="42" height="42" fill="none"/>
+      <rect width="3" height="42" fill="#ffffff" opacity="0.09"/>
+    </pattern>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect width="1200" height="630" fill="url(#stripes)"/>
+  <circle cx="156" cy="95" r="210" fill="#ffe34d" opacity="0.2"/>
+  <circle cx="1030" cy="86" r="230" fill="#ff4fd8" opacity="0.2"/>
+  <circle cx="915" cy="524" r="250" fill="#28d7ff" opacity="0.12"/>
+
+  <g filter="url(#shadow)">
+    <rect x="68" y="72" width="1064" height="486" rx="22" fill="#071031" opacity="0.74"/>
+    <rect x="68" y="72" width="1064" height="486" rx="22" fill="url(#panel)"/>
+    <rect x="68" y="72" width="1064" height="486" rx="22" fill="none" stroke="#ffffff" stroke-opacity="0.24" stroke-width="4"/>
+  </g>
+
+  <g transform="translate(88 108)">
+    <text x="0" y="0" fill="#ffe34d" font-family="Arial Black, Impact, sans-serif" font-size="32" font-weight="900">FORTNITE SPRITE CHECKLIST</text>
+    <text x="0" y="145" fill="#ffffff" filter="url(#title-shadow)" font-family="Arial Black, Impact, sans-serif" font-size="138" font-weight="900">fortsprite</text>
+    <text x="4" y="206" fill="#c8d6ff" font-family="Arial, sans-serif" font-size="34" font-weight="700">Track extracted and mastered Sprites in your browser.</text>
+  </g>
+
+  <g transform="translate(755 126)">
+    <g transform="translate(0 0)">
+      <rect x="0" y="0" width="150" height="150" rx="18" fill="#14205a" stroke="#28d7ff" stroke-opacity="0.7" stroke-width="4"/>
+      <path d="M39 108c0-48 18-80 54-80s54 32 54 80" fill="#37f58f"/>
+      <circle cx="67" cy="75" r="10" fill="#071031"/>
+      <circle cx="115" cy="75" r="10" fill="#071031"/>
+      <path d="M59 35l-28-34 48 17M127 35l28-34-48 17" fill="none" stroke="#37f58f" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <g transform="translate(188 38)">
+      <rect x="0" y="0" width="136" height="136" rx="18" fill="#24164c" stroke="#ffe34d" stroke-opacity="0.75" stroke-width="4"/>
+      <path d="M34 99c0-43 16-72 49-72s49 29 49 72" fill="#ffe34d"/>
+      <circle cx="60" cy="70" r="9" fill="#071031"/>
+      <circle cx="103" cy="70" r="9" fill="#071031"/>
+      <path d="M53 34l-25-31 44 15M113 34l25-31-44 15" fill="none" stroke="#ffe34d" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <g transform="translate(84 196)">
+      <rect x="0" y="0" width="154" height="154" rx="18" fill="#15245f" stroke="#ff4fd8" stroke-opacity="0.72" stroke-width="4"/>
+      <path d="M40 111c0-49 18-82 55-82s55 33 55 82" fill="#ff77e5"/>
+      <circle cx="69" cy="78" r="10" fill="#071031"/>
+      <circle cx="118" cy="78" r="10" fill="#071031"/>
+      <path d="M61 37l-29-35 50 18M129 37l29-35-50 18" fill="none" stroke="#ff77e5" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+  </g>
+
+  <g transform="translate(92 465)">
+    <rect width="184" height="58" rx="12" fill="#071031" opacity="0.82" stroke="#ffffff" stroke-opacity="0.22" stroke-width="2"/>
+    <text x="26" y="39" fill="#37f58f" font-family="Arial Black, Arial, sans-serif" font-size="28" font-weight="900">Extracted</text>
+    <rect x="204" width="172" height="58" rx="12" fill="#071031" opacity="0.82" stroke="#ffffff" stroke-opacity="0.22" stroke-width="2"/>
+    <text x="230" y="39" fill="#ffe34d" font-family="Arial Black, Arial, sans-serif" font-size="28" font-weight="900">Mastered</text>
+  </g>
+</svg>
