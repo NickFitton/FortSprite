@@ -109,6 +109,7 @@ const iconMaps = {
     Galaxy: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_GrimReaper_Galaxy_L.webp'
   },
   seven: {
+    Base: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Seven_ui_L.webp',
     Gold: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Seven_Gold_ui_L.webp',
     Gummy: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Seven_Candy_ui_L.webp',
     Galaxy: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Seven_Galaxy_ui_L.webp',
@@ -236,32 +237,29 @@ const spriteTypes = [
     rarity: 'legendary',
     ability: 'Unreleased sprite listed by Fortnite.GG.',
     unreleased: true,
-    images: { ...iconMaps.zeroPoint, ...iconMaps.seven }
-  },
-  {
-    key: 'batman',
-    name: 'Batman',
-    rarity: 'mythic',
-    ability: 'Unreleased sprite listed by Fortnite.GG.',
-    unreleased: true,
-    images: iconMaps.king
+    images: iconMaps.seven
   }
 ];
 
 const sprites = [
   ...spriteTypes.flatMap((sprite) =>
-    variants.map((variant) => ({
-      id: `${sprite.key}-${variant.toLowerCase()}`,
-      name: variant === 'Base' ? `${sprite.name} Sprite` : `${variant} ${sprite.name} Sprite`,
-      family: sprite.name,
-      variant,
-      rarity: variant === 'Base' ? sprite.rarity : 'special',
-      ability: sprite.ability,
-      released: !sprite.unreleased && releasedVariants.includes(variant),
-      hasExactImage: Boolean(sprite.images[variant]),
-      image: sprite.images[variant] ?? sprite.images.Base,
-      source: sourceList
-    }))
+    variants.flatMap((variant) => {
+      const image = sprite.images[variant] ?? sprite.images.Base;
+      if (!image) return [];
+
+      return {
+        id: `${sprite.key}-${variant.toLowerCase()}`,
+        name: variant === 'Base' ? `${sprite.name} Sprite` : `${variant} ${sprite.name} Sprite`,
+        family: sprite.name,
+        variant,
+        rarity: variant === 'Base' ? sprite.rarity : 'special',
+        ability: sprite.ability,
+        released: !sprite.unreleased && releasedVariants.includes(variant),
+        hasExactImage: Boolean(sprite.images[variant]),
+        image,
+        source: sourceList
+      };
+    })
   ),
   {
     id: 'burnt-peanut-base',
@@ -274,20 +272,9 @@ const sprites = [
     hasExactImage: true,
     image: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_BurntPeanut_ui_L.webp',
     source: sourceList
-  },
-  {
-    id: 'john-wick-base',
-    name: 'John Wick Sprite',
-    family: 'John Wick',
-    variant: 'Base',
-    rarity: 'mythic',
-    ability: 'Unreleased sprite listed by Fortnite.GG.',
-    released: false,
-    hasExactImage: false,
-    image: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Drifter_ui_L.webp',
-    source: sourceList
   }
 ];
+const claimableSprites = sprites.filter((sprite) => sprite.released);
 const spriteRows = [
   ...spriteTypes.map((sprite) => ({
     key: sprite.key,
@@ -302,13 +289,6 @@ const spriteRows = [
     rarity: 'mythic',
     ability: 'Gives a chance to find extra loot, including Mythic items, after eliminations.',
     cells: variants.map((variant) => variant === 'Base' ? sprites.find((item) => item.id === 'burnt-peanut-base') : undefined)
-  },
-  {
-    key: 'john-wick',
-    name: 'John Wick',
-    rarity: 'mythic',
-    ability: 'Unreleased sprite listed by Fortnite.GG.',
-    cells: variants.map((variant) => variant === 'Base' ? sprites.find((item) => item.id === 'john-wick-base') : undefined)
   }
 ];
 
@@ -361,7 +341,7 @@ const canonical = 'https://fortsprite.com/';
         </div>
         <div class="summary" aria-label="Sprite progress">
           <div>
-            <span id="missing-count">{sprites.length}</span>
+            <span id="missing-count">{claimableSprites.length}</span>
             <small>Not found</small>
           </div>
           <div>
@@ -755,8 +735,20 @@ const canonical = 'https://fortsprite.com/';
     max-height: 94px;
     object-fit: contain;
     filter:
-      drop-shadow(0 4px 0 rgba(255, 255, 255, 0.22))
+      drop-shadow(0 0 6px rgba(40, 215, 255, 0.1))
+      drop-shadow(0 4px 0 rgba(0, 0, 0, 0.32))
       drop-shadow(0 16px 16px rgba(0, 0, 0, 0.44));
+  }
+
+  .sprite-cell[data-exact-image="false"] .cell-art img {
+    opacity: 0.55;
+    filter:
+      brightness(0)
+      saturate(0)
+      invert(0.12)
+      drop-shadow(0 0 6px rgba(40, 215, 255, 0.1))
+      drop-shadow(0 4px 0 rgba(0, 0, 0, 0.32))
+      drop-shadow(0 14px 14px rgba(0, 0, 0, 0.44));
   }
 
   .cell-meta {
@@ -861,8 +853,10 @@ const canonical = 'https://fortsprite.com/';
     .sprite-type {
       display: grid;
       place-items: center;
+      position: sticky;
       min-height: 230px;
       padding: 0;
+      overflow: hidden;
     }
 
     .sprite-type .element,
@@ -871,12 +865,17 @@ const canonical = 'https://fortsprite.com/';
     }
 
     .sprite-type h2 {
-      width: max-content;
-      max-width: 190px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 180px;
+      max-width: none;
       transform: rotate(-90deg);
+      transform-origin: center;
       font-size: 1rem;
       line-height: 1;
       text-align: center;
+      translate: -50% -50%;
       white-space: nowrap;
     }
 
