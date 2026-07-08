@@ -1,0 +1,897 @@
+---
+const variants = ['Base', 'Gold', 'Gummy', 'Galaxy', 'Gem', 'Holofoil', 'Cube', 'Quack'];
+const releasedVariants = ['Base', 'Gold', 'Gummy', 'Galaxy'];
+const sourceRoot = 'https://fortnite.gg/sprites';
+const sourceList = `${sourceRoot}`;
+const iconMaps = {
+  water: {
+    Base: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Water_Unvault_Ch7S3_ui_L.webp',
+    Gold: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Water_Gold_ui_L.webp',
+    Gummy: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Water_Candy_ui_L.webp',
+    Galaxy: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Water_Galaxy_ui_L.webp',
+    Gem: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Water_Gem_ui_L.webp',
+    Holofoil: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Water_Holofoil_ui_L.webp'
+  },
+  earth: {
+    Base: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Earth_Ch7S3_UI_L.webp',
+    Gold: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Earth_Gold_ui_L.webp',
+    Gummy: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Earth_Candy_ui_L.webp',
+    Galaxy: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Earth_Galaxy_ui_L.webp',
+    Gem: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Earth_Gem_ui_L.webp'
+  },
+  fire: {
+    Base: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Fire_Unvault_Ch7S3_ui_L.webp',
+    Gold: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Fire_Gold_ui_L.webp',
+    Gummy: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Fire_Candy_ui_L.webp',
+    Galaxy: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Fire_Galaxy_ui_L.webp',
+    Holofoil: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Fire_Holofoil_ui_L.webp'
+  },
+  duck: {
+    Base: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Duck_Default_L.webp',
+    Gold: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Duck_Gold_L.webp',
+    Gummy: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Duck_Candy_L.webp',
+    Galaxy: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Duck_Galaxy_L.webp',
+    Gem: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Duck_Gem_L.webp'
+  },
+  ghost: {
+    Base: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Ghost_Unvault_L.webp',
+    Gold: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Ghost_Gold_L.webp',
+    Gummy: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Ghost_Candy_L.webp',
+    Galaxy: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Ghost_Galaxy_L.webp'
+  },
+  dream: {
+    Base: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Sleepy_ui_L.webp',
+    Gold: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Sleepy_Gold_ui_L.webp',
+    Gummy: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Sleepy_Candy_ui_L.webp',
+    Galaxy: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Sleepy_Galaxy_ui_L.webp',
+    Cube: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Sleepy_Cube_ui_L.webp'
+  },
+  demon: {
+    Base: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_RedDemon_Default_L.webp',
+    Gold: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_RedDemon_Gold_L.webp',
+    Gummy: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_RedDemon_Candy_L.webp',
+    Galaxy: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_RedDemon_Galaxy_L.webp',
+    Gem: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_RedDemon_Gem_L.webp'
+  },
+  punk: {
+    Base: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Punk_ui_L.webp',
+    Gold: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Punk_Gold_ui_L.webp',
+    Gummy: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Punk_Candy_ui_L.webp',
+    Galaxy: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Punk_Galaxy_ui_L.webp',
+    Gem: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Punk_Gem_ui_L.webp',
+    Cube: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Punk_Cube_ui_L.webp'
+  },
+  king: {
+    Base: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_King_ui_L.webp',
+    Gold: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_King_Gold_ui_L.webp',
+    Gummy: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_King_Candy_ui_L.webp',
+    Galaxy: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_King_Galaxy_ui_L.webp',
+    Holofoil: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_King_Holofoil_ui_L.webp'
+  },
+  zeroPoint: {
+    Base: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_ZeroPoint_ui_L.webp',
+    Gold: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_ZeroPoint_Gold_ui_L.webp',
+    Gummy: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_ZeroPoint_Candy_ui_L.webp',
+    Galaxy: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_ZeroPoint_Galaxy_ui_L.webp',
+    Gem: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_ZeroPoint_Gem_ui_L.webp',
+    Quack: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_ZeroPoint_Quack_ui_L.webp'
+  },
+  fishy: {
+    Base: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Fishy_ui_L.webp',
+    Gold: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Fishy_Gold_ui_L.webp',
+    Gummy: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Fishy_Candy_ui_L.webp',
+    Galaxy: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Fishy_Galaxy_ui_L.webp'
+  },
+  striker: {
+    Base: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Soccer_ui_L.webp',
+    Gold: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Soccer_Gold_L.webp',
+    Gummy: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Soccer_Candy_L.webp',
+    Galaxy: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Soccer_Galaxy_L.webp',
+    Holofoil: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Soccer_Holofoil_L.webp'
+  },
+  aura: {
+    Base: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Drifter_ui_L.webp',
+    Gold: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Drifter_Gold_ui_L.webp',
+    Gummy: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Drifter_Candy_ui_L.webp',
+    Galaxy: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Drifter_Galaxy_ui_L.webp',
+    Gem: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Drifter_Gem_ui_L.webp'
+  },
+  boss: {
+    Base: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Boss_ui_L.webp',
+    Gold: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Boss_Gold_ui_L.webp',
+    Gummy: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Boss_Candy_ui_L.webp',
+    Galaxy: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Boss_Galaxy_ui_L.webp'
+  },
+  grim: {
+    Base: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_GrimReaper_Default_L.webp',
+    Gold: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_GrimReaper_Gold_L.webp',
+    Gummy: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_GrimReaper_Candy_L.webp',
+    Galaxy: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_GrimReaper_Galaxy_L.webp'
+  },
+  seven: {
+    Gold: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Seven_Gold_ui_L.webp',
+    Gummy: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Seven_Candy_ui_L.webp',
+    Galaxy: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Seven_Galaxy_ui_L.webp',
+    Holofoil: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Seven_Holofoil_ui_L.webp'
+  }
+};
+
+const spriteTypes = [
+  {
+    key: 'water',
+    name: 'Water',
+    rarity: 'rare',
+    ability: 'Restores shields while you and nearby teammates are in water.',
+    images: iconMaps.water
+  },
+  {
+    key: 'earth',
+    name: 'Earth',
+    rarity: 'rare',
+    ability: 'Increases your chance of finding rare items in chests.',
+    images: iconMaps.earth
+  },
+  {
+    key: 'fire',
+    name: 'Fire',
+    rarity: 'rare',
+    ability: 'Triggers a fiery explosion after you deal enough enemy damage.',
+    images: iconMaps.fire
+  },
+  {
+    key: 'duck',
+    name: 'Duck',
+    rarity: 'epic',
+    ability: 'Restores shields when you emote or jam.',
+    images: iconMaps.duck
+  },
+  {
+    key: 'ghost',
+    name: 'Ghost',
+    rarity: 'epic',
+    ability: 'Makes you temporarily invisible while reloading.',
+    images: iconMaps.ghost
+  },
+  {
+    key: 'dream',
+    name: 'Dream',
+    rarity: 'legendary',
+    ability: 'Gives a random item each level, with legendary loot at Level 5.',
+    images: iconMaps.dream
+  },
+  {
+    key: 'demon',
+    name: 'Demon',
+    rarity: 'epic',
+    ability: 'Grants health and shields after an elimination.',
+    images: iconMaps.demon
+  },
+  {
+    key: 'punk',
+    name: 'Punk',
+    rarity: 'legendary',
+    ability: 'Adds random chest bonuses, including stronger loot and effects.',
+    images: iconMaps.punk
+  },
+  {
+    key: 'king',
+    name: 'King',
+    rarity: 'epic',
+    ability: 'Increases pickaxe damage.',
+    images: iconMaps.king
+  },
+  {
+    key: 'zero-point',
+    name: 'Zero Point',
+    rarity: 'mythic',
+    ability: 'Spawns a Shield Bubble Jr. whenever you heal yourself.',
+    images: iconMaps.zeroPoint
+  },
+  {
+    key: 'fishy',
+    name: 'Fishy',
+    rarity: 'rare',
+    ability: 'Track this extracted variant in your permanent Sprite collection.',
+    images: iconMaps.fishy
+  },
+  {
+    key: 'striker',
+    name: 'Striker',
+    rarity: 'epic',
+    ability: 'Track this extracted variant in your permanent Sprite collection.',
+    images: iconMaps.striker
+  },
+  {
+    key: 'aura',
+    name: 'Aura',
+    rarity: 'epic',
+    ability: 'Track this extracted variant in your permanent Sprite collection.',
+    images: iconMaps.aura
+  },
+  {
+    key: 'boss',
+    name: 'Boss',
+    rarity: 'legendary',
+    ability: 'Track this extracted variant in your permanent Sprite collection.',
+    images: iconMaps.boss
+  },
+  {
+    key: 'grim',
+    name: 'Grim',
+    rarity: 'mythic',
+    ability: 'Track this extracted variant in your permanent Sprite collection.',
+    images: iconMaps.grim
+  },
+  {
+    key: 'air',
+    name: 'Air',
+    rarity: 'rare',
+    ability: 'Unreleased sprite listed by Fortnite.GG.',
+    unreleased: true,
+    images: iconMaps.water
+  },
+  {
+    key: 'seven',
+    name: 'Seven',
+    rarity: 'legendary',
+    ability: 'Unreleased sprite listed by Fortnite.GG.',
+    unreleased: true,
+    images: { ...iconMaps.zeroPoint, ...iconMaps.seven }
+  },
+  {
+    key: 'batman',
+    name: 'Batman',
+    rarity: 'mythic',
+    ability: 'Unreleased sprite listed by Fortnite.GG.',
+    unreleased: true,
+    images: iconMaps.king
+  }
+];
+
+const sprites = [
+  ...spriteTypes.flatMap((sprite) =>
+    variants.map((variant) => ({
+      id: `${sprite.key}-${variant.toLowerCase()}`,
+      name: variant === 'Base' ? `${sprite.name} Sprite` : `${variant} ${sprite.name} Sprite`,
+      family: sprite.name,
+      variant,
+      rarity: variant === 'Base' ? sprite.rarity : 'special',
+      ability: sprite.ability,
+      released: !sprite.unreleased && releasedVariants.includes(variant),
+      hasExactImage: Boolean(sprite.images[variant]),
+      image: sprite.images[variant] ?? sprite.images.Base,
+      source: sourceList
+    }))
+  ),
+  {
+    id: 'burnt-peanut-base',
+    name: 'Burnt Peanut Sprite',
+    family: 'Burnt Peanut',
+    variant: 'Base',
+    rarity: 'mythic',
+    ability: 'Gives a chance to find extra loot, including Mythic items, after eliminations.',
+    released: true,
+    hasExactImage: true,
+    image: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_BurntPeanut_ui_L.webp',
+    source: sourceList
+  },
+  {
+    id: 'john-wick-base',
+    name: 'John Wick Sprite',
+    family: 'John Wick',
+    variant: 'Base',
+    rarity: 'mythic',
+    ability: 'Unreleased sprite listed by Fortnite.GG.',
+    released: false,
+    hasExactImage: false,
+    image: 'https://fortnite.gg/img/x/sprites/icons/T_Icon_BR_Creature_Sprite_Drifter_ui_L.webp',
+    source: sourceList
+  }
+];
+const spriteRows = [
+  ...spriteTypes.map((sprite) => ({
+    key: sprite.key,
+    name: sprite.name,
+    rarity: sprite.rarity,
+    ability: sprite.ability,
+    cells: variants.map((variant) => sprites.find((item) => item.family === sprite.name && item.variant === variant))
+  })),
+  {
+    key: 'burnt-peanut',
+    name: 'Burnt Peanut',
+    rarity: 'mythic',
+    ability: 'Gives a chance to find extra loot, including Mythic items, after eliminations.',
+    cells: variants.map((variant) => variant === 'Base' ? sprites.find((item) => item.id === 'burnt-peanut-base') : undefined)
+  },
+  {
+    key: 'john-wick',
+    name: 'John Wick',
+    rarity: 'mythic',
+    ability: 'Unreleased sprite listed by Fortnite.GG.',
+    cells: variants.map((variant) => variant === 'Base' ? sprites.find((item) => item.id === 'john-wick-base') : undefined)
+  }
+];
+
+const title = 'Fort Sprite - Fortnite Sprite Checker';
+const description = 'Track every current and unreleased Fortnite Sprite variant you have extracted, mastered, or still need to find. Your checklist saves privately in your browser.';
+const canonical = 'https://fortsprite.com/';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="theme-color" content="#121826" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:site_name" content="Fort Sprite" />
+
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+
+    <script type="application/ld+json" set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'WebApplication',
+      name: 'Fort Sprite',
+      url: canonical,
+      applicationCategory: 'GameApplication',
+      operatingSystem: 'Any',
+      description
+    })} />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">Fortnite Sprite Checklist</p>
+          <h1 id="page-title">Fort Sprite</h1>
+          <p class="intro">
+            Mark each sprite as not found, extracted, or mastered. Progress is saved on this device.
+          </p>
+        </div>
+        <div class="summary" aria-label="Sprite progress">
+          <div>
+            <span id="mastered-count">0</span>
+            <small>Mastered</small>
+          </div>
+          <div>
+            <span id="extracted-count">0</span>
+            <small>Extracted</small>
+          </div>
+          <div>
+            <span id="missing-count">{sprites.length}</span>
+            <small>Not found</small>
+          </div>
+        </div>
+      </section>
+
+      <section class="toolbar" aria-label="Checklist controls">
+        <div class="control-stack">
+          <div class="filter-group" role="tablist" aria-label="Filter sprites by status">
+            <button class="filter is-active" type="button" data-status-filter="all" aria-pressed="true">All</button>
+            <button class="filter" type="button" data-status-filter="not-found" aria-pressed="false">Not found</button>
+            <button class="filter" type="button" data-status-filter="extracted" aria-pressed="false">Extracted</button>
+            <button class="filter" type="button" data-status-filter="mastered" aria-pressed="false">Mastered</button>
+          </div>
+          <div class="filter-group" role="tablist" aria-label="Filter sprites by variant">
+            <button class="filter is-active" type="button" data-variant-filter="all" aria-pressed="true">All variants</button>
+            <button class="filter" type="button" data-variant-filter="Base" aria-pressed="false">Base</button>
+            <button class="filter" type="button" data-variant-filter="Gold" aria-pressed="false">Gold</button>
+            <button class="filter" type="button" data-variant-filter="Gummy" aria-pressed="false">Gummy</button>
+            <button class="filter" type="button" data-variant-filter="Galaxy" aria-pressed="false">Galaxy</button>
+            <button class="filter" type="button" data-variant-filter="Gem" aria-pressed="false">Gem</button>
+            <button class="filter" type="button" data-variant-filter="Holofoil" aria-pressed="false">Holofoil</button>
+            <button class="filter" type="button" data-variant-filter="Cube" aria-pressed="false">Cube</button>
+            <button class="filter" type="button" data-variant-filter="Quack" aria-pressed="false">Quack</button>
+          </div>
+          <div class="filter-group" role="tablist" aria-label="Filter sprites by availability">
+            <button class="filter is-active" type="button" data-release-filter="all" aria-pressed="true">All availability</button>
+            <button class="filter" type="button" data-release-filter="released" aria-pressed="false">Released</button>
+            <button class="filter" type="button" data-release-filter="unreleased" aria-pressed="false">Unreleased</button>
+          </div>
+        </div>
+        <button class="reset" type="button" id="reset-progress">Reset</button>
+      </section>
+
+      <section class="matrix-wrap" aria-label="Sprite checklist">
+        <div class="sprite-matrix">
+          <div class="matrix-header sprite-type-heading">Sprite</div>
+          {variants.map((variant) => (
+            <div class="matrix-header" data-variant-column={variant}>{variant === 'Base' ? 'Regular' : variant}</div>
+          ))}
+
+          {spriteRows.map((row) => (
+            <>
+              <article class="sprite-type" data-sprite-row>
+                <p class="element">{row.rarity}</p>
+                <h2>{row.name}</h2>
+                <p>{row.ability}</p>
+              </article>
+              {row.cells.map((sprite, index) => (
+                sprite ? (
+                  <div
+                    class="sprite-cell"
+                    data-sprite-card
+                    data-id={sprite.id}
+                    data-variant={sprite.variant}
+                    data-released={String(sprite.released)}
+                    data-exact-image={String(sprite.hasExactImage)}
+                    data-status="not-found"
+                  >
+                    <div class="cell-art">
+                      <img src={sprite.image} alt={sprite.name} loading="lazy" decoding="async" />
+                    </div>
+                    <div class="cell-meta">
+                    </div>
+                    <button class="status-button" type="button" data-status-button aria-label={`${sprite.name} status`}>
+                      None
+                    </button>
+                  </div>
+                ) : (
+                  <div class="sprite-cell empty" data-empty-cell data-variant={variants[index]} aria-label={`No ${variants[index]} variant for ${row.name}`}>-</div>
+                )
+              ))}
+            </>
+          ))}
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const storageKey = 'fortsprite:v1';
+      const cards = Array.from(document.querySelectorAll('[data-sprite-card]'));
+      const statusFilters = Array.from(document.querySelectorAll('[data-status-filter]'));
+      const variantFilters = Array.from(document.querySelectorAll('[data-variant-filter]'));
+      const releaseFilters = Array.from(document.querySelectorAll('[data-release-filter]'));
+      const counts = {
+        mastered: document.querySelector('#mastered-count'),
+        extracted: document.querySelector('#extracted-count'),
+        missing: document.querySelector('#missing-count')
+      };
+
+      let selectedStatusFilter = 'all';
+      let selectedVariantFilter = 'all';
+      let selectedReleaseFilter = 'all';
+      let state = {};
+
+      try {
+        state = JSON.parse(localStorage.getItem(storageKey) || '{}') || {};
+      } catch {
+        state = {};
+      }
+
+      function persist() {
+        localStorage.setItem(storageKey, JSON.stringify(state));
+      }
+
+      function applyState() {
+        const totals = { mastered: 0, extracted: 0, 'not-found': 0 };
+
+        cards.forEach((card) => {
+          const id = card.dataset.id;
+          const status = state[id] || 'not-found';
+          totals[status] += 1;
+          card.dataset.status = status;
+          const button = card.querySelector('[data-status-button]');
+          if (button) {
+            button.textContent = status === 'not-found' ? 'None' : status === 'extracted' ? 'Extracted' : 'Mastered';
+            button.setAttribute('aria-label', `${button.getAttribute('aria-label').replace(/ status:.*/, ' status')}: ${button.textContent}`);
+          }
+          const statusMatches = selectedStatusFilter === 'all' || selectedStatusFilter === status;
+          const variantMatches = selectedVariantFilter === 'all' || selectedVariantFilter === card.dataset.variant;
+          const releaseMatches =
+            selectedReleaseFilter === 'all' ||
+            (selectedReleaseFilter === 'released' && card.dataset.released === 'true') ||
+            (selectedReleaseFilter === 'unreleased' && card.dataset.released === 'false');
+          card.hidden = !statusMatches || !variantMatches || !releaseMatches;
+        });
+
+        document.querySelectorAll('[data-variant-column], [data-empty-cell]').forEach((item) => {
+          item.hidden = selectedVariantFilter !== 'all' && selectedVariantFilter !== item.dataset.variantColumn && selectedVariantFilter !== item.dataset.variant;
+        });
+
+        document.querySelectorAll('[data-sprite-row]').forEach((row) => {
+          const rowCells = [];
+          let sibling = row.nextElementSibling;
+          while (sibling && !sibling.matches('[data-sprite-row]')) {
+            if (sibling.matches('[data-sprite-card]')) rowCells.push(sibling);
+            sibling = sibling.nextElementSibling;
+          }
+          row.hidden = rowCells.every((cell) => cell.hidden);
+        });
+
+        counts.mastered.textContent = String(totals.mastered);
+        counts.extracted.textContent = String(totals.extracted);
+        counts.missing.textContent = String(totals['not-found']);
+      }
+
+      cards.forEach((card) => {
+        card.addEventListener('click', (event) => {
+          const target = event.target;
+          if (!(target instanceof HTMLElement) || !target.matches('[data-status-button]')) return;
+          const current = state[card.dataset.id] || 'not-found';
+          state[card.dataset.id] =
+            current === 'not-found' ? 'extracted' : current === 'extracted' ? 'mastered' : 'not-found';
+          persist();
+          applyState();
+        });
+      });
+
+      statusFilters.forEach((button) => {
+        button.addEventListener('click', () => {
+          selectedStatusFilter = button.dataset.statusFilter;
+          statusFilters.forEach((filter) => {
+            const active = filter === button;
+            filter.classList.toggle('is-active', active);
+            filter.setAttribute('aria-pressed', String(active));
+          });
+          applyState();
+        });
+      });
+
+      variantFilters.forEach((button) => {
+        button.addEventListener('click', () => {
+          selectedVariantFilter = button.dataset.variantFilter;
+          variantFilters.forEach((filter) => {
+            const active = filter === button;
+            filter.classList.toggle('is-active', active);
+            filter.setAttribute('aria-pressed', String(active));
+          });
+          applyState();
+        });
+      });
+
+      releaseFilters.forEach((button) => {
+        button.addEventListener('click', () => {
+          selectedReleaseFilter = button.dataset.releaseFilter;
+          releaseFilters.forEach((filter) => {
+            const active = filter === button;
+            filter.classList.toggle('is-active', active);
+            filter.setAttribute('aria-pressed', String(active));
+          });
+          applyState();
+        });
+      });
+
+      document.querySelector('#reset-progress').addEventListener('click', () => {
+        state = {};
+        persist();
+        applyState();
+      });
+
+      applyState();
+    </script>
+  </body>
+</html>
+
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #10151f;
+    --panel: #17202e;
+    --panel-2: #202b3a;
+    --text: #f4f7fb;
+    --muted: #aeb8c7;
+    --line: #344154;
+    --green: #36d399;
+    --blue: #5fb3ff;
+    --gold: #ffd166;
+    --red: #ff6b6b;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background:
+      radial-gradient(circle at 20% 0%, rgba(54, 211, 153, 0.22), transparent 30rem),
+      linear-gradient(135deg, #10151f 0%, #182333 52%, #10151f 100%);
+    color: var(--text);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  button,
+  input {
+    font: inherit;
+  }
+
+  .shell {
+    width: min(1180px, calc(100% - 32px));
+    margin: 0 auto;
+    padding: 40px 0;
+  }
+
+  .hero {
+    display: grid;
+    grid-template-columns: 1fr minmax(280px, 420px);
+    gap: 24px;
+    align-items: end;
+    margin-bottom: 24px;
+  }
+
+  .eyebrow,
+  .element {
+    margin: 0 0 8px;
+    color: var(--green);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(3rem, 8vw, 6.5rem);
+    line-height: 0.9;
+  }
+
+  .intro {
+    max-width: 660px;
+    margin: 18px 0 0;
+    color: var(--muted);
+    font-size: 1.12rem;
+    line-height: 1.6;
+  }
+
+  .summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: rgba(23, 32, 46, 0.82);
+  }
+
+  .summary div {
+    min-width: 0;
+    padding: 18px;
+    border-left: 1px solid var(--line);
+  }
+
+  .summary div:first-child {
+    border-left: 0;
+  }
+
+  .summary span {
+    display: block;
+    font-size: 2.1rem;
+    font-weight: 900;
+  }
+
+  .summary small {
+    color: var(--muted);
+    font-weight: 700;
+  }
+
+  .toolbar {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: flex-start;
+    margin: 0 0 18px;
+  }
+
+  .control-stack {
+    display: grid;
+    gap: 8px;
+  }
+
+  .filter-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .filter,
+  .reset {
+    min-height: 42px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: rgba(23, 32, 46, 0.86);
+    color: var(--text);
+    cursor: pointer;
+    font-weight: 800;
+    padding: 0 14px;
+  }
+
+  .filter.is-active {
+    border-color: var(--green);
+    background: var(--green);
+    color: #07120d;
+  }
+
+  .reset {
+    color: var(--red);
+  }
+
+  .matrix-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: rgba(23, 32, 46, 0.78);
+  }
+
+  .sprite-matrix {
+    display: grid;
+    grid-template-columns: minmax(210px, 260px) repeat(8, minmax(148px, 1fr));
+    gap: 1px;
+    min-width: 1390px;
+    background: var(--line);
+  }
+
+  .matrix-header,
+  .sprite-type,
+  .sprite-cell {
+    background: rgba(23, 32, 46, 0.98);
+  }
+
+  .matrix-header {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    min-height: 46px;
+    padding: 14px 12px;
+    color: var(--text);
+    font-size: 0.84rem;
+    font-weight: 900;
+    text-align: center;
+    text-transform: uppercase;
+  }
+
+  .sprite-type-heading,
+  .sprite-type {
+    position: sticky;
+    left: 0;
+    z-index: 3;
+  }
+
+  .sprite-type {
+    min-height: 230px;
+    padding: 16px;
+  }
+
+  h2 {
+    margin: 0;
+    font-size: 1.15rem;
+  }
+
+  .sprite-type p:last-child {
+    color: var(--muted);
+    line-height: 1.45;
+  }
+
+  .sprite-cell {
+    display: grid;
+    grid-template-rows: 104px minmax(26px, auto) auto;
+    align-items: start;
+    min-height: 230px;
+    padding: 10px;
+  }
+
+  .sprite-cell[data-status="extracted"] {
+    background: linear-gradient(180deg, rgba(95, 179, 255, 0.18), rgba(23, 32, 46, 0.98));
+  }
+
+  .sprite-cell[data-status="mastered"] {
+    background: linear-gradient(180deg, rgba(255, 209, 102, 0.2), rgba(23, 32, 46, 0.98));
+  }
+
+  .sprite-cell[data-released="false"] {
+    background: rgba(18, 24, 35, 0.86);
+  }
+
+  .sprite-cell[data-released="false"] .cell-art img {
+    opacity: 0.34;
+    filter: grayscale(0.9) drop-shadow(0 10px 10px rgba(0, 0, 0, 0.3));
+  }
+
+  .sprite-cell[data-released="false"] .status-button {
+    opacity: 0.62;
+  }
+
+  .sprite-cell.empty {
+    display: grid;
+    place-items: center;
+    color: rgba(174, 184, 199, 0.38);
+    font-size: 1.4rem;
+    font-weight: 900;
+  }
+
+  .cell-art {
+    display: grid;
+    place-items: center;
+    min-height: 104px;
+  }
+
+  .cell-art img {
+    display: block;
+    max-width: 94px;
+    max-height: 94px;
+    object-fit: contain;
+    filter: drop-shadow(0 14px 14px rgba(0, 0, 0, 0.34));
+  }
+
+  .cell-meta {
+    min-height: 26px;
+  }
+
+  .status-button {
+    min-width: 0;
+    min-height: 38px;
+    margin: 8px 0;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 0 8px;
+    background: rgba(16, 21, 31, 0.68);
+    color: var(--muted);
+    cursor: pointer;
+    text-align: center;
+    font-size: 0.78rem;
+    font-weight: 900;
+    transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
+  }
+
+  .sprite-cell[data-status="extracted"] .status-button {
+    border-color: rgba(95, 179, 255, 0.72);
+    background: rgba(95, 179, 255, 0.18);
+    color: var(--blue);
+  }
+
+  .sprite-cell[data-status="mastered"] .status-button {
+    border-color: rgba(255, 209, 102, 0.82);
+    background: rgba(255, 209, 102, 0.2);
+    color: var(--gold);
+  }
+
+  @media (max-width: 980px) {
+    .hero {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .hero > div:first-child {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .shell {
+      width: min(100% - 20px, 1180px);
+      padding: 24px 0;
+    }
+
+    .hero {
+      grid-template-columns: 1fr;
+    }
+
+    .summary div {
+      padding: 12px;
+    }
+
+    .summary span {
+      font-size: 1.6rem;
+    }
+
+    .toolbar {
+      align-items: stretch;
+      flex-direction: column;
+    }
+
+    .filter,
+    .reset {
+      flex: 1 1 auto;
+    }
+  }
+</style>
