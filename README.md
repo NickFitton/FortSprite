@@ -1,6 +1,6 @@
-# Fort Sprite
+# fortsprite
 
-Fort Sprite is an Astro site for tracking Fortnite sprite collectibles and variants. It stores checklist progress in browser local storage.
+fortsprite is an Astro site for tracking Fortnite sprite collectibles and variants. It stores checklist progress in browser local storage.
 
 ## Development
 

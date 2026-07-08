@@ -312,7 +312,7 @@ const spriteRows = [
   }
 ];
 
-const title = 'Fort Sprite - Fortnite Sprite Checker';
+const title = 'fortsprite - Fortnite Sprite Checker';
 const description = 'Track every current and unreleased Fortnite Sprite variant you have extracted, mastered, or still need to find. Your checklist saves privately in your browser.';
 const canonical = 'https://fortsprite.com/';
 ---
@@ -333,7 +333,7 @@ const canonical = 'https://fortsprite.com/';
     <meta property="og:url" content={canonical} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:site_name" content="Fort Sprite" />
+    <meta property="og:site_name" content="fortsprite" />
 
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content={title} />
@@ -342,7 +342,7 @@ const canonical = 'https://fortsprite.com/';
     <script type="application/ld+json" set:html={JSON.stringify({
       '@context': 'https://schema.org',
       '@type': 'WebApplication',
-      name: 'Fort Sprite',
+      name: 'fortsprite',
       url: canonical,
       applicationCategory: 'GameApplication',
       operatingSystem: 'Any',
@@ -354,7 +354,7 @@ const canonical = 'https://fortsprite.com/';
       <section class="hero" aria-labelledby="page-title">
         <div>
           <p class="eyebrow">Fortnite Sprite Checklist</p>
-          <h1 id="page-title">Fort Sprite</h1>
+          <h1 id="page-title">fortsprite</h1>
           <p class="intro">
             Mark each sprite as not found, extracted, or mastered. Progress is saved on this device.
           </p>
@@ -399,15 +399,18 @@ const canonical = 'https://fortsprite.com/';
                     data-released={String(sprite.released)}
                     data-exact-image={String(sprite.hasExactImage)}
                     data-status="not-found"
+                    role={sprite.released ? 'button' : 'group'}
+                    tabindex={sprite.released ? '0' : undefined}
+                    aria-label={`${sprite.name} status: None`}
                   >
                     <div class="cell-art">
                       <img src={sprite.image} alt={sprite.name} loading="lazy" decoding="async" />
                     </div>
                     <div class="cell-meta">
                     </div>
-                    <button class="status-button" type="button" data-status-button aria-label={`${sprite.name} status`}>
-                      None
-                    </button>
+                    <span class="status-badge" data-status-badge>
+                      {sprite.released ? 'None' : 'Locked'}
+                    </span>
                   </div>
                 ) : (
                   <div class="sprite-cell empty" data-empty-cell data-variant={variants[index]} aria-label={`No ${variants[index]} variant for ${row.name}`}>-</div>
@@ -445,14 +448,16 @@ const canonical = 'https://fortsprite.com/';
 
         cards.forEach((card) => {
           const id = card.dataset.id;
+          const isReleased = card.dataset.released === 'true';
           const status = state[id] || 'not-found';
-          totals[status] += 1;
+          if (isReleased) totals[status] += 1;
           card.dataset.status = status;
-          const button = card.querySelector('[data-status-button]');
-          if (button) {
-            button.textContent = status === 'not-found' ? 'None' : status === 'extracted' ? 'Extracted' : 'Mastered';
-            button.setAttribute('aria-label', `${button.getAttribute('aria-label').replace(/ status:.*/, ' status')}: ${button.textContent}`);
+          const label = !isReleased ? 'Locked' : status === 'not-found' ? 'None' : status === 'extracted' ? 'Extracted' : 'Mastered';
+          const badge = card.querySelector('[data-status-badge]');
+          if (badge) {
+            badge.textContent = label;
           }
+          card.setAttribute('aria-label', `${card.getAttribute('aria-label').replace(/ status:.*/, ' status')}: ${label}`);
         });
 
         counts.mastered.textContent = String(totals.mastered);
@@ -461,14 +466,24 @@ const canonical = 'https://fortsprite.com/';
       }
 
       cards.forEach((card) => {
-        card.addEventListener('click', (event) => {
-          const target = event.target;
-          if (!(target instanceof HTMLElement) || !target.matches('[data-status-button]')) return;
+        function cycleStatus() {
           const current = state[card.dataset.id] || 'not-found';
           state[card.dataset.id] =
             current === 'not-found' ? 'extracted' : current === 'extracted' ? 'mastered' : 'not-found';
           persist();
           applyState();
+        }
+
+        card.addEventListener('click', () => {
+          if (card.dataset.released !== 'true') return;
+          cycleStatus();
+        });
+
+        card.addEventListener('keydown', (event) => {
+          if (card.dataset.released !== 'true') return;
+          if (event.key !== 'Enter' && event.key !== ' ') return;
+          event.preventDefault();
+          cycleStatus();
         });
       });
 
@@ -478,18 +493,28 @@ const canonical = 'https://fortsprite.com/';
 </html>
 
 <style>
+  @font-face {
+    font-display: swap;
+    font-family: "Burbank Big Condensed";
+    font-style: normal;
+    font-weight: 900;
+    src: url("/fonts/burbank-big-condensed-black.otf") format("opentype");
+  }
+
   :root {
     color-scheme: dark;
-    --bg: #10151f;
-    --panel: #17202e;
-    --panel-2: #202b3a;
-    --text: #f4f7fb;
-    --muted: #aeb8c7;
-    --line: #344154;
-    --green: #36d399;
-    --blue: #5fb3ff;
-    --gold: #ffd166;
-    --red: #ff6b6b;
+    --bg: #070b24;
+    --panel: #121a4a;
+    --panel-2: #1d2f77;
+    --text: #ffffff;
+    --muted: #c8d6ff;
+    --line: #3658d8;
+    --green: #37f58f;
+    --blue: #28d7ff;
+    --gold: #ffe34d;
+    --violet: #9f5cff;
+    --pink: #ff4fd8;
+    --shadow: rgba(0, 0, 0, 0.38);
   }
 
   * {
@@ -500,10 +525,23 @@ const canonical = 'https://fortsprite.com/';
     margin: 0;
     min-height: 100vh;
     background:
-      radial-gradient(circle at 20% 0%, rgba(54, 211, 153, 0.22), transparent 30rem),
-      linear-gradient(135deg, #10151f 0%, #182333 52%, #10151f 100%);
+      radial-gradient(circle at 18% 12%, rgba(255, 227, 77, 0.24), transparent 16rem),
+      radial-gradient(circle at 84% 8%, rgba(255, 79, 216, 0.22), transparent 18rem),
+      linear-gradient(145deg, #070b24 0%, #162b88 46%, #5e2fd6 100%);
     color: var(--text);
-    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-family: "Burbank Big Condensed", Impact, Haettenschweiler, "Arial Narrow Bold", Inter, ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: 0;
+  }
+
+  body::before {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background:
+      linear-gradient(115deg, transparent 0 40%, rgba(255, 255, 255, 0.08) 40% 41%, transparent 41% 100%),
+      repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.045) 0 2px, transparent 2px 22px);
+    content: "";
+    pointer-events: none;
   }
 
   button,
@@ -512,9 +550,9 @@ const canonical = 'https://fortsprite.com/';
   }
 
   .shell {
-    width: min(1180px, calc(100% - 32px));
+    width: min(1320px, calc(100% - 32px));
     margin: 0 auto;
-    padding: 40px 0;
+    padding: 34px 0 44px;
   }
 
   .hero {
@@ -522,46 +560,63 @@ const canonical = 'https://fortsprite.com/';
     grid-template-columns: 1fr minmax(280px, 420px);
     gap: 24px;
     align-items: end;
-    margin-bottom: 24px;
+    margin-bottom: 18px;
+    border: 3px solid rgba(255, 255, 255, 0.18);
+    border-radius: 8px;
+    padding: 22px;
+    background:
+      linear-gradient(135deg, rgba(40, 215, 255, 0.18), rgba(159, 92, 255, 0.3)),
+      rgba(7, 11, 36, 0.72);
+    box-shadow: 0 18px 40px var(--shadow), inset 0 0 0 1px rgba(255, 255, 255, 0.14);
   }
 
   .eyebrow,
   .element {
     margin: 0 0 8px;
-    color: var(--green);
-    font-size: 0.78rem;
-    font-weight: 800;
+    color: var(--gold);
+    font-size: 0.82rem;
+    font-weight: 900;
     letter-spacing: 0;
     text-transform: uppercase;
+    text-shadow: 0 2px 0 rgba(0, 0, 0, 0.45);
   }
 
   h1 {
     margin: 0;
-    font-size: clamp(3rem, 8vw, 6.5rem);
+    color: var(--text);
+    font-size: clamp(3.8rem, 9vw, 8rem);
     line-height: 0.9;
+    text-shadow:
+      0 5px 0 #1230a5,
+      0 9px 0 rgba(0, 0, 0, 0.45),
+      0 0 28px rgba(40, 215, 255, 0.42);
+    text-transform: uppercase;
   }
 
   .intro {
     max-width: 660px;
     margin: 18px 0 0;
     color: var(--muted);
-    font-size: 1.12rem;
-    line-height: 1.6;
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    font-size: 1rem;
+    font-weight: 800;
+    line-height: 1.5;
   }
 
   .summary {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     overflow: hidden;
-    border: 1px solid var(--line);
+    border: 2px solid rgba(255, 255, 255, 0.2);
     border-radius: 8px;
-    background: rgba(23, 32, 46, 0.82);
+    background: rgba(7, 11, 36, 0.76);
+    box-shadow: inset 0 0 18px rgba(40, 215, 255, 0.12);
   }
 
   .summary div {
     min-width: 0;
     padding: 18px;
-    border-left: 1px solid var(--line);
+    border-left: 2px solid rgba(255, 255, 255, 0.16);
   }
 
   .summary div:first-child {
@@ -570,46 +625,53 @@ const canonical = 'https://fortsprite.com/';
 
   .summary span {
     display: block;
-    font-size: 2.1rem;
+    color: var(--gold);
+    font-size: 2.35rem;
     font-weight: 900;
+    text-shadow: 0 3px 0 #704c00;
   }
 
   .summary small {
-    color: var(--muted);
-    font-weight: 700;
+    color: var(--text);
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    font-weight: 900;
+    text-transform: uppercase;
   }
 
   .matrix-wrap {
     overflow-x: auto;
-    border: 1px solid var(--line);
+    border: 3px solid rgba(255, 255, 255, 0.2);
     border-radius: 8px;
-    background: rgba(23, 32, 46, 0.78);
+    background: rgba(7, 11, 36, 0.82);
+    box-shadow: 0 22px 44px var(--shadow);
   }
 
   .sprite-matrix {
     display: grid;
     grid-template-columns: minmax(210px, 260px) repeat(8, minmax(148px, 1fr));
-    gap: 1px;
+    gap: 2px;
     min-width: 1390px;
-    background: var(--line);
+    background: rgba(255, 255, 255, 0.18);
   }
 
   .matrix-header,
   .sprite-type,
   .sprite-cell {
-    background: rgba(23, 32, 46, 0.98);
+    background: rgba(10, 18, 66, 0.98);
   }
 
   .matrix-header {
     position: sticky;
     top: 0;
     z-index: 2;
-    min-height: 46px;
-    padding: 14px 12px;
+    min-height: 50px;
+    padding: 15px 12px;
+    background: linear-gradient(180deg, #ffe34d, #f39c12);
     color: var(--text);
-    font-size: 0.84rem;
+    font-size: 0.92rem;
     font-weight: 900;
     text-align: center;
+    text-shadow: 0 2px 0 rgba(0, 0, 0, 0.55);
     text-transform: uppercase;
   }
 
@@ -623,15 +685,24 @@ const canonical = 'https://fortsprite.com/';
   .sprite-type {
     min-height: 230px;
     padding: 16px;
+    background: linear-gradient(160deg, rgba(30, 54, 150, 0.98), rgba(15, 25, 86, 0.98));
+    box-shadow: inset -10px 0 24px rgba(0, 0, 0, 0.24);
   }
 
   h2 {
     margin: 0;
-    font-size: 1.15rem;
+    color: var(--text);
+    font-size: 1.35rem;
+    line-height: 1;
+    text-shadow: 0 3px 0 rgba(0, 0, 0, 0.5);
+    text-transform: uppercase;
   }
 
   .sprite-type p:last-child {
     color: var(--muted);
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.86rem;
+    font-weight: 700;
     line-height: 1.45;
   }
 
@@ -644,15 +715,15 @@ const canonical = 'https://fortsprite.com/';
   }
 
   .sprite-cell[data-status="extracted"] {
-    background: linear-gradient(180deg, rgba(95, 179, 255, 0.18), rgba(23, 32, 46, 0.98));
+    background: linear-gradient(180deg, rgba(55, 245, 143, 0.22), rgba(10, 18, 66, 0.98));
   }
 
   .sprite-cell[data-status="mastered"] {
-    background: linear-gradient(180deg, rgba(255, 209, 102, 0.2), rgba(23, 32, 46, 0.98));
+    background: linear-gradient(180deg, rgba(255, 227, 77, 0.34), rgba(10, 18, 66, 0.98));
   }
 
   .sprite-cell[data-released="false"] {
-    background: rgba(18, 24, 35, 0.86);
+    background: rgba(10, 14, 40, 0.92);
   }
 
   .sprite-cell[data-released="false"] .cell-art img {
@@ -660,7 +731,7 @@ const canonical = 'https://fortsprite.com/';
     filter: grayscale(0.9) drop-shadow(0 10px 10px rgba(0, 0, 0, 0.3));
   }
 
-  .sprite-cell[data-released="false"] .status-button {
+  .sprite-cell[data-released="false"] .status-badge {
     opacity: 0.62;
   }
 
@@ -683,39 +754,70 @@ const canonical = 'https://fortsprite.com/';
     max-width: 94px;
     max-height: 94px;
     object-fit: contain;
-    filter: drop-shadow(0 14px 14px rgba(0, 0, 0, 0.34));
+    filter:
+      drop-shadow(0 4px 0 rgba(255, 255, 255, 0.22))
+      drop-shadow(0 16px 16px rgba(0, 0, 0, 0.44));
   }
 
   .cell-meta {
     min-height: 26px;
   }
 
-  .status-button {
+  .sprite-cell:not(.empty)[data-released="true"] {
+    cursor: pointer;
+    transition: transform 120ms ease, box-shadow 160ms ease;
+  }
+
+  .sprite-cell:not(.empty)[data-released="true"]:hover,
+  .sprite-cell:not(.empty)[data-released="true"]:focus-visible {
+    z-index: 1;
+    outline: 2px solid rgba(255, 255, 255, 0.72);
+    outline-offset: -2px;
+    box-shadow: inset 0 0 22px rgba(40, 215, 255, 0.22);
+    transform: translateY(-1px);
+  }
+
+  .status-badge {
+    display: grid;
+    place-items: center;
     min-width: 0;
     min-height: 38px;
     margin: 8px 0;
-    border: 1px solid var(--line);
+    border: 2px solid rgba(255, 255, 255, 0.18);
     border-radius: 8px;
     padding: 0 8px;
-    background: rgba(16, 21, 31, 0.68);
+    background: linear-gradient(180deg, #263579, #131c4c);
     color: var(--muted);
-    cursor: pointer;
     text-align: center;
-    font-size: 0.78rem;
+    font-size: 0.84rem;
     font-weight: 900;
+    text-shadow: 0 2px 0 rgba(0, 0, 0, 0.4);
+    text-transform: uppercase;
+    box-shadow: 0 5px 0 rgba(0, 0, 0, 0.28);
+    pointer-events: none;
     transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
   }
 
-  .sprite-cell[data-status="extracted"] .status-button {
-    border-color: rgba(95, 179, 255, 0.72);
-    background: rgba(95, 179, 255, 0.18);
-    color: var(--blue);
+  .sprite-cell[data-status="extracted"] .status-badge {
+    border-color: rgba(55, 245, 143, 0.8);
+    background: linear-gradient(180deg, #37f58f, #119f58);
+    color: #031c11;
+    text-shadow: none;
   }
 
-  .sprite-cell[data-status="mastered"] .status-button {
-    border-color: rgba(255, 209, 102, 0.82);
-    background: rgba(255, 209, 102, 0.2);
-    color: var(--gold);
+  .sprite-cell[data-status="mastered"] .status-badge {
+    border-color: rgba(255, 255, 255, 0.65);
+    background: linear-gradient(180deg, #fff36b, #f0a613);
+    color: #211500;
+    text-shadow: none;
+  }
+
+  .sprite-cell[data-released="false"] .status-badge {
+    border-color: rgba(255, 255, 255, 0.12);
+    background: linear-gradient(180deg, #1c244d, #0b102e);
+    color: rgba(200, 214, 255, 0.58);
+    box-shadow: none;
+    text-shadow: none;
   }
 
   @media (max-width: 980px) {
@@ -746,5 +848,41 @@ const canonical = 'https://fortsprite.com/';
       font-size: 1.6rem;
     }
 
+    .sprite-matrix {
+      grid-template-columns: 44px repeat(8, minmax(128px, 1fr));
+      min-width: 1068px;
+    }
+
+    .sprite-type-heading {
+      color: transparent;
+      font-size: 0;
+    }
+
+    .sprite-type {
+      display: grid;
+      place-items: center;
+      min-height: 230px;
+      padding: 0;
+    }
+
+    .sprite-type .element,
+    .sprite-type p:last-child {
+      display: none;
+    }
+
+    .sprite-type h2 {
+      width: max-content;
+      max-width: 190px;
+      transform: rotate(-90deg);
+      font-size: 1rem;
+      line-height: 1;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .matrix-header {
+      position: sticky;
+      top: 0;
+    }
   }
 </style>
