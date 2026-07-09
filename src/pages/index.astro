@@ -1,5 +1,5 @@
 ---
-const variants = ['Base', 'Gold', 'Gummy', 'Galaxy', 'Gem', 'Holofoil', 'Cube', 'Quack'];
+const variants = ['Base', 'Gold', 'Gummy', 'Galaxy', 'Holofoil', 'Gem', 'Cube', 'Quack'];
 const releasedVariants = ['Base', 'Gold', 'Gummy', 'Galaxy'];
 const sourceRoot = 'https://fortnite.gg/sprites';
 const sourceList = `${sourceRoot}`;
@@ -506,18 +506,33 @@ const previewImage = new URL('/og-image.png', canonical).toString();
 
         const scale = Math.min(2, window.devicePixelRatio || 1);
         const elements = Array.from(matrix.children);
-        const columnCount = 9;
-        const headerHeight = elements[0]?.offsetHeight || 50;
-        const rowHeight = elements[columnCount]?.offsetHeight || 230;
-        const compactNameWidth = 44;
-        const columnWidths = elements.slice(0, columnCount).map((element, index) =>
-          index === 0 ? compactNameWidth : element.offsetWidth
-        );
+        const sourceColumnCount = 9;
+        const shareColumns = ['Base', 'Gold', 'Gummy', 'Galaxy'];
+        const shareColumnIndexes = [0, ...shareColumns.map((variant) =>
+          elements.findIndex((element) => element.dataset.variantColumn === variant)
+        ).filter((index) => index > 0)];
+        const headerHeight = 34;
+        const rowHeight = 104;
+        const compactNameWidth = 38;
+        const columnWidths = shareColumnIndexes.map((_, index) => index === 0 ? compactNameWidth : 76);
         const columnX = columnWidths.reduce((positions, columnWidth, index) => {
           positions.push(index === 0 ? 0 : positions[index - 1] + columnWidths[index - 1]);
           return positions;
         }, []);
-        const rowCount = Math.ceil(elements.length / columnCount) - 1;
+        const sourceRows = [];
+        for (let rowStart = sourceColumnCount; rowStart < elements.length; rowStart += sourceColumnCount) {
+          const rowElements = elements.slice(rowStart, rowStart + sourceColumnCount);
+          const hasReleasedCell = shareColumnIndexes.slice(1).some((columnIndex) => (
+            rowElements[columnIndex]?.dataset.released === 'true'
+          ));
+          if (hasReleasedCell) sourceRows.push(rowElements);
+        }
+        const shareElements = [
+          shareColumnIndexes.map((columnIndex) => elements[columnIndex]),
+          ...sourceRows.map((rowElements) => shareColumnIndexes.map((columnIndex) => rowElements[columnIndex]))
+        ].flat();
+        const columnCount = shareColumnIndexes.length;
+        const rowCount = sourceRows.length;
         const width = columnWidths.reduce((total, columnWidth) => total + columnWidth, 0);
         const height = headerHeight + rowCount * rowHeight;
         const canvas = document.createElement('canvas');
@@ -542,7 +557,7 @@ const previewImage = new URL('/og-image.png', canonical).toString();
         );
         const loadedImages = new Map(imageEntries);
 
-        elements.forEach((element, index) => {
+        shareElements.forEach((element, index) => {
           const columnIndex = index % columnCount;
           const rowIndex = Math.floor(index / columnCount);
           const x = columnX[columnIndex];
@@ -552,14 +567,14 @@ const previewImage = new URL('/og-image.png', canonical).toString();
 
           if (element.classList.contains('matrix-header')) {
             fillVerticalGradient(context, x, y, cellWidth, cellHeight, '#ffe34d', '#f39c12');
-            context.fillStyle = '#ffffff';
-            context.font = '900 15px "Burbank Big Condensed", Impact, sans-serif';
+            context.fillStyle = '#171000';
+            context.font = '900 14px Inter, ui-sans-serif, system-ui, sans-serif';
             context.textAlign = 'center';
             context.textBaseline = 'middle';
-            context.shadowColor = 'rgba(0, 0, 0, 0.55)';
+            context.shadowColor = 'rgba(255, 255, 255, 0.38)';
             context.shadowBlur = 0;
-            context.shadowOffsetY = 2;
-            const headerText = columnIndex === 0 ? 'SPRITE' : element.textContent.trim().toUpperCase();
+            context.shadowOffsetY = 1;
+            const headerText = columnIndex === 0 ? '' : element.textContent.trim().toUpperCase();
             context.fillText(headerText, x + cellWidth / 2, y + cellHeight / 2 + 1);
             context.shadowOffsetY = 0;
             return;
@@ -576,7 +591,7 @@ const previewImage = new URL('/og-image.png', canonical).toString();
             context.translate(x + cellWidth / 2, y + cellHeight / 2);
             context.rotate(-Math.PI / 2);
             context.fillStyle = '#ffffff';
-            context.font = '900 16px "Burbank Big Condensed", Impact, sans-serif';
+            context.font = '900 14px Inter, ui-sans-serif, system-ui, sans-serif';
             context.textAlign = 'center';
             context.textBaseline = 'middle';
             context.shadowColor = 'rgba(0, 0, 0, 0.5)';
@@ -615,35 +630,18 @@ const previewImage = new URL('/og-image.png', canonical).toString();
             const imageNode = element.querySelector('.cell-art img');
             const image = loadedImages.get(imageNode);
             if (image) {
-              const size = Math.min(94, cellWidth - 28, 94);
+              const size = Math.min(64, cellWidth - 16);
               context.save();
-              context.globalAlpha = element.dataset.released === 'false' || element.dataset.exactImage === 'false' ? 0.45 : 1;
-              context.shadowColor = 'rgba(0, 0, 0, 0.44)';
-              context.shadowBlur = 16;
-              context.shadowOffsetY = 12;
-              context.drawImage(image, x + (cellWidth - size) / 2, y + 20, size, size);
+              if (element.dataset.released === 'false' || element.dataset.exactImage === 'false') {
+                context.globalAlpha = 0.5;
+                context.filter = 'brightness(0) saturate(0) invert(0.12)';
+              }
+              context.shadowColor = 'rgba(0, 0, 0, 0.38)';
+              context.shadowBlur = 10;
+              context.shadowOffsetY = 7;
+              context.drawImage(image, x + (cellWidth - size) / 2, y + 12, size, size);
               context.restore();
             }
-
-            const badgeText = element.querySelector('[data-status-badge]')?.textContent.trim().toUpperCase() || '';
-            const badgeX = x + 10;
-            const badgeY = y + cellHeight - 56;
-            const badgeWidth = cellWidth - 20;
-            const badgeHeight = 38;
-            if (status === 'extracted') {
-              fillVerticalGradient(context, badgeX, badgeY, badgeWidth, badgeHeight, '#37f58f', '#119f58');
-              context.fillStyle = '#031c11';
-            } else if (status === 'mastered') {
-              fillVerticalGradient(context, badgeX, badgeY, badgeWidth, badgeHeight, '#fff36b', '#f0a613');
-              context.fillStyle = '#211500';
-            } else {
-              fillVerticalGradient(context, badgeX, badgeY, badgeWidth, badgeHeight, '#263579', '#131c4c');
-              context.fillStyle = element.dataset.released === 'false' ? 'rgba(200, 214, 255, 0.58)' : '#c8d6ff';
-            }
-            context.font = '900 14px "Burbank Big Condensed", Impact, sans-serif';
-            context.textAlign = 'center';
-            context.textBaseline = 'middle';
-            context.fillText(badgeText, x + cellWidth / 2, badgeY + badgeHeight / 2 + 1);
           }
         });
 
@@ -769,6 +767,7 @@ const previewImage = new URL('/og-image.png', canonical).toString();
   .element {
     margin: 0 0 8px;
     color: var(--gold);
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
     font-size: 0.82rem;
     font-weight: 900;
     letter-spacing: 0;
@@ -888,11 +887,12 @@ const previewImage = new URL('/og-image.png', canonical).toString();
     min-height: 50px;
     padding: 15px 12px;
     background: linear-gradient(180deg, #ffe34d, #f39c12);
-    color: var(--text);
+    color: #171000;
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
     font-size: 0.92rem;
     font-weight: 900;
     text-align: center;
-    text-shadow: 0 2px 0 rgba(0, 0, 0, 0.55);
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.38);
     text-transform: uppercase;
   }
 
@@ -948,8 +948,14 @@ const previewImage = new URL('/og-image.png', canonical).toString();
   }
 
   .sprite-cell[data-released="false"] .cell-art img {
-    opacity: 0.34;
-    filter: grayscale(0.9) drop-shadow(0 10px 10px rgba(0, 0, 0, 0.3));
+    opacity: 0.5;
+    filter:
+      brightness(0)
+      saturate(0)
+      invert(0.12)
+      drop-shadow(0 0 6px rgba(40, 215, 255, 0.1))
+      drop-shadow(0 4px 0 rgba(0, 0, 0, 0.32))
+      drop-shadow(0 14px 14px rgba(0, 0, 0, 0.44));
   }
 
   .sprite-cell[data-released="false"] .status-badge {
@@ -1021,6 +1027,7 @@ const previewImage = new URL('/og-image.png', canonical).toString();
     padding: 0 8px;
     background: linear-gradient(180deg, #263579, #131c4c);
     color: var(--muted);
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
     text-align: center;
     font-size: 0.84rem;
     font-weight: 900;
