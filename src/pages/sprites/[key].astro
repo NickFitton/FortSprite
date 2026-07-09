@@ -1,0 +1,659 @@
+---
+import { spriteDetails } from '../../data/sprites.js';
+
+export function getStaticPaths() {
+  return spriteDetails.map((sprite) => ({
+    params: { key: sprite.key },
+    props: { sprite }
+  }));
+}
+
+const { sprite } = Astro.props;
+const canonical = `https://fortsprite.com${sprite.path}`;
+const title = `${sprite.name} Sprite - Fortnite Sprite Info | fortsprite`;
+const releasedVariants = sprite.variants.filter((variant) => variant.released);
+const upcomingVariants = sprite.variants.filter((variant) => !variant.released);
+const description = `${sprite.name} Sprite is a ${sprite.rarity} Fortnite Sprite. ${sprite.ability} View released and unreleased variants, artwork, and checklist status details.`;
+const previewImage = new URL(sprite.images.Base || sprite.variants[0]?.image || '/og-image.png', canonical).toString();
+const relatedSprites = spriteDetails.filter((item) => item.key !== sprite.key);
+const aboutHeading = `About ${sprite.name} Sprite`;
+const levelsHeading = `${sprite.name} Sprite level effects`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/og-image.png" />
+    <meta name="theme-color" content="#121826" />
+
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:site_name" content="fortsprite" />
+    <meta property="og:image" content={previewImage} />
+    <meta property="og:image:alt" content={`${sprite.name} Sprite artwork`} />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={previewImage} />
+    <meta name="twitter:image:alt" content={`${sprite.name} Sprite artwork`} />
+
+    <script type="application/ld+json" set:html={JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'ItemPage',
+      name: `${sprite.name} Sprite`,
+      url: canonical,
+      image: previewImage,
+      description,
+      mainEntity: {
+        '@type': 'Thing',
+        name: `${sprite.name} Sprite`,
+        description: sprite.ability,
+        image: previewImage,
+        additionalProperty: [
+          { '@type': 'PropertyValue', name: 'Rarity', value: sprite.rarity },
+          { '@type': 'PropertyValue', name: 'Level effects', value: sprite.levelEffects.map((row) => `Level ${row.level}: ${row.effect}`).join(' | ') },
+          { '@type': 'PropertyValue', name: 'Released variants', value: releasedVariants.map((variant) => variant.variant).join(', ') || 'None' },
+          { '@type': 'PropertyValue', name: 'Upcoming variants', value: upcomingVariants.map((variant) => variant.variant).join(', ') || 'None' }
+        ]
+      }
+    })} />
+  </head>
+  <body>
+    <main class="shell">
+      <nav class="top-nav" aria-label="Breadcrumb">
+        <a href="/">fortsprite</a>
+        <span aria-hidden="true">/</span>
+        <span>{sprite.name} Sprite</span>
+      </nav>
+
+      <section class="hero" aria-labelledby="page-title">
+        <div class="hero-copy">
+          <p class="eyebrow">{sprite.rarity} Sprite</p>
+          <h1 id="page-title">{sprite.name} Sprite</h1>
+          <p class="intro">{sprite.ability}</p>
+        </div>
+        <div class="hero-art" aria-label={`${sprite.name} Sprite artwork`}>
+          <img src={sprite.images.Base || sprite.variants[0]?.image} alt={`${sprite.name} Sprite`} decoding="async" />
+        </div>
+      </section>
+
+      <section class="facts" aria-label={`${sprite.name} Sprite details`}>
+        <div>
+          <span>Rarity</span>
+          <strong>{sprite.rarity}</strong>
+        </div>
+        <div>
+          <span>Released variants</span>
+          <strong>{releasedVariants.length}</strong>
+        </div>
+        <div>
+          <span>Tracked variants</span>
+          <strong>{sprite.variants.length}</strong>
+        </div>
+      </section>
+
+      <section class="content" aria-labelledby="about-heading">
+        <article class="info-card about-card">
+          <h2 id="about-heading">{aboutHeading}</h2>
+          <p>
+            {sprite.name} Sprite is a {sprite.rarity} Fortnite Sprite tracked by fortsprite. Its listed ability is:
+            {` ${sprite.ability}`}
+          </p>
+          <p>
+            Use the checklist on the homepage to mark released variants as not found, extracted, or mastered. Variant progress is saved privately in your browser.
+          </p>
+        </article>
+        <article class="info-card levels-card" aria-labelledby="levels-heading">
+          <p class="table-note">
+            Level values show how the listed effect scales from Level 1 to Level 5.
+          </p>
+          <div class="level-table-wrap">
+            <table class="level-table">
+              <caption id="levels-heading">{levelsHeading}</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Level</th>
+                  <th scope="col">Effect</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sprite.levelEffects.map((row) => (
+                  <tr>
+                    <th scope="row">Level {row.level}</th>
+                    <td>{row.effect}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
+      <section aria-labelledby="variants-heading">
+        <div class="section-heading">
+          <h2 id="variants-heading">{sprite.name} Sprite variants</h2>
+          <a href="/">Open checklist</a>
+        </div>
+        {releasedVariants.length > 0 && (
+          <div class="variant-group">
+            <h3>Released</h3>
+            <div class="variant-grid released-grid">
+              {releasedVariants.map((variant) => (
+                <article class="variant-card">
+                  <img src={variant.image} alt={variant.name} loading="lazy" decoding="async" />
+                  <div>
+                    <h4>{variant.variant === 'Base' ? 'Regular' : variant.variant}</h4>
+                    <p>Released and trackable in the checklist.</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        )}
+        {upcomingVariants.length > 0 && (
+          <div class="variant-group">
+            <h3>Upcoming or unreleased</h3>
+            <div class="variant-grid upcoming-grid">
+              {upcomingVariants.map((variant) => (
+                <article class:list={['variant-card', 'locked', { silhouette: !variant.hasExactImage }]}>
+                  <img src={variant.image} alt={variant.name} loading="lazy" decoding="async" />
+                  <div>
+                    <h4>{variant.variant === 'Base' ? 'Regular' : variant.variant}</h4>
+                    <p>{variant.hasExactImage ? 'Artwork exists, but this variant is not trackable yet.' : 'Silhouette shown until published artwork exists.'}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        )}
+      </section>
+
+      <section aria-labelledby="more-heading">
+        <div class="section-heading">
+          <h2 id="more-heading">More sprites</h2>
+        </div>
+        <div class="sprite-links">
+          {relatedSprites.map((item) => (
+            <a href={item.path}>{item.name}</a>
+          ))}
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
+
+<style>
+  @font-face {
+    font-display: swap;
+    font-family: "Burbank Big Condensed";
+    font-style: normal;
+    font-weight: 900;
+    src: url("/fonts/burbank-big-condensed-black.otf") format("opentype");
+  }
+
+  :root {
+    color-scheme: dark;
+    --bg: #070b24;
+    --panel: #121a4a;
+    --text: #ffffff;
+    --muted: #c8d6ff;
+    --green: #37f58f;
+    --gold: #ffe34d;
+    --shadow: rgba(0, 0, 0, 0.38);
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background:
+      radial-gradient(circle at 18% 12%, rgba(255, 227, 77, 0.24), transparent 16rem),
+      radial-gradient(circle at 84% 8%, rgba(255, 79, 216, 0.22), transparent 18rem),
+      linear-gradient(145deg, #070b24 0%, #162b88 46%, #5e2fd6 100%);
+    color: var(--text);
+    font-family: "Burbank Big Condensed", Impact, Haettenschweiler, "Arial Narrow Bold", Inter, ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: 0;
+  }
+
+  body::before {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background:
+      linear-gradient(115deg, transparent 0 40%, rgba(255, 255, 255, 0.08) 40% 41%, transparent 41% 100%),
+      repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.045) 0 2px, transparent 2px 22px);
+    content: "";
+    pointer-events: none;
+  }
+
+  a {
+    color: inherit;
+  }
+
+  .shell {
+    width: min(1040px, calc(100% - 32px));
+    margin: 0 auto;
+    padding: 24px 0 44px;
+  }
+
+  .top-nav {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 14px;
+    color: var(--muted);
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.92rem;
+    font-weight: 800;
+  }
+
+  .top-nav a {
+    color: var(--gold);
+    text-decoration: none;
+  }
+
+  .top-nav a:focus-visible,
+  .top-nav a:hover {
+    text-decoration: underline;
+  }
+
+  .hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(180px, 320px);
+    gap: 24px;
+    align-items: center;
+    border: 3px solid rgba(255, 255, 255, 0.18);
+    border-radius: 8px;
+    padding: 22px;
+    background:
+      linear-gradient(135deg, rgba(40, 215, 255, 0.18), rgba(159, 92, 255, 0.3)),
+      rgba(7, 11, 36, 0.72);
+    box-shadow: 0 18px 40px var(--shadow), inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+  }
+
+  .eyebrow {
+    margin: 0 0 8px;
+    color: var(--gold);
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.84rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    text-shadow: 0 2px 0 rgba(0, 0, 0, 0.45);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  p {
+    margin-top: 0;
+  }
+
+  h1 {
+    margin-bottom: 16px;
+    font-size: clamp(3.2rem, 11vw, 7.2rem);
+    line-height: 0.9;
+    text-shadow:
+      0 5px 0 #1230a5,
+      0 9px 0 rgba(0, 0, 0, 0.45),
+      0 0 28px rgba(40, 215, 255, 0.42);
+    text-transform: uppercase;
+  }
+
+  .intro,
+  .content p,
+  .variant-card p {
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  }
+
+  .intro {
+    max-width: 620px;
+    margin-bottom: 0;
+    color: var(--muted);
+    font-size: 1.08rem;
+    font-weight: 800;
+    line-height: 1.5;
+  }
+
+  .hero-art {
+    display: grid;
+    place-items: center;
+    min-height: 220px;
+  }
+
+  .hero-art img {
+    display: block;
+    width: min(100%, 260px);
+    filter:
+      drop-shadow(0 0 10px rgba(40, 215, 255, 0.18))
+      drop-shadow(0 8px 0 rgba(0, 0, 0, 0.32))
+      drop-shadow(0 22px 22px rgba(0, 0, 0, 0.44));
+  }
+
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 2px;
+    overflow: hidden;
+    margin: 18px 0;
+    border: 3px solid rgba(255, 255, 255, 0.18);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.16);
+  }
+
+  .facts div {
+    min-width: 0;
+    padding: 16px;
+    background: rgba(10, 18, 66, 0.98);
+  }
+
+  .facts span {
+    display: block;
+    color: var(--muted);
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.82rem;
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+
+  .facts strong {
+    display: block;
+    margin-top: 4px;
+    color: var(--gold);
+    font-size: 2rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    text-shadow: 0 3px 0 #704c00;
+  }
+
+  .info-card,
+  .variant-card,
+  .sprite-links a {
+    border: 2px solid rgba(255, 255, 255, 0.16);
+    border-radius: 8px;
+    background: rgba(10, 18, 66, 0.9);
+  }
+
+  .content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 22px;
+    @media (max-width: 980px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .info-card {
+    padding: 20px;
+  }
+
+  .about-card {
+    flex: 999 1 var(--card-min);
+    min-width: min(100%, var(--card-min));
+    max-width: 100%;
+  }
+
+  .levels-card {
+    flex: 1 1 var(--card-min);
+    min-width: min(100%, var(--card-min));
+    max-width: 100%;
+  }
+
+  h2 {
+    margin-bottom: 12px;
+    font-size: 2rem;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  .content p {
+    color: var(--muted);
+    font-size: 1rem;
+    font-weight: 750;
+    line-height: 1.65;
+  }
+
+  .content p:last-child {
+    margin-bottom: 0;
+  }
+
+  .table-note {
+    margin-bottom: 10px;
+    color: var(--muted);
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.94rem;
+    font-weight: 750;
+    line-height: 1.45;
+  }
+
+  .section-heading a {
+    color: var(--gold);
+  }
+
+  .level-table-wrap {
+    overflow-x: auto;
+    border: 2px solid rgba(255, 255, 255, 0.14);
+    border-radius: 8px;
+    background: rgba(7, 11, 36, 0.58);
+  }
+
+  .level-table {
+    width: 100%;
+    min-width: 0;
+    border-collapse: collapse;
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  }
+
+  .level-table caption {
+    padding: 14px 16px 4px;
+    color: var(--gold);
+    font-size: 0.9rem;
+    font-weight: 900;
+    text-align: left;
+    text-transform: uppercase;
+  }
+
+  .level-table th,
+  .level-table td {
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 10px 14px;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .level-table thead th {
+    color: var(--text);
+    font-size: 0.82rem;
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+
+  .level-table tbody th {
+    width: 88px;
+    color: var(--text);
+    font-size: 0.92rem;
+    font-weight: 900;
+    white-space: nowrap;
+  }
+
+  .level-table td {
+    color: var(--muted);
+    font-size: 0.94rem;
+    font-weight: 750;
+    line-height: 1.45;
+  }
+
+  .section-heading {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    justify-content: space-between;
+    margin: 22px 0 12px;
+  }
+
+  .section-heading a {
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.92rem;
+    font-weight: 900;
+  }
+
+  .variant-group {
+    margin-bottom: 18px;
+  }
+
+  .variant-group h3 {
+    margin: 0 0 10px;
+    color: var(--gold);
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.9rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    text-shadow: 0 2px 0 rgba(0, 0, 0, 0.45);
+  }
+
+  .variant-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 12px;
+  }
+
+  .released-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+
+  .upcoming-grid {
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  }
+
+  .variant-card {
+    display: grid;
+    grid-template-columns: 92px minmax(0, 1fr);
+    gap: 14px;
+    align-items: center;
+    min-height: 124px;
+    padding: 14px;
+  }
+
+  .variant-card img {
+    width: 84px;
+    height: 84px;
+    object-fit: contain;
+    filter:
+      drop-shadow(0 0 6px rgba(40, 215, 255, 0.1))
+      drop-shadow(0 4px 0 rgba(0, 0, 0, 0.32))
+      drop-shadow(0 14px 14px rgba(0, 0, 0, 0.44));
+  }
+
+  .variant-card.locked {
+    background: rgba(8, 13, 43, 0.82);
+  }
+
+  .variant-card.silhouette img {
+    opacity: 0.64;
+    filter:
+      brightness(0)
+      saturate(0)
+      invert(0.2)
+      drop-shadow(0 0 8px rgba(40, 215, 255, 0.16))
+      drop-shadow(0 4px 0 rgba(0, 0, 0, 0.32))
+      drop-shadow(0 14px 14px rgba(0, 0, 0, 0.44));
+  }
+
+  h4 {
+    margin-bottom: 4px;
+    font-size: 1.45rem;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+  .variant-card p {
+    margin-bottom: 4px;
+    color: var(--muted);
+    font-size: 0.92rem;
+    font-weight: 750;
+    line-height: 1.45;
+  }
+
+  .variant-card p:last-child {
+    margin-bottom: 0;
+  }
+
+  .sprite-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .sprite-links a {
+    padding: 9px 12px;
+    color: var(--muted);
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.92rem;
+    font-weight: 900;
+    text-decoration: none;
+  }
+
+  .sprite-links a:hover,
+  .sprite-links a:focus-visible {
+    color: var(--gold);
+    outline: 2px solid rgba(255, 255, 255, 0.72);
+    outline-offset: 2px;
+  }
+
+  @media (max-width: 700px) {
+    .shell {
+      width: min(100% - 20px, 1040px);
+      padding: 18px 0 32px;
+    }
+
+    .hero {
+      grid-template-columns: 1fr;
+      gap: 12px;
+      padding: 18px;
+    }
+
+    .hero-art {
+      min-height: auto;
+    }
+
+    .hero-art img {
+      width: min(72vw, 220px);
+    }
+
+    .facts {
+      grid-template-columns: 1fr;
+    }
+
+    .content {
+      gap: 16px;
+    }
+
+    .info-card {
+      padding: 16px;
+    }
+
+    .section-heading {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .variant-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
