@@ -216,7 +216,7 @@ const previewImage = new URL('/og-image.png', canonical).toString();
         const scale = Math.min(2, window.devicePixelRatio || 1);
         const elements = Array.from(matrix.children);
         const sourceColumnCount = 9;
-        const shareColumns = ['Base', 'Gold', 'Gummy', 'Galaxy'];
+        const shareColumns = ['Base', 'Gold', 'Gummy', 'Galaxy', 'Holofoil'];
         const shareColumnIndexes = [0, ...shareColumns.map((variant) =>
           elements.findIndex((element) => element.dataset.variantColumn === variant)
         ).filter((index) => index > 0)];

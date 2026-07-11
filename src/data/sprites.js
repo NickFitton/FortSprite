@@ -1,5 +1,5 @@
 export const variants = ['Base', 'Gold', 'Gummy', 'Galaxy', 'Holofoil', 'Gem', 'Cube', 'Quack'];
-export const releasedVariants = ['Base', 'Gold', 'Gummy', 'Galaxy'];
+export const releasedVariants = ['Base', 'Gold', 'Gummy', 'Galaxy', 'Holofoil'];
 
 export const iconMaps = {
   water: {
@@ -15,7 +15,8 @@ export const iconMaps = {
     Gold: '/sprites/T_Icon_BR_Creature_Sprite_Earth_Gold_ui_L.webp',
     Gummy: '/sprites/T_Icon_BR_Creature_Sprite_Earth_Candy_ui_L.webp',
     Galaxy: '/sprites/T_Icon_BR_Creature_Sprite_Earth_Galaxy_ui_L.webp',
-    Gem: '/sprites/T_Icon_BR_Creature_Sprite_Earth_Gem_ui_L.webp'
+    Gem: '/sprites/T_Icon_BR_Creature_Sprite_Earth_Gem_ui_L.webp',
+    Holofoil: null
   },
   fire: {
     Base: '/sprites/T_Icon_BR_Creature_Sprite_Fire_Unvault_Ch7S3_ui_L.webp',
@@ -29,27 +30,31 @@ export const iconMaps = {
     Gold: '/sprites/T_Icon_BR_Duck_Gold_L.webp',
     Gummy: '/sprites/T_Icon_BR_Duck_Candy_L.webp',
     Galaxy: '/sprites/T_Icon_BR_Duck_Galaxy_L.webp',
-    Gem: '/sprites/T_Icon_BR_Duck_Gem_L.webp'
+    Gem: '/sprites/T_Icon_BR_Duck_Gem_L.webp',
+    Holofoil: null
   },
   ghost: {
     Base: '/sprites/T_Icon_BR_Creature_Sprite_Ghost_Unvault_L.webp',
     Gold: '/sprites/T_Icon_BR_Creature_Sprite_Ghost_Gold_L.webp',
     Gummy: '/sprites/T_Icon_BR_Creature_Sprite_Ghost_Candy_L.webp',
-    Galaxy: '/sprites/T_Icon_BR_Creature_Sprite_Ghost_Galaxy_L.webp'
+    Galaxy: '/sprites/T_Icon_BR_Creature_Sprite_Ghost_Galaxy_L.webp',
+    Holofoil: null
   },
   dream: {
     Base: '/sprites/T_Icon_BR_Creature_Sprite_Sleepy_ui_L.webp',
     Gold: '/sprites/T_Icon_BR_Creature_Sprite_Sleepy_Gold_ui_L.webp',
     Gummy: '/sprites/T_Icon_BR_Creature_Sprite_Sleepy_Candy_ui_L.webp',
     Galaxy: '/sprites/T_Icon_BR_Creature_Sprite_Sleepy_Galaxy_ui_L.webp',
-    Cube: '/sprites/T_Icon_BR_Creature_Sprite_Sleepy_Cube_ui_L.webp'
+    Cube: '/sprites/T_Icon_BR_Creature_Sprite_Sleepy_Cube_ui_L.webp',
+    Holofoil: null
   },
   demon: {
     Base: '/sprites/T_Icon_BR_RedDemon_Default_L.webp',
     Gold: '/sprites/T_Icon_BR_RedDemon_Gold_L.webp',
     Gummy: '/sprites/T_Icon_BR_RedDemon_Candy_L.webp',
     Galaxy: '/sprites/T_Icon_BR_RedDemon_Galaxy_L.webp',
-    Gem: '/sprites/T_Icon_BR_RedDemon_Gem_L.webp'
+    Gem: '/sprites/T_Icon_BR_RedDemon_Gem_L.webp',
+    Holofoil: null
   },
   punk: {
     Base: '/sprites/T_Icon_BR_Creature_Sprite_Punk_ui_L.webp',
@@ -57,7 +62,8 @@ export const iconMaps = {
     Gummy: '/sprites/T_Icon_BR_Creature_Sprite_Punk_Candy_ui_L.webp',
     Galaxy: '/sprites/T_Icon_BR_Creature_Sprite_Punk_Galaxy_ui_L.webp',
     Gem: '/sprites/T_Icon_BR_Creature_Sprite_Punk_Gem_ui_L.webp',
-    Cube: '/sprites/T_Icon_BR_Creature_Sprite_Punk_Cube_ui_L.webp'
+    Cube: '/sprites/T_Icon_BR_Creature_Sprite_Punk_Cube_ui_L.webp',
+    Holofoil: null
   },
   king: {
     Base: '/sprites/T_Icon_BR_Creature_Sprite_King_ui_L.webp',
@@ -72,13 +78,15 @@ export const iconMaps = {
     Gummy: '/sprites/T_Icon_BR_Creature_Sprite_ZeroPoint_Candy_ui_L.webp',
     Galaxy: '/sprites/T_Icon_BR_Creature_Sprite_ZeroPoint_Galaxy_ui_L.webp',
     Gem: '/sprites/T_Icon_BR_Creature_Sprite_ZeroPoint_Gem_ui_L.webp',
-    Quack: '/sprites/T_Icon_BR_Creature_Sprite_ZeroPoint_Quack_ui_L.webp'
+    Quack: '/sprites/T_Icon_BR_Creature_Sprite_ZeroPoint_Quack_ui_L.webp',
+    Holofoil: null
   },
   fishy: {
     Base: '/sprites/T_Icon_BR_Creature_Sprite_Fishy_ui_L.webp',
     Gold: '/sprites/T_Icon_BR_Creature_Sprite_Fishy_Gold_ui_L.webp',
     Gummy: '/sprites/T_Icon_BR_Creature_Sprite_Fishy_Candy_ui_L.webp',
-    Galaxy: '/sprites/T_Icon_BR_Creature_Sprite_Fishy_Galaxy_ui_L.webp'
+    Galaxy: '/sprites/T_Icon_BR_Creature_Sprite_Fishy_Galaxy_ui_L.webp',
+    Holofoil: null
   },
   striker: {
     Base: '/sprites/T_Icon_BR_Creature_Sprite_Soccer_ui_L.webp',
@@ -92,19 +100,22 @@ export const iconMaps = {
     Gold: '/sprites/T_Icon_BR_Creature_Sprite_Drifter_Gold_ui_L.webp',
     Gummy: '/sprites/T_Icon_BR_Creature_Sprite_Drifter_Candy_ui_L.webp',
     Galaxy: '/sprites/T_Icon_BR_Creature_Sprite_Drifter_Galaxy_ui_L.webp',
-    Gem: '/sprites/T_Icon_BR_Creature_Sprite_Drifter_Gem_ui_L.webp'
+    Gem: '/sprites/T_Icon_BR_Creature_Sprite_Drifter_Gem_ui_L.webp',
+    Holofoil: null
   },
   boss: {
     Base: '/sprites/T_Icon_BR_Creature_Sprite_Boss_ui_L.webp',
     Gold: '/sprites/T_Icon_BR_Creature_Sprite_Boss_Gold_ui_L.webp',
     Gummy: '/sprites/T_Icon_BR_Creature_Sprite_Boss_Candy_ui_L.webp',
-    Galaxy: '/sprites/T_Icon_BR_Creature_Sprite_Boss_Galaxy_ui_L.webp'
+    Galaxy: '/sprites/T_Icon_BR_Creature_Sprite_Boss_Galaxy_ui_L.webp',
+    Holofoil: null
   },
   grim: {
     Base: '/sprites/T_Icon_BR_GrimReaper_Default_L.webp',
     Gold: '/sprites/T_Icon_BR_GrimReaper_Gold_L.webp',
     Gummy: '/sprites/T_Icon_BR_GrimReaper_Candy_L.webp',
-    Galaxy: '/sprites/T_Icon_BR_GrimReaper_Galaxy_L.webp'
+    Galaxy: '/sprites/T_Icon_BR_GrimReaper_Galaxy_L.webp',
+    Holofoil: null
   },
   seven: {
     Base: '/sprites/T_Icon_BR_Creature_Sprite_Seven_ui_L.webp',
