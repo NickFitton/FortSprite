@@ -144,6 +144,10 @@ const previewImage = new URL('/og-image.png', canonical).toString();
             </article>
           ))}
         </div>
+        <div class="quick-toast" data-quick-toast role="status" aria-live="polite" hidden>
+          <span data-quick-toast-message></span>
+          <button type="button" data-quick-undo>Undo</button>
+        </div>
       </section>
     </main>
 
@@ -158,6 +162,9 @@ const previewImage = new URL('/og-image.png', canonical).toString();
       const regularButton = document.querySelector('[data-regular-mode]');
       const quickView = document.querySelector('[data-quick-view]');
       const quickCount = document.querySelector('[data-quick-count]');
+      const quickToast = document.querySelector('[data-quick-toast]');
+      const quickToastMessage = document.querySelector('[data-quick-toast-message]');
+      const quickUndoButton = document.querySelector('[data-quick-undo]');
       const counts = {
         mastered: document.querySelector('#mastered-count'),
         extracted: document.querySelector('#extracted-count'),
@@ -165,6 +172,8 @@ const previewImage = new URL('/og-image.png', canonical).toString();
       };
 
       let state = {};
+      let lastQuickAction = null;
+      let quickToastTimer = null;
 
       try {
         state = JSON.parse(localStorage.getItem(storageKey) || '{}') || {};
@@ -212,7 +221,40 @@ const previewImage = new URL('/og-image.png', canonical).toString();
         if (quickView) quickView.hidden = !isQuick;
         if (isQuick) {
           window.scrollTo({ top: 0, behavior: 'instant' });
+        } else {
+          hideQuickToast();
         }
+      }
+
+      function hideQuickToast() {
+        if (quickToastTimer) {
+          window.clearTimeout(quickToastTimer);
+          quickToastTimer = null;
+        }
+        if (quickToast) {
+          quickToast.dataset.visible = 'false';
+          window.setTimeout(() => {
+            if (quickToast.dataset.visible === 'false') {
+              quickToast.hidden = true;
+            }
+          }, 220);
+        }
+        lastQuickAction = null;
+      }
+
+      function showQuickToast(action) {
+        lastQuickAction = action;
+        if (quickToastMessage) {
+          quickToastMessage.textContent = `${action.name} marked extracted`;
+        }
+        if (quickToast) {
+          quickToast.dataset.visible = 'false';
+          quickToast.hidden = false;
+          quickToast.getBoundingClientRect();
+          quickToast.dataset.visible = 'true';
+        }
+        if (quickToastTimer) window.clearTimeout(quickToastTimer);
+        quickToastTimer = window.setTimeout(hideQuickToast, 5000);
       }
 
       cards.forEach((card) => {
@@ -239,9 +281,16 @@ const previewImage = new URL('/og-image.png', canonical).toString();
 
       quickCards.forEach((card) => {
         function markExtracted() {
-          state[card.dataset.id] = 'extracted';
+          const id = card.dataset.id;
+          const previousStatus = state[id] || 'not-found';
+          state[id] = 'extracted';
           persist();
           applyState();
+          showQuickToast({
+            id,
+            name: card.querySelector('h2')?.textContent?.trim() || 'Sprite',
+            previousStatus
+          });
         }
 
         card.addEventListener('click', markExtracted);
@@ -254,6 +303,13 @@ const previewImage = new URL('/og-image.png', canonical).toString();
 
       quickButton?.addEventListener('click', () => setQuickMode(true));
       regularButton?.addEventListener('click', () => setQuickMode(false));
+      quickUndoButton?.addEventListener('click', () => {
+        if (!lastQuickAction) return;
+        state[lastQuickAction.id] = lastQuickAction.previousStatus;
+        persist();
+        applyState();
+        hideQuickToast();
+      });
 
       function loadImage(src) {
         return new Promise((resolve, reject) => {
@@ -767,6 +823,66 @@ const previewImage = new URL('/og-image.png', canonical).toString();
     text-transform: uppercase;
   }
 
+  .quick-toast {
+    position: fixed;
+    right: 12px;
+    bottom: 12px;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: min(420px, calc(100vw - 24px));
+    border: 2px solid rgba(255, 255, 255, 0.22);
+    border-radius: 8px;
+    padding: 10px 10px 10px 14px;
+    background: rgba(7, 11, 36, 0.96);
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.42);
+    opacity: 0;
+    transform: translateY(calc(100% + 20px));
+    transition: opacity 180ms ease, transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .quick-toast[hidden] {
+    display: none;
+  }
+
+  .quick-toast[data-visible="true"] {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .quick-toast span {
+    min-width: 0;
+    color: var(--text);
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.82rem;
+    font-weight: 900;
+    line-height: 1.2;
+    text-transform: uppercase;
+  }
+
+  .quick-toast button {
+    flex: 0 0 auto;
+    min-height: 34px;
+    border: 0;
+    border-radius: 6px;
+    padding: 0 12px;
+    background: linear-gradient(180deg, var(--green), #119f58);
+    color: #031c11;
+    cursor: pointer;
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.78rem;
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+
+  .quick-toast button:hover,
+  .quick-toast button:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.84);
+    outline-offset: -4px;
+    filter: brightness(1.08);
+  }
+
   .matrix-wrap {
     overflow-x: auto;
     border: 3px solid rgba(255, 255, 255, 0.2);
@@ -1043,6 +1159,19 @@ const previewImage = new URL('/og-image.png', canonical).toString();
 
     .quick-card h2 {
       font-size: 0.58rem;
+    }
+
+    .quick-toast {
+      right: 6px;
+      bottom: 6px;
+      left: 6px;
+      justify-content: space-between;
+      max-width: none;
+      padding: 8px 8px 8px 10px;
+    }
+
+    .quick-toast span {
+      font-size: 0.72rem;
     }
 
     .sprite-type-heading {
