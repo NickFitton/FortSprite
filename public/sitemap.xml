@@ -6,6 +6,11 @@
     <priority>1.0</priority>
   </url>
   <url>
+    <loc>https://fortsprite.com/sprites/batman/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://fortsprite.com/sprites/water/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -89,6 +94,16 @@
     <loc>https://fortsprite.com/sprites/seven/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://fortsprite.com/sprites/pollo/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://fortsprite.com/sprites/vini-jr/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://fortsprite.com/sprites/burnt-peanut/</loc>

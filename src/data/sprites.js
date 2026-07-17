@@ -2,6 +2,14 @@ export const variants = ['Base', 'Gold', 'Gummy', 'Galaxy', 'Holofoil', 'Gem', '
 export const releasedVariants = ['Base', 'Gold', 'Gummy', 'Galaxy', 'Holofoil'];
 
 export const iconMaps = {
+  batman: {
+    Base: '/sprites/T_Icon_BR_FossilMeal_Default_L.webp',
+    Gold: '/sprites/T_Icon_BR_FossilMeal_Gold_L.webp',
+    Gummy: '/sprites/T_Icon_BR_FossilMeal_Candy_L.webp',
+    Galaxy: '/sprites/T_Icon_BR_FossilMeal_Galaxy_L.webp',
+    Holofoil: '/sprites/T_Icon_BR_FossilMeal_Holofoil_L.webp',
+    Cube: '/sprites/T_Icon_BR_FossilMeal_Cube_L.webp'
+  },
   water: {
     Base: '/sprites/T_Icon_BR_Creature_Sprite_Water_Unvault_Ch7S3_ui_L.webp',
     Gold: '/sprites/T_Icon_BR_Creature_Sprite_Water_Gold_ui_L.webp',
@@ -31,14 +39,14 @@ export const iconMaps = {
     Gummy: '/sprites/T_Icon_BR_Duck_Candy_L.webp',
     Galaxy: '/sprites/T_Icon_BR_Duck_Galaxy_L.webp',
     Gem: '/sprites/T_Icon_BR_Duck_Gem_L.webp',
-    Holofoil: null
+    Holofoil: '/sprites/tmp_duck_holofoil.webp'
   },
   ghost: {
     Base: '/sprites/T_Icon_BR_Creature_Sprite_Ghost_Unvault_L.webp',
     Gold: '/sprites/T_Icon_BR_Creature_Sprite_Ghost_Gold_L.webp',
     Gummy: '/sprites/T_Icon_BR_Creature_Sprite_Ghost_Candy_L.webp',
     Galaxy: '/sprites/T_Icon_BR_Creature_Sprite_Ghost_Galaxy_L.webp',
-    Holofoil: null
+    Holofoil: '/sprites/T_Icon_BR_Creature_Sprite_Ghost_Holo_L.webp'
   },
   dream: {
     Base: '/sprites/T_Icon_BR_Creature_Sprite_Sleepy_ui_L.webp',
@@ -117,6 +125,13 @@ export const iconMaps = {
     Galaxy: '/sprites/T_Icon_BR_GrimReaper_Galaxy_L.webp',
     Holofoil: null
   },
+  air: {
+    Base: '/sprites/T_Icon_BR_Air_Default_L.webp',
+    Gold: '/sprites/T_Icon_BR_Air_Gold_L.webp',
+    Gummy: '/sprites/T_Icon_BR_Air_Candy_L.webp',
+    Galaxy: '/sprites/T_Icon_BR_Air_Galaxy_L.webp',
+    Holofoil: '/sprites/T_Icon_BR_Air_Holo_L.webp'
+  },
   seven: {
     Base: '/sprites/T_Icon_BR_Creature_Sprite_Seven_ui_L.webp',
     Gold: '/sprites/T_Icon_BR_Creature_Sprite_Seven_Gold_ui_L.webp',
@@ -139,6 +154,7 @@ export const spriteTypes = [
     name: 'Earth',
     rarity: 'rare',
     ability: 'Gives a chance to find additional rare loot when opening chests.',
+    unreleasedVariants: ['Holofoil'],
     images: iconMaps.earth
   },
   {
@@ -153,6 +169,7 @@ export const spriteTypes = [
     name: 'Duck',
     rarity: 'epic',
     ability: 'Restores shields when you emote or jam.',
+    unreleasedVariants: ['Holofoil'],
     images: iconMaps.duck
   },
   {
@@ -167,6 +184,7 @@ export const spriteTypes = [
     name: 'Dream',
     rarity: 'legendary',
     ability: 'Gives a random item each level, with legendary loot at Level 5.',
+    unreleasedVariants: ['Holofoil'],
     images: iconMaps.dream
   },
   {
@@ -174,13 +192,22 @@ export const spriteTypes = [
     name: 'Demon',
     rarity: 'epic',
     ability: 'Siphons health and shields when you eliminate an opponent.',
+    unreleasedVariants: ['Holofoil'],
     images: iconMaps.demon
+  },
+  {
+    key: 'batman',
+    name: 'Batman',
+    rarity: 'mythic',
+    ability: 'Grants the ability to launch in the air and deploy the Bat Cape.',
+    images: iconMaps.batman
   },
   {
     key: 'punk',
     name: 'Punk',
     rarity: 'legendary',
     ability: 'Possibly nothing... or infinitely something.',
+    unreleasedVariants: ['Holofoil'],
     images: iconMaps.punk
   },
   {
@@ -195,6 +222,7 @@ export const spriteTypes = [
     name: 'Zero Point',
     rarity: 'mythic',
     ability: 'Spawns a Shield Bubble Jr. when you use a healing item on yourself, excluding splashes and grenades.',
+    unreleasedVariants: ['Holofoil'],
     images: iconMaps.zeroPoint
   },
   {
@@ -202,6 +230,7 @@ export const spriteTypes = [
     name: 'Fishy',
     rarity: 'rare',
     ability: 'Greatly increases swim speed and briefly increases movement speed after taking damage.',
+    unreleasedVariants: ['Holofoil'],
     images: iconMaps.fishy
   },
   {
@@ -216,6 +245,7 @@ export const spriteTypes = [
     name: 'Aura',
     rarity: 'epic',
     ability: 'Grants a Shock Rock charge after you deal enough damage to enemies.',
+    unreleasedVariants: ['Holofoil'],
     images: iconMaps.aura
   },
   {
@@ -223,6 +253,7 @@ export const spriteTypes = [
     name: 'Boss',
     rarity: 'legendary',
     ability: 'Increases your maximum health and shield.',
+    unreleasedVariants: ['Holofoil'],
     images: iconMaps.boss
   },
   {
@@ -230,28 +261,36 @@ export const spriteTypes = [
     name: 'Grim',
     rarity: 'mythic',
     ability: 'Marks players who attack you for a duration.',
+    unreleasedVariants: ['Holofoil'],
     images: iconMaps.grim
   },
   {
     key: 'air',
     name: 'Air',
     rarity: 'rare',
-    ability: 'Unreleased sprite; effects are not currently available.',
-    unreleased: true,
-    images: iconMaps.water
+    ability: 'Increases sprinting speed and jump height. Also nullifies fall damage.',
+    images: iconMaps.air
   },
   {
     key: 'seven',
     name: 'Seven',
     rarity: 'legendary',
     ability: 'Unreleased sprite; effects are not currently available.',
-    unreleased: true,
+    unreleasedVariants: ['Gem', 'Cube', 'Quack'],
     images: iconMaps.seven
-  }
+  },
+  {
+    key: 'batman',
+    name: 'Batman',
+    rarity: 'mythic',
+    ability: 'Grants the ability to launch in the air and deploy the Bat Cape.',
+    images: iconMaps.batman
+  },
 ];
 
 function levelEffectsFor(sprite) {
   const levelEffectSets = {
+    batman: ['Launch and deploy the Bat Cape.', 'Launch and deploy the Bat Cape.', 'Launch and deploy the Bat Cape.', 'Launch and deploy the Bat Cape.', 'Launch and deploy the Bat Cape.'],
     water: ['2 shield', '3 shield', '4 shield', '5 shield', '6 shield'],
     earth: ['10%', '12.5%', '15%', '17.5%', '20%'],
     fire: ['150 damage', '125 damage', '100 damage', '75 damage', '50 damage'],
@@ -292,24 +331,67 @@ function levelEffectsFor(sprite) {
   ];
 }
 
-export const burntPeanutSprite = {
-  id: 'burnt-peanut-base',
-  name: 'Burnt Peanut Sprite',
-  family: 'Burnt Peanut',
-  variant: 'Base',
-  rarity: 'mythic',
-  ability: 'Gives a chance to find extra loot, including Mythic items, after eliminations.',
-  released: true,
-  hasExactImage: true,
-  image: '/sprites/T_Icon_BR_Creature_Sprite_BurntPeanut_ui_L.webp',
-  levelEffects: [
-    { level: 1, effect: '20% chance to find more loot after eliminations.' },
-    { level: 2, effect: '30% chance to find more loot after eliminations.' },
-    { level: 3, effect: '40% chance to find more loot after eliminations.' },
-    { level: 4, effect: '50% chance to find more loot after eliminations.' },
-    { level: 5, effect: '60% chance to find more loot after eliminations, with a 10% chance to find Mythic loot.' }
-  ]
-};
+export const specialSprites = [
+  {
+    key: 'burnt-peanut',
+    id: 'burnt-peanut-base',
+    name: 'Burnt Peanut Sprite',
+    family: 'Burnt Peanut',
+    variant: 'Base',
+    rarity: 'mythic',
+    ability: 'Gives a chance to find extra loot, including Mythic items, after eliminations.',
+    released: true,
+    hasExactImage: true,
+    image: '/sprites/T_Icon_BR_Creature_Sprite_BurntPeanut_ui_L.webp',
+    levelEffects: [
+      { level: 1, effect: '20% chance to find more loot after eliminations.' },
+      { level: 2, effect: '30% chance to find more loot after eliminations.' },
+      { level: 3, effect: '40% chance to find more loot after eliminations.' },
+      { level: 4, effect: '50% chance to find more loot after eliminations.' },
+      { level: 5, effect: '60% chance to find more loot after eliminations, with a 10% chance to find Mythic loot.' }
+    ]
+  },
+  {
+    key: 'vini-jr',
+    id: 'vini-jr-base',
+    name: 'Vini Jr. Sprite',
+    family: 'Vini Jr.',
+    variant: 'Base',
+    rarity: 'mythic',
+    ability: 'Sprinting for a short time makes your slide destructive. Slidekicking enemies increases rate of fire and reload speed.',
+    released: true,
+    hasExactImage: true,
+    image: '/sprites/T_Icon_BR_CokeParmesan_Default_L.webp',
+    levelEffects: [
+      { level: 1, effect: '40 damage / 10% fire rate.' },
+      { level: 2, effect: '45 damage / 20% fire rate.' },
+      { level: 3, effect: '50 damage / 30% fire rate.' },
+      { level: 4, effect: '55 damage / 40% fire rate.' },
+      { level: 5, effect: '60 damage / 50% fire rate.' }
+    ]
+  },
+  {
+    key: 'pollo',
+    id: 'pollo-base',
+    name: 'Pollo Sprite',
+    family: 'Pollo',
+    variant: 'Base',
+    rarity: 'mythic',
+    ability: 'Upon earning an elimination, slowly replenish shield for you and nearby squad members for a duration.',
+    released: false,
+    hasExactImage: true,
+    image: '/sprites/T_Icon_BR_CompanyStargazer_Default_L.webp',
+    levelEffects: [
+      { level: 1, effect: '6 seconds of shield replenishment after eliminations.' },
+      { level: 2, effect: '7 seconds of shield replenishment after eliminations.' },
+      { level: 3, effect: '8 seconds of shield replenishment after eliminations.' },
+      { level: 4, effect: '9 seconds of shield replenishment after eliminations.' },
+      { level: 5, effect: '10 seconds of shield replenishment after eliminations.' }
+    ]
+  },
+];
+
+export const burntPeanutSprite = specialSprites.find((sprite) => sprite.id === 'burnt-peanut-base');
 
 export const sprites = [
   ...spriteTypes.flatMap((sprite) =>
@@ -325,13 +407,13 @@ export const sprites = [
         variant,
         rarity: variant === 'Base' ? sprite.rarity : 'special',
         ability: sprite.ability,
-        released: !sprite.unreleased && releasedVariants.includes(variant),
+        released: !sprite.unreleased && releasedVariants.includes(variant) && !sprite.unreleasedVariants?.includes(variant),
         hasExactImage: Boolean(sprite.images[variant]),
         image
       };
     })
   ),
-  burntPeanutSprite
+  ...specialSprites
 ];
 
 export const spriteDetails = [
@@ -343,16 +425,16 @@ export const spriteDetails = [
       sprites.find((item) => item.family === sprite.name && item.variant === variant)
     ).filter(Boolean)
   })),
-  {
-    key: 'burnt-peanut',
-    name: 'Burnt Peanut',
-    rarity: 'mythic',
-    ability: burntPeanutSprite.ability,
-    levelEffects: burntPeanutSprite.levelEffects,
-    images: { Base: burntPeanutSprite.image },
-    path: '/sprites/burnt-peanut/',
-    variants: [burntPeanutSprite]
-  }
+  ...specialSprites.map((sprite) => ({
+    key: sprite.key,
+    name: sprite.family,
+    rarity: sprite.rarity,
+    ability: sprite.ability,
+    levelEffects: sprite.levelEffects,
+    images: { Base: sprite.image },
+    path: `/sprites/${sprite.key}/`,
+    variants: [sprite]
+  }))
 ];
 
 export const claimableSprites = sprites.filter((sprite) => sprite.released);
@@ -366,12 +448,12 @@ export const spriteRows = [
     path: `/sprites/${sprite.key}/`,
     cells: variants.map((variant) => sprites.find((item) => item.family === sprite.name && item.variant === variant))
   })),
-  {
-    key: 'burnt-peanut',
-    name: 'Burnt Peanut',
-    rarity: 'mythic',
-    ability: burntPeanutSprite.ability,
-    path: '/sprites/burnt-peanut/',
-    cells: variants.map((variant) => variant === 'Base' ? sprites.find((item) => item.id === 'burnt-peanut-base') : undefined)
-  }
+  ...specialSprites.map((sprite) => ({
+    key: sprite.key,
+    name: sprite.family,
+    rarity: sprite.rarity,
+    ability: sprite.ability,
+    path: `/sprites/${sprite.key}/`,
+    cells: variants.map((variant) => variant === 'Base' ? sprites.find((item) => item.id === sprite.id) : undefined)
+  }))
 ];
