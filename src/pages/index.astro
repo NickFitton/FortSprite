@@ -72,6 +72,7 @@ const previewImage = new URL('/og-image.png', canonical).toString();
             <span id="mastered-count">0</span>
             <small>Mastered</small>
           </div>
+          <button class="quick-button" type="button" data-quick-mode>Quick mode</button>
           <button class="share-button" type="button" data-share-image>Share image</button>
         </div>
       </section>
@@ -121,13 +122,42 @@ const previewImage = new URL('/og-image.png', canonical).toString();
           ))}
         </div>
       </section>
+
+      <section class="quick-view" data-quick-view aria-label="Missing sprites" hidden>
+        <div class="quick-actions">
+          <button class="back-button" type="button" data-regular-mode>Back</button>
+          <span data-quick-count>{claimableSprites.length} missing</span>
+        </div>
+        <div class="quick-grid" data-quick-grid>
+          {claimableSprites.map((sprite) => (
+            <article
+              class="quick-card"
+              data-quick-card
+              data-id={sprite.id}
+              data-status="not-found"
+              role="button"
+              tabindex="0"
+              aria-label={sprite.name}
+            >
+              <img src={sprite.image} alt={sprite.name} loading="lazy" decoding="async" />
+              <h2>{sprite.name.replace(' Sprite', '').replace(/^Base /, '')}</h2>
+            </article>
+          ))}
+        </div>
+      </section>
     </main>
 
     <script>
       const storageKey = 'fortsprite:v1';
       const cards = Array.from(document.querySelectorAll('[data-sprite-card]'));
+      const quickCards = Array.from(document.querySelectorAll('[data-quick-card]'));
       const matrix = document.querySelector('.sprite-matrix');
+      const shell = document.querySelector('.shell');
       const shareButton = document.querySelector('[data-share-image]');
+      const quickButton = document.querySelector('[data-quick-mode]');
+      const regularButton = document.querySelector('[data-regular-mode]');
+      const quickView = document.querySelector('[data-quick-view]');
+      const quickCount = document.querySelector('[data-quick-count]');
       const counts = {
         mastered: document.querySelector('#mastered-count'),
         extracted: document.querySelector('#extracted-count'),
@@ -163,9 +193,26 @@ const previewImage = new URL('/og-image.png', canonical).toString();
           card.setAttribute('aria-label', `${card.getAttribute('aria-label').replace(/ status:.*/, ' status')}: ${label}`);
         });
 
+        quickCards.forEach((card) => {
+          const status = state[card.dataset.id] || 'not-found';
+          card.dataset.status = status;
+          card.hidden = status !== 'not-found';
+        });
+
         counts.mastered.textContent = String(totals.mastered);
         counts.extracted.textContent = String(totals.extracted);
         counts.missing.textContent = String(totals['not-found']);
+        if (quickCount) {
+          quickCount.textContent = `${totals['not-found']} missing`;
+        }
+      }
+
+      function setQuickMode(isQuick) {
+        shell?.classList.toggle('is-quick', isQuick);
+        if (quickView) quickView.hidden = !isQuick;
+        if (isQuick) {
+          window.scrollTo({ top: 0, behavior: 'instant' });
+        }
       }
 
       cards.forEach((card) => {
@@ -189,6 +236,24 @@ const previewImage = new URL('/og-image.png', canonical).toString();
           cycleStatus();
         });
       });
+
+      quickCards.forEach((card) => {
+        function markExtracted() {
+          state[card.dataset.id] = 'extracted';
+          persist();
+          applyState();
+        }
+
+        card.addEventListener('click', markExtracted);
+        card.addEventListener('keydown', (event) => {
+          if (event.key !== 'Enter' && event.key !== ' ') return;
+          event.preventDefault();
+          markExtracted();
+        });
+      });
+
+      quickButton?.addEventListener('click', () => setQuickMode(true));
+      regularButton?.addEventListener('click', () => setQuickMode(false));
 
       function loadImage(src) {
         return new Promise((resolve, reject) => {
@@ -556,15 +621,150 @@ const previewImage = new URL('/og-image.png', canonical).toString();
     transition: filter 160ms ease, transform 120ms ease;
   }
 
+  .quick-button {
+    grid-column: 1 / -1;
+    min-height: 48px;
+    border: 0;
+    border-top: 2px solid rgba(255, 255, 255, 0.16);
+    padding: 0 18px;
+    background: linear-gradient(180deg, var(--blue), #1160c9);
+    color: #031021;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    transition: filter 160ms ease, transform 120ms ease;
+  }
+
   .share-button:hover,
-  .share-button:focus-visible {
+  .share-button:focus-visible,
+  .quick-button:hover,
+  .quick-button:focus-visible,
+  .back-button:hover,
+  .back-button:focus-visible {
     outline: 2px solid rgba(255, 255, 255, 0.84);
     outline-offset: -4px;
     filter: brightness(1.08);
   }
 
-  .share-button:active {
+  .share-button:active,
+  .quick-button:active,
+  .back-button:active {
     transform: translateY(1px);
+  }
+
+  .quick-view[hidden] {
+    display: none;
+  }
+
+  .shell.is-quick {
+    width: 100%;
+    padding: 0;
+  }
+
+  .shell.is-quick .hero,
+  .shell.is-quick .matrix-wrap {
+    display: none;
+  }
+
+  .quick-view {
+    min-height: 100vh;
+    padding: 8px;
+    background: rgba(7, 11, 36, 0.62);
+  }
+
+  .quick-actions {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    min-height: 42px;
+    margin: -8px -8px 8px;
+    padding: 6px 8px;
+    background: rgba(7, 11, 36, 0.96);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.28);
+  }
+
+  .back-button {
+    min-height: 32px;
+    border: 0;
+    border-radius: 6px;
+    padding: 0 14px;
+    background: linear-gradient(180deg, var(--gold), #d8870d);
+    color: #1d1200;
+    cursor: pointer;
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.78rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    transition: filter 160ms ease, transform 120ms ease;
+  }
+
+  .quick-actions span {
+    color: var(--text);
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.78rem;
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+
+  .quick-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(86px, 1fr));
+    gap: 6px;
+  }
+
+  .quick-card {
+    display: grid;
+    grid-template-rows: minmax(58px, 1fr) auto;
+    align-items: center;
+    min-width: 0;
+    min-height: 104px;
+    margin: 0;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 6px;
+    padding: 5px;
+    background: rgba(10, 18, 66, 0.96);
+    cursor: pointer;
+    box-shadow: inset 0 0 14px rgba(40, 215, 255, 0.08);
+  }
+
+  .quick-card[hidden] {
+    display: none;
+  }
+
+  .quick-card:hover,
+  .quick-card:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.74);
+    outline-offset: -2px;
+    background: linear-gradient(180deg, rgba(55, 245, 143, 0.2), rgba(10, 18, 66, 0.98));
+  }
+
+  .quick-card img {
+    justify-self: center;
+    width: min(72px, 100%);
+    height: 72px;
+    object-fit: contain;
+    filter:
+      drop-shadow(0 0 5px rgba(40, 215, 255, 0.12))
+      drop-shadow(0 8px 9px rgba(0, 0, 0, 0.4));
+  }
+
+  .quick-card h2 {
+    min-width: 0;
+    margin: 0;
+    overflow-wrap: anywhere;
+    color: var(--text);
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.66rem;
+    font-weight: 900;
+    line-height: 1.05;
+    text-align: center;
+    text-shadow: 0 2px 0 rgba(0, 0, 0, 0.48);
+    text-transform: uppercase;
   }
 
   .matrix-wrap {
@@ -813,6 +1013,36 @@ const previewImage = new URL('/og-image.png', canonical).toString();
     .sprite-matrix {
       grid-template-columns: 44px repeat(8, minmax(128px, 1fr));
       min-width: 1068px;
+    }
+
+    .quick-view {
+      padding: 6px;
+    }
+
+    .quick-actions {
+      margin: -6px -6px 6px;
+      padding: 5px 6px;
+    }
+
+    .quick-grid {
+      grid-template-columns: repeat(auto-fill, minmax(68px, 1fr));
+      gap: 4px;
+    }
+
+    .quick-card {
+      grid-template-rows: 52px auto;
+      min-height: 86px;
+      border-radius: 5px;
+      padding: 4px;
+    }
+
+    .quick-card img {
+      width: min(54px, 100%);
+      height: 54px;
+    }
+
+    .quick-card h2 {
+      font-size: 0.58rem;
     }
 
     .sprite-type-heading {

@@ -279,13 +279,6 @@ export const spriteTypes = [
     unreleasedVariants: ['Gem', 'Cube', 'Quack'],
     images: iconMaps.seven
   },
-  {
-    key: 'batman',
-    name: 'Batman',
-    rarity: 'mythic',
-    ability: 'Grants the ability to launch in the air and deploy the Bat Cape.',
-    images: iconMaps.batman
-  },
 ];
 
 function levelEffectsFor(sprite) {
