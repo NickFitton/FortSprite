@@ -7,3 +7,9 @@ test-results/
 .env
 .env.*
 npm-debug.log*
+
+# AI
+.agents/
+.claude/
+.scratch/
+skills-lock.json
