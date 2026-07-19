@@ -1,5 +1,8 @@
 ---
+import { Show, SignInButton, SignUpButton, UserButton } from '@clerk/astro/components';
 import { spriteDetails } from '../../data/sprites.js';
+
+export const prerender = true;
 
 export function getStaticPaths() {
   return spriteDetails.map((sprite) => ({
@@ -71,9 +74,20 @@ const levelsHeading = `${sprite.name} Sprite level effects`;
   <body>
     <main class="shell">
       <nav class="top-nav" aria-label="Breadcrumb">
-        <a href="/">fortsprite</a>
-        <span aria-hidden="true">/</span>
-        <span>{sprite.name} Sprite</span>
+        <div class="breadcrumb">
+          <a href="/">fortsprite</a>
+          <span aria-hidden="true">/</span>
+          <span>{sprite.name} Sprite</span>
+        </div>
+        <div class="auth-controls">
+          <Show when="signed-out">
+            <SignInButton mode="modal" class="auth-link">Sign in</SignInButton>
+            <SignUpButton mode="modal" class="auth-button">Sign up</SignUpButton>
+          </Show>
+          <Show when="signed-in">
+            <UserButton />
+          </Show>
+        </div>
       </nav>
 
       <section class="hero" aria-labelledby="page-title">
@@ -251,8 +265,9 @@ const levelsHeading = `${sprite.name} Sprite level effects`;
 
   .top-nav {
     display: flex;
-    gap: 8px;
+    gap: 16px;
     align-items: center;
+    justify-content: space-between;
     margin-bottom: 14px;
     color: var(--muted);
     font-family: Inter, ui-sans-serif, system-ui, sans-serif;
@@ -260,14 +275,61 @@ const levelsHeading = `${sprite.name} Sprite level effects`;
     font-weight: 800;
   }
 
+  .breadcrumb,
+  .auth-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .auth-controls {
+    gap: 10px;
+    justify-content: flex-end;
+    min-height: 40px;
+  }
+
   .top-nav a {
     color: var(--gold);
     text-decoration: none;
   }
 
+  .auth-link,
+  .auth-button {
+    min-height: 40px;
+    border-radius: 8px;
+    padding: 0 14px;
+    cursor: pointer;
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.84rem;
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+
+  .auth-link {
+    border: 2px solid rgba(255, 255, 255, 0.24);
+    background: rgba(7, 11, 36, 0.6);
+    color: var(--text);
+  }
+
+  .auth-button {
+    border: 0;
+    background: linear-gradient(180deg, var(--gold), #f39c12);
+    color: #171000;
+    box-shadow: 0 4px 0 rgba(112, 76, 0, 0.76);
+  }
+
   .top-nav a:focus-visible,
   .top-nav a:hover {
     text-decoration: underline;
+  }
+
+  .auth-link:focus-visible,
+  .auth-link:hover,
+  .auth-button:focus-visible,
+  .auth-button:hover {
+    outline: 2px solid rgba(255, 255, 255, 0.84);
+    outline-offset: 2px;
+    filter: brightness(1.08);
   }
 
   .hero {
@@ -620,6 +682,11 @@ const levelsHeading = `${sprite.name} Sprite level effects`;
       padding: 18px 0 32px;
     }
 
+    .top-nav {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
     .hero {
       grid-template-columns: 1fr;
       gap: 12px;
@@ -655,5 +722,13 @@ const levelsHeading = `${sprite.name} Sprite level effects`;
     .variant-grid {
       grid-template-columns: 1fr;
     }
+  }
+</style>
+
+<style is:global>
+  [class^="cl-"],
+  [class*=" cl-"] {
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    letter-spacing: 0;
   }
 </style>
