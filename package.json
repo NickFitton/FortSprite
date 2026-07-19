@@ -6,11 +6,15 @@
   "scripts": {
     "dev": "ASTRO_TELEMETRY_DISABLED=1 astro dev --host 127.0.0.1",
     "build": "ASTRO_TELEMETRY_DISABLED=1 astro build",
-    "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview --host 127.0.0.1"
+    "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview --host 127.0.0.1",
+    "test": "playwright test"
   },
   "dependencies": {
     "@astrojs/node": "^9.5.5",
     "@clerk/astro": "^3.4.14",
     "astro": "^5.11.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.61.1"
   }
 }

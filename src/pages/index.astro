@@ -166,7 +166,8 @@ const previewImage = new URL('/og-image.png', canonical).toString();
     </main>
 
     <script>
-      const storageKey = 'fortsprite:v1';
+      import { loadAnonymousProgress, saveAnonymousProgress } from '../lib/anonymous-progress';
+
       const cards = Array.from(document.querySelectorAll('[data-sprite-card]'));
       const quickCards = Array.from(document.querySelectorAll('[data-quick-card]'));
       const matrix = document.querySelector('.sprite-matrix');
@@ -185,18 +186,13 @@ const previewImage = new URL('/og-image.png', canonical).toString();
         missing: document.querySelector('#missing-count')
       };
 
-      let state = {};
+      const recognizedIds = new Set(cards.map((card) => card.dataset.id).filter(Boolean));
+      let state = loadAnonymousProgress(recognizedIds);
       let lastQuickAction = null;
       let quickToastTimer = null;
 
-      try {
-        state = JSON.parse(localStorage.getItem(storageKey) || '{}') || {};
-      } catch {
-        state = {};
-      }
-
       function persist() {
-        localStorage.setItem(storageKey, JSON.stringify(state));
+        saveAnonymousProgress(state);
       }
 
       function applyState() {
@@ -274,8 +270,9 @@ const previewImage = new URL('/og-image.png', canonical).toString();
       cards.forEach((card) => {
         function cycleStatus() {
           const current = state[card.dataset.id] || 'not-found';
-          state[card.dataset.id] =
-            current === 'not-found' ? 'extracted' : current === 'extracted' ? 'mastered' : 'not-found';
+          if (current === 'not-found') state[card.dataset.id] = 'extracted';
+          else if (current === 'extracted') state[card.dataset.id] = 'mastered';
+          else delete state[card.dataset.id];
           persist();
           applyState();
         }
@@ -319,7 +316,8 @@ const previewImage = new URL('/og-image.png', canonical).toString();
       regularButton?.addEventListener('click', () => setQuickMode(false));
       quickUndoButton?.addEventListener('click', () => {
         if (!lastQuickAction) return;
-        state[lastQuickAction.id] = lastQuickAction.previousStatus;
+        if (lastQuickAction.previousStatus === 'not-found') delete state[lastQuickAction.id];
+        else state[lastQuickAction.id] = lastQuickAction.previousStatus;
         persist();
         applyState();
         hideQuickToast();
