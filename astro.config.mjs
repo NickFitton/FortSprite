@@ -6,5 +6,5 @@ export default defineConfig({
   adapter: vercel(),
   integrations: [clerk()],
   output: 'server',
-  site: 'https://fortsprite.com'
+  site: 'https://fortsprite.app'
 });
