@@ -21,6 +21,6 @@ Static output is generated in `dist/`.
 
 ## Deployment
 
-The site is configured with `site: 'https://fortsprite.com'` in `astro.config.mjs`.
+The site is configured with `site: 'https://fortsprite.app'` in `astro.config.mjs`.
 
 This repo includes a GitHub Pages workflow at `.github/workflows/deploy.yml`. In GitHub, set Pages to deploy from GitHub Actions.

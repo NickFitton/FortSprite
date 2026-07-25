@@ -12,7 +12,7 @@ export function getStaticPaths() {
 }
 
 const { sprite } = Astro.props;
-const canonical = `https://fortsprite.com${sprite.path}`;
+const canonical = `https://fortsprite.app${sprite.path}`;
 const title = `${sprite.name} Sprite - Fortnite Sprite Info | fortsprite`;
 const releasedVariants = sprite.variants.filter((variant) => variant.released);
 const upcomingVariants = sprite.variants.filter((variant) => !variant.released);
