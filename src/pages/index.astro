@@ -164,6 +164,7 @@ const previewImage = new URL('/og-image.png', canonical).toString();
     </main>
 
     <script>
+      import { connectAccountChecklist } from '../lib/account-checklist';
       import { loadAnonymousProgress, saveAnonymousProgress } from '../lib/anonymous-progress';
 
       const cards = Array.from(document.querySelectorAll('[data-sprite-card]'));
@@ -186,11 +187,30 @@ const previewImage = new URL('/og-image.png', canonical).toString();
 
       const recognizedIds = new Set(cards.map((card) => card.dataset.id).filter(Boolean));
       let state = loadAnonymousProgress(recognizedIds);
+      let usesAccountProgress = false;
+      let accountSyncPending = false;
+      let accountProgress: ReturnType<typeof connectAccountChecklist> = null;
+      const pendingAccountWrites = new Set<string>();
       let lastQuickAction = null;
       let quickToastTimer = null;
 
       function persist() {
-        saveAnonymousProgress(state);
+        if (!usesAccountProgress) saveAnonymousProgress(state);
+      }
+
+      function setStatus(id, status) {
+        if (accountSyncPending) return;
+        if (!usesAccountProgress) {
+          if (status === 'not-found') delete state[id];
+          else state[id] = status;
+          persist();
+          applyState();
+          return;
+        }
+
+        if (pendingAccountWrites.has(id)) return;
+        pendingAccountWrites.add(id);
+        accountProgress?.setSpriteStatus(id, status);
       }
 
       function applyState() {
@@ -268,11 +288,9 @@ const previewImage = new URL('/og-image.png', canonical).toString();
       cards.forEach((card) => {
         function cycleStatus() {
           const current = state[card.dataset.id] || 'not-found';
-          if (current === 'not-found') state[card.dataset.id] = 'extracted';
-          else if (current === 'extracted') state[card.dataset.id] = 'mastered';
-          else delete state[card.dataset.id];
-          persist();
-          applyState();
+          if (current === 'not-found') setStatus(card.dataset.id, 'extracted');
+          else if (current === 'extracted') setStatus(card.dataset.id, 'mastered');
+          else setStatus(card.dataset.id, 'not-found');
         }
 
         card.addEventListener('click', () => {
@@ -292,9 +310,7 @@ const previewImage = new URL('/og-image.png', canonical).toString();
         function markExtracted() {
           const id = card.dataset.id;
           const previousStatus = state[id] || 'not-found';
-          state[id] = 'extracted';
-          persist();
-          applyState();
+          setStatus(id, 'extracted');
           showQuickToast({
             id,
             name: card.querySelector('h2')?.textContent?.trim() || 'Sprite',
@@ -314,10 +330,7 @@ const previewImage = new URL('/og-image.png', canonical).toString();
       regularButton?.addEventListener('click', () => setQuickMode(false));
       quickUndoButton?.addEventListener('click', () => {
         if (!lastQuickAction) return;
-        if (lastQuickAction.previousStatus === 'not-found') delete state[lastQuickAction.id];
-        else state[lastQuickAction.id] = lastQuickAction.previousStatus;
-        persist();
-        applyState();
+        setStatus(lastQuickAction.id, lastQuickAction.previousStatus);
         hideQuickToast();
       });
 
@@ -520,6 +533,37 @@ const previewImage = new URL('/og-image.png', canonical).toString();
         }
       });
 
+      if (Object.keys(state).length === 0) {
+        accountProgress = connectAccountChecklist({
+          onPending() {
+            accountSyncPending = true;
+          },
+          onReady() {
+            accountSyncPending = false;
+            usesAccountProgress = true;
+            state = {};
+            applyState();
+          },
+          onSignedOut() {
+            accountSyncPending = false;
+            usesAccountProgress = false;
+            state = loadAnonymousProgress(recognizedIds);
+            applyState();
+          },
+          onChecklist(checklist) {
+            state = checklist.progress;
+            pendingAccountWrites.clear();
+            applyState();
+          },
+          onError(error) {
+            accountSyncPending = false;
+            pendingAccountWrites.clear();
+            console.error('Could not sync the account checklist.', error);
+          }
+        });
+      }
+
+      window.addEventListener('pagehide', () => accountProgress?.close(), { once: true });
       applyState();
     </script>
   </body>
