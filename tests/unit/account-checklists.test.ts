@@ -51,6 +51,20 @@ describe('authenticated checklist API', () => {
     expect(repeated).toEqual(first);
   });
 
+  test('concurrent first visits still create only one checklist', async () => {
+    const backend = testBackend();
+    const firstClient = asUser(backend, 'user_123');
+    const secondClient = asUser(backend, 'user_123');
+
+    const [first, second] = await Promise.all([
+      firstClient.mutation(ensureChecklist, {}),
+      secondClient.mutation(ensureChecklist, {})
+    ]);
+
+    expect(first).toEqual(second);
+    expect(await firstClient.query(getChecklist, {})).toEqual(first);
+  });
+
   test('explicit upgrades, downgrades, and clears are durable and revisioned', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-07-25T10:00:00.000Z'));
