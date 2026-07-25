@@ -120,7 +120,7 @@ const previewImage = new URL('/og-image.png', canonical).toString();
                     aria-label={`${sprite.name} status: None`}
                   >
                     <div class="cell-art">
-                      <img src={sprite.image} alt={sprite.name} loading="lazy" decoding="async" />
+                      <img src={sprite.released ? sprite.image : sprite.placeholderImage} alt={sprite.name} loading="lazy" decoding="async" />
                     </div>
                     <span class="status-badge" data-status-badge>
                       {sprite.released ? 'None' : 'Locked'}

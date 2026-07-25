@@ -402,7 +402,8 @@ export const burntPeanutSprite = specialSprites.find((sprite) => sprite.id === '
 export const sprites = [
   ...spriteTypes.flatMap((sprite) =>
     variants.flatMap((variant) => {
-      const image = sprite.images[variant] ?? sprite.images.Base;
+      const placeholderImage = sprite.images.Base;
+      const image = sprite.images[variant] ?? placeholderImage;
       if (!image) return [];
 
       return {
@@ -415,7 +416,8 @@ export const sprites = [
         ability: sprite.ability,
         released: !sprite.unreleased && (releasedVariants.includes(variant) || sprite.additionalReleasedVariants?.includes(variant)) && !sprite.unreleasedVariants?.includes(variant),
         hasExactImage: Boolean(sprite.images[variant]),
-        image
+        image,
+        placeholderImage
       };
     })
   ),
