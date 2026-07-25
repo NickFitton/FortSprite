@@ -7,14 +7,21 @@
     "dev": "ASTRO_TELEMETRY_DISABLED=1 astro dev --host 127.0.0.1",
     "build": "ASTRO_TELEMETRY_DISABLED=1 astro build",
     "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview --host 127.0.0.1",
-    "test": "playwright test"
+    "test": "playwright test",
+    "test:unit": "vitest run",
+    "typecheck": "astro check && tsc --noEmit"
   },
   "dependencies": {
     "@astrojs/vercel": "^8.2.11",
     "@clerk/astro": "^3.4.14",
-    "astro": "^5.11.0"
+    "astro": "^5.11.0",
+    "convex": "^1.42.3"
   },
   "devDependencies": {
-    "@playwright/test": "^1.61.1"
+    "@edge-runtime/vm": "^5.0.0",
+    "@playwright/test": "^1.61.1",
+    "@types/node": "^26.1.1",
+    "convex-test": "^0.0.54",
+    "vitest": "^4.1.10"
   }
 }
