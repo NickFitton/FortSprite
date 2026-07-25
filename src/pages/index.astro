@@ -86,8 +86,8 @@ const previewImage = new URL('/og-image.png', canonical).toString();
             <span id="mastered-count">0</span>
             <small>Mastered</small>
           </div>
-          <button class="quick-button" type="button" data-quick-mode>Quick mode</button>
-          <button class="share-button" type="button" data-share-image>Share image</button>
+          <button class="quick-button" type="button" data-quick-mode>Find missing sprites</button>
+          <button class="share-button" type="button" data-share-image>Share collection</button>
         </div>
       </section>
 
@@ -103,7 +103,7 @@ const previewImage = new URL('/og-image.png', canonical).toString();
               <article class="sprite-type" data-sprite-row>
                 <p class="element">{row.rarity}</p>
                 <h2><a href={row.path}>{row.name}</a></h2>
-                <p>{row.ability}</p>
+                <p class="sprite-ability">{row.ability}</p>
               </article>
               {row.cells.map((sprite, index) => (
                 sprite ? (
@@ -121,8 +121,6 @@ const previewImage = new URL('/og-image.png', canonical).toString();
                   >
                     <div class="cell-art">
                       <img src={sprite.image} alt={sprite.name} loading="lazy" decoding="async" />
-                    </div>
-                    <div class="cell-meta">
                     </div>
                     <span class="status-badge" data-status-badge>
                       {sprite.released ? 'None' : 'Locked'}
@@ -1005,7 +1003,6 @@ const previewImage = new URL('/og-image.png', canonical).toString();
   }
 
   .sprite-type {
-    min-height: 230px;
     padding: 16px;
     background: linear-gradient(160deg, rgba(30, 54, 150, 0.98), rgba(15, 25, 86, 0.98));
     box-shadow: inset -10px 0 24px rgba(0, 0, 0, 0.24);
@@ -1045,7 +1042,6 @@ const previewImage = new URL('/og-image.png', canonical).toString();
     display: grid;
     grid-template-rows: 104px minmax(26px, auto) auto;
     align-items: start;
-    min-height: 230px;
     padding: 10px;
   }
 
@@ -1087,7 +1083,6 @@ const previewImage = new URL('/og-image.png', canonical).toString();
   .cell-art {
     display: grid;
     place-items: center;
-    min-height: 104px;
   }
 
   .cell-art img {
@@ -1112,10 +1107,6 @@ const previewImage = new URL('/og-image.png', canonical).toString();
       drop-shadow(0 14px 14px rgba(0, 0, 0, 0.44));
   }
 
-  .cell-meta {
-    min-height: 26px;
-  }
-
   .sprite-cell:not(.empty)[data-released="true"] {
     cursor: pointer;
     transition: transform 120ms ease, box-shadow 160ms ease;
@@ -1135,7 +1126,7 @@ const previewImage = new URL('/og-image.png', canonical).toString();
     place-items: center;
     min-width: 0;
     min-height: 38px;
-    margin: 8px 0;
+    margin: 8px 0 0 0;
     border: 2px solid rgba(255, 255, 255, 0.18);
     border-radius: 8px;
     padding: 0 8px;
@@ -1184,6 +1175,10 @@ const previewImage = new URL('/og-image.png', canonical).toString();
     }
   }
 
+  .sprite-ability {
+    margin: 0;
+    padding: 0;
+  }
   @media (max-width: 640px) {
     .shell {
       width: min(100% - 20px, 1180px);
@@ -1264,7 +1259,6 @@ const previewImage = new URL('/og-image.png', canonical).toString();
       display: grid;
       place-items: center;
       position: sticky;
-      min-height: 230px;
       padding: 0;
       overflow: hidden;
     }
@@ -1287,6 +1281,17 @@ const previewImage = new URL('/og-image.png', canonical).toString();
       text-align: center;
       translate: -50% -50%;
       white-space: nowrap;
+    }
+
+    .sprite-cell {
+      grid-template-rows: 104px auto;
+      padding: 6px;
+    }
+
+    .status-badge {
+      min-height: 32px;
+      margin: 4px 0;
+      font-size: 0.74rem;
     }
 
     .matrix-header {
