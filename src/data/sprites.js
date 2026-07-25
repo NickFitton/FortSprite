@@ -24,6 +24,7 @@ export const iconMaps = {
     Gummy: '/sprites/T_Icon_BR_Creature_Sprite_Earth_Candy_ui_L.webp',
     Galaxy: '/sprites/T_Icon_BR_Creature_Sprite_Earth_Galaxy_ui_L.webp',
     Gem: '/sprites/T_Icon_BR_Creature_Sprite_Earth_Gem_ui_L.webp',
+    Cube: '/sprites/T_Icon_BR_Creature_Sprite_Earth_Cube_ui_L.webp',
     Holofoil: null
   },
   fire: {
@@ -31,6 +32,7 @@ export const iconMaps = {
     Gold: '/sprites/T_Icon_BR_Creature_Sprite_Fire_Gold_ui_L.webp',
     Gummy: '/sprites/T_Icon_BR_Creature_Sprite_Fire_Candy_ui_L.webp',
     Galaxy: '/sprites/T_Icon_BR_Creature_Sprite_Fire_Galaxy_ui_L.webp',
+    Cube: '/sprites/T_Icon_BR_Creature_Sprite_Fire_Cube_ui_L.webp',
     Holofoil: '/sprites/T_Icon_BR_Creature_Sprite_Fire_Holofoil_ui_L.webp'
   },
   duck: {
@@ -94,6 +96,7 @@ export const iconMaps = {
     Gold: '/sprites/T_Icon_BR_Creature_Sprite_Fishy_Gold_ui_L.webp',
     Gummy: '/sprites/T_Icon_BR_Creature_Sprite_Fishy_Candy_ui_L.webp',
     Galaxy: '/sprites/T_Icon_BR_Creature_Sprite_Fishy_Galaxy_ui_L.webp',
+    Cube: '/sprites/T_Icon_BR_Creature_Sprite_Fishy_Cube_L.webp',
     Holofoil: null
   },
   striker: {
@@ -116,6 +119,7 @@ export const iconMaps = {
     Gold: '/sprites/T_Icon_BR_Creature_Sprite_Boss_Gold_ui_L.webp',
     Gummy: '/sprites/T_Icon_BR_Creature_Sprite_Boss_Candy_ui_L.webp',
     Galaxy: '/sprites/T_Icon_BR_Creature_Sprite_Boss_Galaxy_ui_L.webp',
+    Cube: '/sprites/T_Icon_BR_Creature_Sprite_Boss_Cube_ui_L.webp',
     Holofoil: null
   },
   grim: {
@@ -123,6 +127,7 @@ export const iconMaps = {
     Gold: '/sprites/T_Icon_BR_GrimReaper_Gold_L.webp',
     Gummy: '/sprites/T_Icon_BR_GrimReaper_Candy_L.webp',
     Galaxy: '/sprites/T_Icon_BR_GrimReaper_Galaxy_L.webp',
+    Cube: '/sprites/T_Icon_BR_GrimReaper_Cube_L.webp',
     Holofoil: null
   },
   air: {
@@ -155,6 +160,7 @@ export const spriteTypes = [
     rarity: 'rare',
     ability: 'Gives a chance to find additional rare loot when opening chests.',
     unreleasedVariants: ['Holofoil'],
+    additionalReleasedVariants: ['Cube'],
     images: iconMaps.earth
   },
   {
@@ -162,6 +168,7 @@ export const spriteTypes = [
     name: 'Fire',
     rarity: 'rare',
     ability: 'Creates a fiery burst after you deal enough damage to an enemy.',
+    additionalReleasedVariants: ['Cube'],
     images: iconMaps.fire
   },
   {
@@ -185,6 +192,7 @@ export const spriteTypes = [
     rarity: 'legendary',
     ability: 'Gives a random item each level, with legendary loot at Level 5.',
     unreleasedVariants: ['Holofoil'],
+    additionalReleasedVariants: ['Cube'],
     images: iconMaps.dream
   },
   {
@@ -200,6 +208,7 @@ export const spriteTypes = [
     name: 'Batman',
     rarity: 'mythic',
     ability: 'Grants the ability to launch in the air and deploy the Bat Cape.',
+    additionalReleasedVariants: ['Cube'],
     images: iconMaps.batman
   },
   {
@@ -208,6 +217,7 @@ export const spriteTypes = [
     rarity: 'legendary',
     ability: 'Possibly nothing... or infinitely something.',
     unreleasedVariants: ['Holofoil'],
+    additionalReleasedVariants: ['Cube'],
     images: iconMaps.punk
   },
   {
@@ -231,6 +241,7 @@ export const spriteTypes = [
     rarity: 'rare',
     ability: 'Greatly increases swim speed and briefly increases movement speed after taking damage.',
     unreleasedVariants: ['Holofoil'],
+    additionalReleasedVariants: ['Cube'],
     images: iconMaps.fishy
   },
   {
@@ -254,6 +265,7 @@ export const spriteTypes = [
     rarity: 'legendary',
     ability: 'Increases your maximum health and shield.',
     unreleasedVariants: ['Holofoil'],
+    additionalReleasedVariants: ['Cube'],
     images: iconMaps.boss
   },
   {
@@ -262,6 +274,7 @@ export const spriteTypes = [
     rarity: 'mythic',
     ability: 'Marks players who attack you for a duration.',
     unreleasedVariants: ['Holofoil'],
+    additionalReleasedVariants: ['Cube'],
     images: iconMaps.grim
   },
   {
@@ -400,7 +413,7 @@ export const sprites = [
         variant,
         rarity: variant === 'Base' ? sprite.rarity : 'special',
         ability: sprite.ability,
-        released: !sprite.unreleased && releasedVariants.includes(variant) && !sprite.unreleasedVariants?.includes(variant),
+        released: !sprite.unreleased && (releasedVariants.includes(variant) || sprite.additionalReleasedVariants?.includes(variant)) && !sprite.unreleasedVariants?.includes(variant),
         hasExactImage: Boolean(sprite.images[variant]),
         image
       };
