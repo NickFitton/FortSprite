@@ -384,7 +384,7 @@ export const specialSprites = [
     variant: 'Base',
     rarity: 'mythic',
     ability: 'Upon earning an elimination, slowly replenish shield for you and nearby squad members for a duration.',
-    released: false,
+    released: true,
     hasExactImage: true,
     image: '/sprites/T_Icon_BR_CompanyStargazer_Default_L.webp',
     levelEffects: [
