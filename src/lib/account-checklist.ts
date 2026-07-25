@@ -62,7 +62,7 @@ export function connectAccountChecklist(
   }
 
   const stopSessionSubscription = $sessionStore.subscribe((session) => {
-    client.setAuth(async () => session?.getToken() ?? null, (isAuthenticated) => {
+    client.setAuth(async () => session?.getToken({ template: 'convex' }) ?? null, (isAuthenticated) => {
       if (closed) return;
       if (!isAuthenticated) {
         ready = false;

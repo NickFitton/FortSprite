@@ -1,18 +1,21 @@
 import { afterEach, describe, expect, test, vi } from 'vitest';
 
 const testState = vi.hoisted(() => ({
-  clients: [] as FakeConvexClient[]
+  clients: [] as FakeConvexClient[],
+  getToken: vi.fn(() => Promise.resolve('clerk-token'))
 }));
 
 class FakeConvexClient {
   mutationCalls: Array<{ args: unknown }> = [];
   checklistUpdate: ((checklist: unknown) => void) | undefined;
+  fetchToken: (() => Promise<string | null>) | undefined;
 
   constructor() {
     testState.clients.push(this);
   }
 
-  setAuth(_fetchToken: unknown, onChange: (authenticated: boolean) => void) {
+  setAuth(fetchToken: () => Promise<string | null>, onChange: (authenticated: boolean) => void) {
+    this.fetchToken = fetchToken;
     onChange(true);
   }
 
@@ -38,8 +41,8 @@ class FakeConvexClient {
 vi.mock('convex/browser', () => ({ ConvexClient: FakeConvexClient }));
 vi.mock('@clerk/astro/client', () => ({
   $sessionStore: {
-    subscribe(callback: (session: { getToken(): Promise<string> }) => void) {
-      callback({ getToken: () => Promise.resolve('clerk-token') });
+    subscribe(callback: (session: { getToken(options?: { template?: string }): Promise<string> }) => void) {
+      callback({ getToken: testState.getToken });
       return () => undefined;
     }
   }
@@ -47,6 +50,7 @@ vi.mock('@clerk/astro/client', () => ({
 
 afterEach(() => {
   testState.clients.length = 0;
+  testState.getToken.mockClear();
   vi.unstubAllEnvs();
   vi.resetModules();
 });
@@ -75,6 +79,9 @@ describe('signed-in account checklist client', () => {
     await flushPromises();
 
     expect(testState.clients).toHaveLength(2);
+    await testState.clients[0].fetchToken?.();
+    await testState.clients[1].fetchToken?.();
+    expect(testState.getToken).toHaveBeenCalledWith({ template: 'convex' });
     expect(testState.clients[0].mutationCalls).toEqual([{ args: {} }]);
     expect(testState.clients[1].mutationCalls).toEqual([{ args: {} }]);
 
