@@ -89,6 +89,32 @@ export const ensure = mutation({
   }
 });
 
+export const reset = mutation({
+  args: {},
+  returns: publicChecklist,
+  handler: async (ctx) => {
+    const ownerTokenIdentifier = await requireOwnerTokenIdentifier(ctx);
+    const existing = await findOwnedChecklist(ctx, ownerTokenIdentifier);
+    const nextChecklist = {
+      ownerTokenIdentifier,
+      progress: {},
+      revision: (existing?.revision ?? -1) + 1,
+      updatedAt: Date.now()
+    };
+
+    if (existing) {
+      await ctx.db.patch(existing._id, nextChecklist);
+    } else {
+      await ctx.db.insert('accountChecklists', nextChecklist);
+    }
+    return {
+      progress: nextChecklist.progress,
+      revision: nextChecklist.revision,
+      updatedAt: nextChecklist.updatedAt
+    };
+  }
+});
+
 export const setSpriteStatus = mutation({
   args: {
     spriteId: v.string(),

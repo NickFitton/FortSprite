@@ -60,6 +60,7 @@ const previewImage = new URL('/og-image.png', canonical).toString();
             <SignUpButton mode="modal" class="auth-button">Sign up</SignUpButton>
           </Show>
           <Show when="signed-in">
+            <button class="auth-link" type="button" data-reset-account>Reset checklist</button>
             <UserButton />
           </Show>
         </div>
@@ -179,6 +180,7 @@ const previewImage = new URL('/og-image.png', canonical).toString();
       const quickToast = document.querySelector('[data-quick-toast]');
       const quickToastMessage = document.querySelector('[data-quick-toast-message]');
       const quickUndoButton = document.querySelector('[data-quick-undo]');
+      const resetAccountButton = document.querySelector('[data-reset-account]');
       const counts = {
         mastered: document.querySelector('#mastered-count'),
         extracted: document.querySelector('#extracted-count'),
@@ -332,6 +334,13 @@ const previewImage = new URL('/og-image.png', canonical).toString();
         if (!lastQuickAction) return;
         setStatus(lastQuickAction.id, lastQuickAction.previousStatus);
         hideQuickToast();
+      });
+
+      resetAccountButton?.addEventListener('click', () => {
+        if (accountSyncPending || !usesAccountProgress) return;
+        if (!window.confirm('Reset your signed-in checklist? This cannot be undone.')) return;
+        pendingAccountWrites.clear();
+        accountProgress?.reset();
       });
 
       function loadImage(src) {
@@ -541,7 +550,6 @@ const previewImage = new URL('/og-image.png', canonical).toString();
           onReady() {
             accountSyncPending = false;
             usesAccountProgress = true;
-            state = {};
             applyState();
           },
           onSignedOut() {

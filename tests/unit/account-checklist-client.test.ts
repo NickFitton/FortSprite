@@ -21,7 +21,7 @@ class FakeConvexClient {
 
   mutation(_reference: unknown, args: unknown) {
     this.mutationCalls.push({ args });
-    return Promise.resolve({});
+    return Promise.resolve({ progress: {}, revision: 0, updatedAt: 1_753_440_000_000 });
   }
 
   onUpdate(
@@ -41,8 +41,11 @@ class FakeConvexClient {
 vi.mock('convex/browser', () => ({ ConvexClient: FakeConvexClient }));
 vi.mock('@clerk/astro/client', () => ({
   $sessionStore: {
-    subscribe(callback: (session: { getToken(options?: { template?: string }): Promise<string> }) => void) {
-      callback({ getToken: testState.getToken });
+    subscribe(callback: (session: {
+      user: { id: string };
+      getToken(options?: { template?: string }): Promise<string>;
+    }) => void) {
+      callback({ user: { id: 'user_123' }, getToken: testState.getToken });
       return () => undefined;
     }
   }
@@ -84,6 +87,10 @@ describe('signed-in account checklist client', () => {
     expect(testState.getToken).toHaveBeenCalledWith({ template: 'convex' });
     expect(testState.clients[0].mutationCalls).toEqual([{ args: {} }]);
     expect(testState.clients[1].mutationCalls).toEqual([{ args: {} }]);
+    expect(firstClientUpdates).toEqual([{ progress: {}, revision: 0, updatedAt: 1_753_440_000_000 }]);
+    expect(secondClientUpdates).toEqual([{ progress: {}, revision: 0, updatedAt: 1_753_440_000_000 }]);
+    firstClientUpdates.length = 0;
+    secondClientUpdates.length = 0;
 
     const confirmedChecklist = {
       progress: { 'burnt-peanut-base': 'mastered' },

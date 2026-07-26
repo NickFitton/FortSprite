@@ -22,6 +22,9 @@ const setSpriteStatus = makeFunctionReference<
   { spriteId: string; status: Status },
   Checklist
 >('checklists:setSpriteStatus');
+const resetChecklist = makeFunctionReference<'mutation', Record<string, never>, Checklist>(
+  'checklists:reset'
+);
 
 function testBackend() {
   return convexTest(schema, modules);
@@ -97,6 +100,30 @@ describe('authenticated checklist API', () => {
     expect(cleared.progress).toEqual({});
     expect(cleared.revision).toBe(3);
     expect(await user.query(getChecklist, {})).toEqual(cleared);
+    vi.useRealTimers();
+  });
+
+  test('reset clears the existing account checklist and advances its revision', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-07-26T10:00:00.000Z'));
+    const user = asUser(testBackend(), 'user_123');
+
+    await user.mutation(setSpriteStatus, {
+      spriteId: 'burnt-peanut-base',
+      status: 'mastered'
+    });
+    vi.setSystemTime(new Date('2026-07-26T10:01:00.000Z'));
+
+    await expect(user.mutation(resetChecklist, {})).resolves.toEqual({
+      progress: {},
+      revision: 2,
+      updatedAt: Date.parse('2026-07-26T10:01:00.000Z')
+    });
+    expect(await user.query(getChecklist, {})).toEqual({
+      progress: {},
+      revision: 2,
+      updatedAt: Date.parse('2026-07-26T10:01:00.000Z')
+    });
     vi.useRealTimers();
   });
 
