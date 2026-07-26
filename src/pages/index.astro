@@ -51,6 +51,10 @@ const previewImage = new URL('/og-image.png', canonical).toString();
     })} />
   </head>
   <body>
+    <div class="checklist-loading" data-checklist-loading role="status" aria-live="polite">
+      <span class="checklist-loading-mark" aria-hidden="true"></span>
+      <span>Loading your checklist</span>
+    </div>
     <main class="shell">
       <nav class="top-nav" aria-label="Account">
         <a class="brand-link" href="/">fortsprite</a>
@@ -60,6 +64,7 @@ const previewImage = new URL('/og-image.png', canonical).toString();
             <SignUpButton mode="modal" class="auth-button">Sign up</SignUpButton>
           </Show>
           <Show when="signed-in">
+            <button class="auth-link" type="button" data-reset-account>Reset checklist</button>
             <UserButton />
           </Show>
         </div>
@@ -162,10 +167,34 @@ const previewImage = new URL('/og-image.png', canonical).toString();
         </div>
       </section>
     </main>
+    <dialog class="sync-dialog" data-reconciliation-dialog aria-labelledby="sync-dialog-title">
+      <section class="sync-dialog-panel">
+        <p class="eyebrow">Signed in with anonymous data</p>
+        <h2 id="sync-dialog-title">Choose how to sync your checklist</h2>
+        <p data-reconciliation-intro></p>
+        <div class="sync-counts" data-reconciliation-counts></div>
+        <div class="sync-differences" data-reconciliation-differences></div>
+        <p class="sync-note">Your anonymous checklist stays in this browser whichever option you choose.</p>
+        <div class="sync-actions">
+          <button class="sync-merge" type="button" data-reconciliation-merge>Merge progress</button>
+          <button class="sync-account" type="button" data-reconciliation-account>Use account checklist</button>
+          <button class="sync-cancel" type="button" data-reconciliation-cancel>Cancel and sign out</button>
+        </div>
+      </section>
+    </dialog>
 
     <script>
-      import { connectAccountChecklist } from '../lib/account-checklist';
-      import { loadAnonymousProgress, saveAnonymousProgress } from '../lib/anonymous-progress';
+      import { connectAccountChecklist, type AccountChecklist } from '../lib/account-checklist';
+      import {
+        acknowledgeAnonymousReconciliation,
+        hasAcknowledgedAnonymousReconciliation,
+        loadAnonymousProgress,
+        saveAnonymousProgress
+      } from '../lib/anonymous-progress';
+      import { mergeProgress, summarizeReconciliation } from '../lib/checklist-reconciliation';
+
+      type TestConnectionFactory = typeof connectAccountChecklist;
+      type TestWindow = Window & { __fortspriteTestConnectAccountChecklist?: TestConnectionFactory };
 
       const cards = Array.from(document.querySelectorAll('[data-sprite-card]'));
       const quickCards = Array.from(document.querySelectorAll('[data-quick-card]'));
@@ -179,6 +208,15 @@ const previewImage = new URL('/og-image.png', canonical).toString();
       const quickToast = document.querySelector('[data-quick-toast]');
       const quickToastMessage = document.querySelector('[data-quick-toast-message]');
       const quickUndoButton = document.querySelector('[data-quick-undo]');
+      const resetAccountButton = document.querySelector('[data-reset-account]');
+      const reconciliationDialog = document.querySelector('[data-reconciliation-dialog]');
+      const reconciliationIntro = document.querySelector('[data-reconciliation-intro]');
+      const reconciliationCounts = document.querySelector('[data-reconciliation-counts]');
+      const reconciliationDifferences = document.querySelector('[data-reconciliation-differences]');
+      const reconciliationMergeButton = document.querySelector('[data-reconciliation-merge]');
+      const reconciliationAccountButton = document.querySelector('[data-reconciliation-account]');
+      const reconciliationCancelButton = document.querySelector('[data-reconciliation-cancel]');
+      const checklistLoading = document.querySelector('[data-checklist-loading]');
       const counts = {
         mastered: document.querySelector('#mastered-count'),
         extracted: document.querySelector('#extracted-count'),
@@ -190,12 +228,153 @@ const previewImage = new URL('/og-image.png', canonical).toString();
       let usesAccountProgress = false;
       let accountSyncPending = false;
       let accountProgress: ReturnType<typeof connectAccountChecklist> = null;
+      let reconciliationComplete = false;
+      let reconciliationDecisionPending = false;
+      let inspectedAccountChecklist: AccountChecklist | null = null;
+      let accountUserId: string | null = null;
       const pendingAccountWrites = new Set<string>();
       let lastQuickAction = null;
       let quickToastTimer = null;
 
       function persist() {
         if (!usesAccountProgress) saveAnonymousProgress(state);
+      }
+
+      function finishChecklistLoading() {
+        checklistLoading.hidden = true;
+      }
+
+      function hasMeaningfulAnonymousProgress() {
+        return Object.keys(state).length > 0;
+      }
+
+      function needsAnonymousReconciliation() {
+        return hasMeaningfulAnonymousProgress() && (
+          !accountUserId || !hasAcknowledgedAnonymousReconciliation(accountUserId, state)
+        );
+      }
+
+      function statusLabel(status) {
+        return status === 'mastered' ? 'Mastered' : status === 'extracted' ? 'Extracted' : 'Not found';
+      }
+
+      function showReconciliation(checklist) {
+        reconciliationDecisionPending = false;
+        inspectedAccountChecklist = checklist;
+        const account = checklist?.progress ?? {};
+        const summary = summarizeReconciliation(account, state);
+        if (reconciliationIntro) {
+          reconciliationIntro.textContent = checklist
+            ? 'Review the differences before deciding which progress should belong to your signed-in account.'
+            : 'This is a new account. You can import your browser checklist or start with an intentionally empty account checklist.';
+        }
+        if (reconciliationCounts) {
+          reconciliationCounts.replaceChildren();
+          [['Anonymous browser', summary.anonymousCount], ['Signed-in account', summary.accountCount]].forEach(([label, count]) => {
+            const item = document.createElement('div');
+            const value = document.createElement('strong');
+            const detail = document.createElement('span');
+            item.className = 'sync-count';
+            value.textContent = String(count);
+            detail.textContent = `${label} saved sprites`;
+            item.append(value, detail);
+            reconciliationCounts.append(item);
+          });
+        }
+        if (reconciliationDifferences) {
+          reconciliationDifferences.replaceChildren();
+          const preview = document.createElement('section');
+          const heading = document.createElement('h3');
+          const detail = document.createElement('p');
+          const scrollArea = document.createElement('div');
+          const table = document.createElement('table');
+          const tableHead = document.createElement('thead');
+          const tableBody = document.createElement('tbody');
+          preview.className = 'sync-merge-preview';
+          heading.className = 'sync-merge-preview-title';
+          detail.className = 'sync-merge-preview-description';
+          scrollArea.className = 'sync-merge-table-scroll';
+          table.className = 'sync-merge-table';
+          heading.textContent = 'Merge preview';
+          detail.textContent = 'This is the signed-in checklist that Merge progress will save.';
+
+          const headerRow = document.createElement('tr');
+          ['Sprite', 'Browser', 'Account', 'After merge', 'Change'].forEach((label) => {
+            const cell = document.createElement('th');
+            cell.scope = 'col';
+            cell.textContent = label;
+            headerRow.append(cell);
+          });
+          tableHead.append(headerRow);
+
+          const merged = mergeProgress(account, state);
+          const spriteIds = [...new Set([...Object.keys(state), ...Object.keys(account)])].sort();
+          spriteIds.forEach((spriteId) => {
+            const anonymousStatus = state[spriteId] ?? 'not-found';
+            const accountStatus = account[spriteId] ?? 'not-found';
+            const mergedStatus = merged[spriteId] ?? 'not-found';
+            const row = document.createElement('tr');
+            const sprite = document.createElement('th');
+            const browser = document.createElement('td');
+            const saved = document.createElement('td');
+            const result = document.createElement('td');
+            const change = document.createElement('td');
+            sprite.scope = 'row';
+            sprite.className = 'sync-sprite-cell';
+            const sourceImage = cards
+              .find((card) => card.dataset.id === spriteId)
+              ?.querySelector('.cell-art img');
+            if (sourceImage) {
+              const image = document.createElement('img');
+              image.className = 'sync-sprite-image';
+              image.src = sourceImage.currentSrc || sourceImage.src;
+              image.alt = sourceImage.alt;
+              image.title = sourceImage.alt;
+              sprite.append(image);
+            } else {
+              const fallback = document.createElement('span');
+              fallback.className = 'sync-sprite-fallback';
+              fallback.textContent = spriteId;
+              sprite.append(fallback);
+            }
+            [
+              [browser, anonymousStatus],
+              [saved, accountStatus],
+              [result, mergedStatus]
+            ].forEach(([cell, status]) => {
+              const badge = document.createElement('span');
+              badge.className = 'sync-status';
+              badge.dataset.status = status;
+              badge.textContent = statusLabel(status);
+              cell.append(badge);
+            });
+            change.textContent = mergedStatus === accountStatus
+              ? 'Keep account'
+              : accountStatus === 'not-found'
+                ? 'Add to account'
+                : 'Upgrade account';
+            row.append(sprite, browser, saved, result, change);
+            tableBody.append(row);
+          });
+          table.append(tableHead, tableBody);
+          scrollArea.append(table);
+          preview.append(heading, detail, scrollArea);
+          reconciliationDifferences.append(preview);
+        }
+        reconciliationMergeButton.disabled = false;
+        reconciliationAccountButton.disabled = false;
+        reconciliationCancelButton.disabled = false;
+        if (!reconciliationDialog.open) reconciliationDialog.showModal();
+      }
+
+      function chooseReconciliation(progress) {
+        if (accountSyncPending) return;
+        accountSyncPending = true;
+        reconciliationDecisionPending = true;
+        reconciliationMergeButton.disabled = true;
+        reconciliationAccountButton.disabled = true;
+        reconciliationCancelButton.disabled = true;
+        accountProgress?.reconcile(progress, inspectedAccountChecklist?.revision ?? null);
       }
 
       function setStatus(id, status) {
@@ -333,6 +512,26 @@ const previewImage = new URL('/og-image.png', canonical).toString();
         setStatus(lastQuickAction.id, lastQuickAction.previousStatus);
         hideQuickToast();
       });
+
+      resetAccountButton?.addEventListener('click', () => {
+        if (accountSyncPending || !usesAccountProgress) return;
+        if (!window.confirm('Reset your signed-in checklist? This cannot be undone.')) return;
+        pendingAccountWrites.clear();
+        accountProgress?.reset();
+      });
+
+      reconciliationMergeButton?.addEventListener('click', () => {
+        chooseReconciliation(mergeProgress(inspectedAccountChecklist?.progress ?? {}, state));
+      });
+      reconciliationAccountButton?.addEventListener('click', () => {
+        chooseReconciliation(inspectedAccountChecklist?.progress ?? {});
+      });
+      reconciliationCancelButton?.addEventListener('click', async () => {
+        if (accountSyncPending) return;
+        reconciliationCancelButton.disabled = true;
+        await window.Clerk.signOut();
+      });
+      reconciliationDialog?.addEventListener('cancel', (event) => event.preventDefault());
 
       function loadImage(src) {
         return new Promise((resolve, reject) => {
@@ -533,35 +732,74 @@ const previewImage = new URL('/og-image.png', canonical).toString();
         }
       });
 
-      if (Object.keys(state).length === 0) {
-        accountProgress = connectAccountChecklist({
+      const connectChecklist = import.meta.env.DEV
+        ? (window as TestWindow).__fortspriteTestConnectAccountChecklist ?? connectAccountChecklist
+        : connectAccountChecklist;
+      accountProgress = connectChecklist({
+          onAuthenticated(userId) {
+            accountUserId = userId;
+            reconciliationComplete = !needsAnonymousReconciliation();
+          },
           onPending() {
             accountSyncPending = true;
           },
           onReady() {
             accountSyncPending = false;
+            if (reconciliationDecisionPending && accountUserId) {
+              acknowledgeAnonymousReconciliation(accountUserId, state);
+            }
+            reconciliationDecisionPending = false;
+            reconciliationComplete = true;
+            if (inspectedAccountChecklist) state = inspectedAccountChecklist.progress;
             usesAccountProgress = true;
-            state = {};
+            reconciliationDialog.close();
             applyState();
+            finishChecklistLoading();
           },
           onSignedOut() {
             accountSyncPending = false;
             usesAccountProgress = false;
+            reconciliationComplete = false;
+            reconciliationDecisionPending = false;
+            inspectedAccountChecklist = null;
+            accountUserId = null;
+            reconciliationDialog.close();
             state = loadAnonymousProgress(recognizedIds);
             applyState();
+            finishChecklistLoading();
           },
           onChecklist(checklist) {
+            if (needsAnonymousReconciliation() && !reconciliationComplete) {
+              if (reconciliationDecisionPending) {
+                inspectedAccountChecklist = checklist;
+                return;
+              }
+              accountSyncPending = false;
+              showReconciliation(checklist);
+              finishChecklistLoading();
+              return;
+            }
+            if (!checklist) return;
             state = checklist.progress;
             pendingAccountWrites.clear();
             applyState();
           },
           onError(error) {
             accountSyncPending = false;
+            reconciliationDecisionPending = false;
             pendingAccountWrites.clear();
+            if (needsAnonymousReconciliation() && !reconciliationComplete) {
+              showReconciliation(inspectedAccountChecklist);
+            }
+            finishChecklistLoading();
             console.error('Could not sync the account checklist.', error);
+          },
+          onReconciliationStale() {
+            reconciliationDecisionPending = false;
           }
-        });
-      }
+        }, { shouldReconcileAnonymousProgress: needsAnonymousReconciliation });
+
+      if (!accountProgress) finishChecklistLoading();
 
       window.addEventListener('pagehide', () => accountProgress?.close(), { once: true });
       applyState();
@@ -624,6 +862,43 @@ const previewImage = new URL('/og-image.png', canonical).toString();
   button,
   input {
     font: inherit;
+  }
+
+  .checklist-loading {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 14px;
+    background:
+      radial-gradient(circle at 50% 42%, rgba(40, 215, 255, 0.18), transparent 15rem),
+      rgba(7, 11, 36, 0.98);
+    color: var(--text);
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.9rem;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .checklist-loading[hidden] {
+    display: none;
+  }
+
+  .checklist-loading-mark {
+    width: 42px;
+    height: 42px;
+    border: 4px solid rgba(255, 255, 255, 0.22);
+    border-top-color: var(--gold);
+    border-right-color: var(--blue);
+    border-radius: 50%;
+    animation: checklist-spin 780ms linear infinite;
+  }
+
+  @keyframes checklist-spin {
+    to { transform: rotate(360deg); }
   }
 
   .shell {
@@ -1001,6 +1276,246 @@ const previewImage = new URL('/og-image.png', canonical).toString();
     filter: brightness(1.08);
   }
 
+  .sync-dialog {
+    width: min(720px, calc(100vw - 28px));
+    max-height: min(820px, calc(100vh - 28px));
+    overflow: auto;
+    border: 3px solid rgba(255, 255, 255, 0.32);
+    border-radius: 12px;
+    padding: 0;
+    background: #0d1647;
+    color: var(--text);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7);
+  }
+
+  .sync-dialog::backdrop {
+    background: rgba(2, 5, 22, 0.78);
+    backdrop-filter: blur(3px);
+  }
+
+  .sync-dialog-panel {
+    padding: 26px;
+    background:
+      linear-gradient(135deg, rgba(40, 215, 255, 0.16), rgba(159, 92, 255, 0.24)),
+      #0d1647;
+  }
+
+  .sync-dialog h2 {
+    margin: 0;
+    font-size: clamp(1.7rem, 4vw, 2.4rem);
+  }
+
+  .sync-dialog-panel > p:not(.eyebrow) {
+    color: var(--muted);
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.96rem;
+    font-weight: 700;
+    line-height: 1.45;
+  }
+
+  .sync-counts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin: 18px 0;
+  }
+
+  .sync-counts :global(.sync-count),
+  .sync-differences :global(.sync-merge-preview) {
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    background: rgba(7, 11, 36, 0.66);
+  }
+
+  .sync-counts :global(.sync-count) {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 14px;
+  }
+
+  .sync-counts :global(.sync-count strong),
+  .sync-counts :global(.sync-count span) {
+    display: block;
+  }
+
+  .sync-counts :global(.sync-count strong) {
+    color: var(--gold);
+    font-size: 2rem;
+    line-height: 1;
+  }
+
+  .sync-counts :global(.sync-count span),
+  .sync-differences :global(.sync-merge-preview-description),
+  .sync-differences :global(.sync-merge-table),
+  .sync-note {
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    line-height: 1.35;
+  }
+
+  .sync-differences {
+    display: grid;
+    gap: 10px;
+  }
+
+  .sync-differences :global(.sync-merge-preview) {
+    margin: 0;
+    padding: 12px 14px;
+  }
+
+  .sync-differences :global(.sync-merge-preview-title) {
+    margin: 0;
+    color: var(--blue);
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.86rem;
+    text-transform: uppercase;
+  }
+
+  .sync-differences :global(.sync-merge-preview-description) {
+    margin: 5px 0;
+    color: var(--muted);
+  }
+
+  .sync-differences :global(.sync-merge-table-scroll) {
+    margin-top: 12px;
+    overflow: auto;
+  }
+
+  .sync-differences :global(.sync-merge-table) {
+    width: 100%;
+    min-width: 620px;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.76rem;
+  }
+
+  .sync-differences :global(.sync-merge-table th),
+  .sync-differences :global(.sync-merge-table td) {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+    padding: 10px 9px;
+    text-align: left;
+    vertical-align: middle;
+  }
+
+  .sync-differences :global(.sync-merge-table thead th) {
+    position: sticky;
+    top: 0;
+    background: #17256b;
+    color: var(--blue);
+    font-size: 0.68rem;
+    text-transform: uppercase;
+  }
+
+  .sync-differences :global(.sync-merge-table tbody th) {
+    color: var(--text);
+    font-weight: 900;
+  }
+
+  .sync-differences :global(.sync-merge-table .sync-sprite-cell) {
+    width: 58px;
+    text-align: center;
+  }
+
+  .sync-differences :global(.sync-sprite-image) {
+    display: block;
+    width: 42px;
+    height: 42px;
+    margin: 0 auto;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 5px rgba(0, 0, 0, 0.34));
+  }
+
+  .sync-differences :global(.sync-sprite-fallback) {
+    display: block;
+    max-width: 110px;
+    overflow-wrap: anywhere;
+    color: var(--muted);
+    font-size: 0.66rem;
+  }
+
+  .sync-differences :global(.sync-merge-table tbody tr:last-child th),
+  .sync-differences :global(.sync-merge-table tbody tr:last-child td) {
+    border-bottom: 0;
+  }
+
+  .sync-differences :global(.sync-status) {
+    display: inline-block;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 999px;
+    padding: 4px 7px;
+    background: rgba(200, 214, 255, 0.12);
+    color: var(--muted);
+    font-size: 0.66rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .sync-differences :global(.sync-status[data-status="extracted"]) {
+    border-color: rgba(55, 245, 143, 0.75);
+    background: rgba(55, 245, 143, 0.17);
+    color: var(--green);
+  }
+
+  .sync-differences :global(.sync-status[data-status="mastered"]) {
+    border-color: rgba(255, 227, 77, 0.8);
+    background: rgba(255, 227, 77, 0.16);
+    color: var(--gold);
+  }
+
+  .sync-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  .sync-actions button {
+    min-height: 42px;
+    border-radius: 7px;
+    padding: 0 14px;
+    cursor: pointer;
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.8rem;
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+
+  .sync-merge {
+    border: 0;
+    background: linear-gradient(180deg, var(--green), #119f58);
+    color: #031c11;
+  }
+
+  .sync-account {
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    background: rgba(7, 11, 36, 0.72);
+    color: var(--text);
+  }
+
+  .sync-cancel {
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    text-decoration: underline;
+  }
+
+  .sync-actions button:hover,
+  .sync-actions button:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.84);
+    outline-offset: 2px;
+    filter: brightness(1.08);
+  }
+
+  .sync-actions button:disabled {
+    cursor: wait;
+    opacity: 0.58;
+  }
+
   .matrix-wrap {
     overflow-x: auto;
     border: 3px solid rgba(255, 255, 255, 0.2);
@@ -1292,6 +1807,18 @@ const previewImage = new URL('/og-image.png', canonical).toString();
 
     .quick-toast span {
       font-size: 0.72rem;
+    }
+
+    .sync-dialog-panel {
+      padding: 20px;
+    }
+
+    .sync-counts {
+      grid-template-columns: 1fr;
+    }
+
+    .sync-actions button {
+      width: 100%;
     }
 
     .sprite-type-heading {

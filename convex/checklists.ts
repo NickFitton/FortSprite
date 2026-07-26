@@ -5,8 +5,9 @@ import { mutation, query } from './_generated/server';
 import { progressStatus } from './schema';
 
 const desiredStatus = v.union(v.literal('not-found'), progressStatus);
+const progress = v.record(v.string(), progressStatus);
 const publicChecklist = v.object({
-  progress: v.record(v.string(), progressStatus),
+  progress,
   revision: v.number(),
   updatedAt: v.number()
 });
@@ -59,6 +60,13 @@ function validateSpriteId(spriteId: string): void {
   }
 }
 
+function validateProgress(nextProgress: Record<string, 'extracted' | 'mastered'>): void {
+  if (Object.keys(nextProgress).length > MAX_PROGRESS_ENTRIES) {
+    throw new ConvexError('The checklist has reached its safe size limit.');
+  }
+  Object.keys(nextProgress).forEach(validateSpriteId);
+}
+
 export const get = query({
   args: {},
   returns: v.union(publicChecklist, v.null()),
@@ -86,6 +94,71 @@ export const ensure = mutation({
     const checklist = await ctx.db.get(checklistId);
     if (!checklist) throw new ConvexError('Could not create the account checklist.');
     return toPublicChecklist(checklist);
+  }
+});
+
+/**
+ * Atomically accepts a user-approved reconciliation. The expected revision is
+ * the exact account state the browser showed in the comparison, so a second
+ * device cannot silently overwrite a newer checklist.
+ */
+export const reconcile = mutation({
+  args: {
+    progress,
+    expectedRevision: v.union(v.number(), v.null())
+  },
+  returns: publicChecklist,
+  handler: async (ctx, args) => {
+    validateProgress(args.progress);
+    const ownerTokenIdentifier = await requireOwnerTokenIdentifier(ctx);
+    const existing = await findOwnedChecklist(ctx, ownerTokenIdentifier);
+    const currentRevision = existing?.revision ?? null;
+    if (currentRevision !== args.expectedRevision) {
+      throw new ConvexError('The account checklist is stale because it changed while you were comparing it. Please review it again.');
+    }
+
+    const nextChecklist = {
+      ownerTokenIdentifier,
+      progress: args.progress,
+      revision: (existing?.revision ?? -1) + 1,
+      updatedAt: Date.now()
+    };
+    if (existing) {
+      await ctx.db.patch(existing._id, nextChecklist);
+    } else {
+      await ctx.db.insert('accountChecklists', nextChecklist);
+    }
+    return {
+      progress: nextChecklist.progress,
+      revision: nextChecklist.revision,
+      updatedAt: nextChecklist.updatedAt
+    };
+  }
+});
+
+export const reset = mutation({
+  args: {},
+  returns: publicChecklist,
+  handler: async (ctx) => {
+    const ownerTokenIdentifier = await requireOwnerTokenIdentifier(ctx);
+    const existing = await findOwnedChecklist(ctx, ownerTokenIdentifier);
+    const nextChecklist = {
+      ownerTokenIdentifier,
+      progress: {},
+      revision: (existing?.revision ?? -1) + 1,
+      updatedAt: Date.now()
+    };
+
+    if (existing) {
+      await ctx.db.patch(existing._id, nextChecklist);
+    } else {
+      await ctx.db.insert('accountChecklists', nextChecklist);
+    }
+    return {
+      progress: nextChecklist.progress,
+      revision: nextChecklist.revision,
+      updatedAt: nextChecklist.updatedAt
+    };
   }
 });
 
