@@ -51,6 +51,10 @@ const previewImage = new URL('/og-image.png', canonical).toString();
     })} />
   </head>
   <body>
+    <div class="checklist-loading" data-checklist-loading role="status" aria-live="polite">
+      <span class="checklist-loading-mark" aria-hidden="true"></span>
+      <span>Loading your checklist</span>
+    </div>
     <main class="shell">
       <nav class="top-nav" aria-label="Account">
         <a class="brand-link" href="/">fortsprite</a>
@@ -212,6 +216,7 @@ const previewImage = new URL('/og-image.png', canonical).toString();
       const reconciliationMergeButton = document.querySelector('[data-reconciliation-merge]');
       const reconciliationAccountButton = document.querySelector('[data-reconciliation-account]');
       const reconciliationCancelButton = document.querySelector('[data-reconciliation-cancel]');
+      const checklistLoading = document.querySelector('[data-checklist-loading]');
       const counts = {
         mastered: document.querySelector('#mastered-count'),
         extracted: document.querySelector('#extracted-count'),
@@ -233,6 +238,10 @@ const previewImage = new URL('/og-image.png', canonical).toString();
 
       function persist() {
         if (!usesAccountProgress) saveAnonymousProgress(state);
+      }
+
+      function finishChecklistLoading() {
+        checklistLoading.hidden = true;
       }
 
       function hasMeaningfulAnonymousProgress() {
@@ -745,6 +754,7 @@ const previewImage = new URL('/og-image.png', canonical).toString();
             usesAccountProgress = true;
             reconciliationDialog.close();
             applyState();
+            finishChecklistLoading();
           },
           onSignedOut() {
             accountSyncPending = false;
@@ -756,6 +766,7 @@ const previewImage = new URL('/og-image.png', canonical).toString();
             reconciliationDialog.close();
             state = loadAnonymousProgress(recognizedIds);
             applyState();
+            finishChecklistLoading();
           },
           onChecklist(checklist) {
             if (needsAnonymousReconciliation() && !reconciliationComplete) {
@@ -765,6 +776,7 @@ const previewImage = new URL('/og-image.png', canonical).toString();
               }
               accountSyncPending = false;
               showReconciliation(checklist);
+              finishChecklistLoading();
               return;
             }
             if (!checklist) return;
@@ -779,12 +791,15 @@ const previewImage = new URL('/og-image.png', canonical).toString();
             if (needsAnonymousReconciliation() && !reconciliationComplete) {
               showReconciliation(inspectedAccountChecklist);
             }
+            finishChecklistLoading();
             console.error('Could not sync the account checklist.', error);
           },
           onReconciliationStale() {
             reconciliationDecisionPending = false;
           }
         }, { shouldReconcileAnonymousProgress: needsAnonymousReconciliation });
+
+      if (!accountProgress) finishChecklistLoading();
 
       window.addEventListener('pagehide', () => accountProgress?.close(), { once: true });
       applyState();
@@ -847,6 +862,43 @@ const previewImage = new URL('/og-image.png', canonical).toString();
   button,
   input {
     font: inherit;
+  }
+
+  .checklist-loading {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 14px;
+    background:
+      radial-gradient(circle at 50% 42%, rgba(40, 215, 255, 0.18), transparent 15rem),
+      rgba(7, 11, 36, 0.98);
+    color: var(--text);
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.9rem;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .checklist-loading[hidden] {
+    display: none;
+  }
+
+  .checklist-loading-mark {
+    width: 42px;
+    height: 42px;
+    border: 4px solid rgba(255, 255, 255, 0.22);
+    border-top-color: var(--gold);
+    border-right-color: var(--blue);
+    border-radius: 50%;
+    animation: checklist-spin 780ms linear infinite;
+  }
+
+  @keyframes checklist-spin {
+    to { transform: rotate(360deg); }
   }
 
   .shell {

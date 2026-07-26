@@ -38,6 +38,10 @@ declare global {
       writes: unknown[];
       signOuts: number;
     };
+    __checklistLoadingStory?: {
+      showCached(): void;
+      showRemote(): void;
+    };
   }
 }
 
@@ -388,4 +392,47 @@ test('an approved reconciliation is acknowledged locally until anonymous progres
   await page.reload();
 
   await expect(page.getByRole('dialog', { name: 'Choose how to sync your checklist' })).toBeVisible();
+});
+
+test('keeps the checklist behind a loading state until the confirmed remote checklist is ready', async ({ page }) => {
+  const cached = {
+    progress: { 'burnt-peanut-base': 'extracted' },
+    revision: 2,
+    updatedAt: 1
+  } satisfies AccountChecklist;
+  const remote = { ...cached, progress: { 'burnt-peanut-base': 'mastered' }, revision: 3 } satisfies AccountChecklist;
+  await page.addInitScript(({ cached, remote }) => {
+    let callbacks: AccountChecklistCallbacks;
+    window.__fortspriteTestConnectAccountChecklist = (nextCallbacks) => {
+      callbacks = nextCallbacks;
+      queueMicrotask(() => {
+        callbacks.onAuthenticated?.('user_123');
+        callbacks.onPending();
+      });
+      return {
+        setSpriteStatus() {},
+        reset() {},
+        reconcile() {},
+        close() {}
+      };
+    };
+    window.__checklistLoadingStory = {
+      showCached() { callbacks.onChecklist(cached); },
+      showRemote() {
+        callbacks.onChecklist(remote);
+        callbacks.onReady();
+      }
+    };
+  }, { cached, remote });
+
+  await page.goto('/');
+  const loading = page.getByText('Loading your checklist');
+  await expect(loading).toBeVisible();
+  await page.evaluate(() => window.__checklistLoadingStory?.showCached());
+  await expect(loading).toBeVisible();
+
+  await page.evaluate(() => window.__checklistLoadingStory?.showRemote());
+  await expect(loading).toBeHidden();
+  await expect(page.locator('[data-sprite-card][data-id="burnt-peanut-base"]'))
+    .toHaveAttribute('data-status', 'mastered');
 });

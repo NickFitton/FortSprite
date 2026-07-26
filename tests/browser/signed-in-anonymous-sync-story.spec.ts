@@ -49,6 +49,7 @@ test.describe('user story: reconcile an anonymous checklist after sign-in', () =
         writes: [] as unknown[],
         signIn() {
           signedIn = true;
+          callbacks.onAuthenticated?.('user_123');
           callbacks.onPending();
           callbacks.onChecklist(account);
         },
@@ -60,6 +61,7 @@ test.describe('user story: reconcile an anonymous checklist after sign-in', () =
       window.__anonymousSyncStory = story;
       window.__fortspriteTestConnectAccountChecklist = (nextCallbacks) => {
         callbacks = nextCallbacks;
+        queueMicrotask(() => callbacks.onSignedOut());
         return {
           setSpriteStatus() {},
           reset() {},
@@ -115,6 +117,7 @@ test.describe('user story: reconcile an anonymous checklist after sign-in', () =
       const story = {
         writes: [] as unknown[],
         signIn() {
+          callbacks.onAuthenticated?.('user_123');
           callbacks.onPending();
           callbacks.onChecklist(null);
         },
@@ -123,6 +126,7 @@ test.describe('user story: reconcile an anonymous checklist after sign-in', () =
       window.__anonymousSyncStory = story;
       window.__fortspriteTestConnectAccountChecklist = (nextCallbacks) => {
         callbacks = nextCallbacks;
+        queueMicrotask(() => callbacks.onSignedOut());
         return {
           setSpriteStatus() {},
           reset() {},
