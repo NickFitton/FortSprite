@@ -1,5 +1,6 @@
 export const variants = ['Base', 'Gold', 'Gummy', 'Galaxy', 'Holofoil', 'Gem', 'Cube', 'Quack'];
 export const releasedVariants = ['Base', 'Gold', 'Gummy', 'Galaxy', 'Holofoil'];
+export const unreleasedVariants = ['Gem', 'Quack'];
 
 export const iconMaps = {
   batman: {
@@ -414,7 +415,10 @@ export const sprites = [
         variant,
         rarity: variant === 'Base' ? sprite.rarity : 'special',
         ability: sprite.ability,
-        released: !sprite.unreleased && (releasedVariants.includes(variant) || sprite.additionalReleasedVariants?.includes(variant)) && !sprite.unreleasedVariants?.includes(variant),
+        released: !sprite.unreleased
+          && !unreleasedVariants.includes(variant)
+          && (releasedVariants.includes(variant) || sprite.additionalReleasedVariants?.includes(variant))
+          && !sprite.unreleasedVariants?.includes(variant),
         hasExactImage: Boolean(sprite.images[variant]),
         image,
         placeholderImage
