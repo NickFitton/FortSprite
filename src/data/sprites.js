@@ -1,4 +1,4 @@
-export const variants = ['Base', 'Gold', 'Gummy', 'Galaxy', 'Holofoil', 'Gem', 'Cube', 'Quack'];
+export const variants = ['Base', 'Gold', 'Gummy', 'Galaxy', 'Holofoil', 'Cube', 'Gem', 'Quack'];
 export const releasedVariants = ['Base', 'Gold', 'Gummy', 'Galaxy', 'Holofoil'];
 export const unreleasedVariants = ['Gem', 'Quack'];
 
