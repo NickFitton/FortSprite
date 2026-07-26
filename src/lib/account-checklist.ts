@@ -12,9 +12,11 @@ export type AccountChecklist = {
 };
 
 export type AccountChecklistCallbacks = {
+  onAuthenticated?(userId: string): void;
   onPending(): void;
   onReady(): void;
   onSignedOut(): void;
+  onReconciliationStale?(): void;
   onChecklist(checklist: AccountChecklist | null): void;
   onError(error: Error): void;
 };
@@ -159,6 +161,7 @@ export function createAccountChecklistConnection(
         userId = nextUserId;
       }
       if (ready || initializing) return;
+      callbacks.onAuthenticated?.(nextUserId);
       initializing = true;
       callbacks.onPending();
       const shouldReconcile = options.shouldReconcileAnonymousProgress?.()
@@ -229,6 +232,7 @@ export function createAccountChecklistConnection(
           if (closed || userId !== reconcilingUserId) return;
           if (error instanceof Error && /checklist is stale/i.test(error.message)) {
             reconciliationPending = true;
+            callbacks.onReconciliationStale?.();
             loadChecklistForReconciliation(reconcilingUserId);
             return;
           }

@@ -181,7 +181,12 @@ const previewImage = new URL('/og-image.png', canonical).toString();
 
     <script>
       import { connectAccountChecklist, type AccountChecklist } from '../lib/account-checklist';
-      import { loadAnonymousProgress, saveAnonymousProgress } from '../lib/anonymous-progress';
+      import {
+        acknowledgeAnonymousReconciliation,
+        hasAcknowledgedAnonymousReconciliation,
+        loadAnonymousProgress,
+        saveAnonymousProgress
+      } from '../lib/anonymous-progress';
       import { mergeProgress, summarizeReconciliation } from '../lib/checklist-reconciliation';
 
       type TestConnectionFactory = typeof connectAccountChecklist;
@@ -219,7 +224,9 @@ const previewImage = new URL('/og-image.png', canonical).toString();
       let accountSyncPending = false;
       let accountProgress: ReturnType<typeof connectAccountChecklist> = null;
       let reconciliationComplete = false;
+      let reconciliationDecisionPending = false;
       let inspectedAccountChecklist: AccountChecklist | null = null;
+      let accountUserId: string | null = null;
       const pendingAccountWrites = new Set<string>();
       let lastQuickAction = null;
       let quickToastTimer = null;
@@ -232,11 +239,18 @@ const previewImage = new URL('/og-image.png', canonical).toString();
         return Object.keys(state).length > 0;
       }
 
+      function needsAnonymousReconciliation() {
+        return hasMeaningfulAnonymousProgress() && (
+          !accountUserId || !hasAcknowledgedAnonymousReconciliation(accountUserId, state)
+        );
+      }
+
       function statusLabel(status) {
         return status === 'mastered' ? 'Mastered' : status === 'extracted' ? 'Extracted' : 'Not found';
       }
 
       function showReconciliation(checklist) {
+        reconciliationDecisionPending = false;
         inspectedAccountChecklist = checklist;
         const account = checklist?.progress ?? {};
         const summary = summarizeReconciliation(account, state);
@@ -347,6 +361,7 @@ const previewImage = new URL('/og-image.png', canonical).toString();
       function chooseReconciliation(progress) {
         if (accountSyncPending) return;
         accountSyncPending = true;
+        reconciliationDecisionPending = true;
         reconciliationMergeButton.disabled = true;
         reconciliationAccountButton.disabled = true;
         reconciliationCancelButton.disabled = true;
@@ -712,11 +727,19 @@ const previewImage = new URL('/og-image.png', canonical).toString();
         ? (window as TestWindow).__fortspriteTestConnectAccountChecklist ?? connectAccountChecklist
         : connectAccountChecklist;
       accountProgress = connectChecklist({
+          onAuthenticated(userId) {
+            accountUserId = userId;
+            reconciliationComplete = !needsAnonymousReconciliation();
+          },
           onPending() {
             accountSyncPending = true;
           },
           onReady() {
             accountSyncPending = false;
+            if (reconciliationDecisionPending && accountUserId) {
+              acknowledgeAnonymousReconciliation(accountUserId, state);
+            }
+            reconciliationDecisionPending = false;
             reconciliationComplete = true;
             if (inspectedAccountChecklist) state = inspectedAccountChecklist.progress;
             usesAccountProgress = true;
@@ -727,13 +750,19 @@ const previewImage = new URL('/og-image.png', canonical).toString();
             accountSyncPending = false;
             usesAccountProgress = false;
             reconciliationComplete = false;
+            reconciliationDecisionPending = false;
             inspectedAccountChecklist = null;
+            accountUserId = null;
             reconciliationDialog.close();
             state = loadAnonymousProgress(recognizedIds);
             applyState();
           },
           onChecklist(checklist) {
-            if (hasMeaningfulAnonymousProgress() && !reconciliationComplete) {
+            if (needsAnonymousReconciliation() && !reconciliationComplete) {
+              if (reconciliationDecisionPending) {
+                inspectedAccountChecklist = checklist;
+                return;
+              }
               accountSyncPending = false;
               showReconciliation(checklist);
               return;
@@ -745,13 +774,17 @@ const previewImage = new URL('/og-image.png', canonical).toString();
           },
           onError(error) {
             accountSyncPending = false;
+            reconciliationDecisionPending = false;
             pendingAccountWrites.clear();
-            if (hasMeaningfulAnonymousProgress() && !reconciliationComplete) {
+            if (needsAnonymousReconciliation() && !reconciliationComplete) {
               showReconciliation(inspectedAccountChecklist);
             }
             console.error('Could not sync the account checklist.', error);
+          },
+          onReconciliationStale() {
+            reconciliationDecisionPending = false;
           }
-        }, { shouldReconcileAnonymousProgress: hasMeaningfulAnonymousProgress });
+        }, { shouldReconcileAnonymousProgress: needsAnonymousReconciliation });
 
       window.addEventListener('pagehide', () => accountProgress?.close(), { once: true });
       applyState();

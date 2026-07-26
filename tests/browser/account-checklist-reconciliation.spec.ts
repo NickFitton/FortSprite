@@ -208,7 +208,9 @@ test('signed-in anonymous data prompt compares both checklists and merges only a
     updatedAt: 1
   } satisfies AccountChecklist;
   await page.addInitScript(({ anonymous, account }) => {
-    localStorage.setItem('fortsprite:anonymous:v1', JSON.stringify(anonymous));
+    if (!localStorage.getItem('fortsprite:anonymous:v1')) {
+      localStorage.setItem('fortsprite:anonymous:v1', JSON.stringify(anonymous));
+    }
     const promptTest: { writes: unknown[]; signOuts: number } = { writes: [], signOuts: 0 };
     window.__fortspritePromptTest = promptTest;
     window.__fortspriteTestConnectAccountChecklist = (callbacks) => {
@@ -332,4 +334,58 @@ test('a new account can keep an intentionally empty checklist', async ({ page })
   await expect(dialog).toBeHidden();
   await expect.poll(() => page.evaluate(() => localStorage.getItem('fortsprite:anonymous:v1')))
     .toBe(JSON.stringify(anonymous));
+});
+
+test('an approved reconciliation is acknowledged locally until anonymous progress changes', async ({ page }) => {
+  const anonymous = { 'burnt-peanut-base': 'mastered' } satisfies AccountChecklist['progress'];
+  const account = {
+    progress: { 'burnt-peanut-base': 'extracted' },
+    revision: 2,
+    updatedAt: 1
+  } satisfies AccountChecklist;
+  await page.addInitScript(({ anonymous, account }) => {
+    if (!localStorage.getItem('fortsprite:anonymous:v1')) {
+      localStorage.setItem('fortsprite:anonymous:v1', JSON.stringify(anonymous));
+    }
+    window.__fortspriteTestConnectAccountChecklist = (callbacks) => {
+      queueMicrotask(() => {
+        callbacks.onAuthenticated?.('user_123');
+        callbacks.onPending();
+        callbacks.onChecklist(account);
+      });
+      return {
+        setSpriteStatus() {},
+        reset() {},
+        reconcile(progress, expectedRevision) {
+          queueMicrotask(() => {
+            callbacks.onChecklist({ ...account, progress, revision: account.revision + 1 });
+            callbacks.onReady();
+          });
+        },
+        close() {}
+      };
+    };
+  }, { anonymous, account });
+
+  await page.goto('/');
+  const dialog = page.getByRole('dialog', { name: 'Choose how to sync your checklist' });
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole('button', { name: 'Merge progress' }).click();
+  await expect(dialog).toBeHidden();
+  await expect.poll(() => page.evaluate(() => localStorage.getItem('fortsprite:reconciliation:user_123:v1')))
+    .not.toBeNull();
+
+  await page.reload();
+
+  await expect(page.locator('[data-reconciliation-dialog]')).not.toHaveAttribute('open', '');
+  await expect(page.locator('[data-sprite-card][data-id="burnt-peanut-base"]'))
+    .toHaveAttribute('data-status', 'extracted');
+
+  await page.evaluate(() => localStorage.setItem('fortsprite:anonymous:v1', JSON.stringify({
+    'burnt-peanut-base': 'mastered',
+    'new-anonymous-sprite': 'extracted'
+  })));
+  await page.reload();
+
+  await expect(page.getByRole('dialog', { name: 'Choose how to sync your checklist' })).toBeVisible();
 });
