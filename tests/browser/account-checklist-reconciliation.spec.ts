@@ -58,8 +58,8 @@ async function connectReconciliation(page: Page) {
     let pending = 0;
     let ready = 0;
     let signedOut = 0;
-    let sessionCallback: ((nextSession: { user: { id: string }; getToken: () => Promise<string> } | undefined) => void) | undefined;
-    let session: { user: { id: string }; getToken: () => Promise<string> } | undefined = {
+    let sessionCallback: ((nextSession: { user: { id: string }; getToken: () => Promise<string> } | null) => void) | undefined;
+    let session: { user: { id: string }; getToken: () => Promise<string> } | null = {
       user: { id: 'user_123' },
       getToken: async () => 'clerk-token'
     };
@@ -110,7 +110,7 @@ async function connectReconciliation(page: Page) {
         connection.reconcile(progress, expectedRevision);
       },
       signOut() {
-        session = undefined;
+        session = null;
         sessionCallback?.(session);
       }
     };

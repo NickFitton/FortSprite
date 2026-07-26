@@ -138,6 +138,11 @@ export function createAccountChecklistConnection(
   }
 
   const stopSessionSubscription = dependencies.subscribeSession((session) => {
+    // Clerk emits `undefined` while its session is still loading. Waiting here
+    // keeps the checklist hidden until we know whether to use anonymous or
+    // account progress, avoiding a local-to-remote flicker on returning visits.
+    if (session === undefined) return;
+
     client.setAuth(async () => session?.getToken({ template: 'convex' }) ?? null, (isAuthenticated) => {
       if (closed) return;
       const nextUserId = session?.user?.id;

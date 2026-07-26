@@ -34,9 +34,68 @@ declare global {
       resolveNext(checklist: AccountChecklist): void;
       setSpriteStatus(): void;
       reset(): void;
+      authenticate?(): void;
     };
   }
 }
+
+test('waits for Clerk to resolve its initial session before initializing the account', async ({ page }) => {
+  await page.goto('/');
+  await page.evaluate(async (userId) => {
+    const moduleUrl = '/src/lib/account-checklist.ts';
+    const { createAccountChecklistConnection } = await import(/* @vite-ignore */ moduleUrl) as typeof import('../../src/lib/account-checklist');
+    const events: string[] = [];
+    let receiveSession: ((session: {
+      user: { id: string } | null;
+      getToken(options?: { template?: string }): Promise<string | null>;
+    } | null | undefined) => void) | undefined;
+
+    const callbacks: AccountChecklistCallbacks = {
+      onAuthenticated() { events.push('authenticated'); },
+      onPending() { events.push('pending'); },
+      onReady() {},
+      onSignedOut() { events.push('signed-out'); },
+      onChecklist() {},
+      onError(error) { throw error; }
+    };
+    const dependencies: AccountChecklistDependencies = {
+      createClient() {
+        return {
+          setAuth(getToken, onChange) {
+            void getToken().then((token) => onChange(token === 'clerk-token'));
+          },
+          query() { return Promise.resolve(null); },
+          mutation() { return new Promise<AccountChecklist>(() => {}); },
+          onUpdate() { return () => {}; },
+          close() { return Promise.resolve(); }
+        };
+      },
+      subscribeSession(callback) {
+        receiveSession = callback;
+        callback(undefined);
+        return () => {};
+      }
+    };
+    createAccountChecklistConnection(callbacks, dependencies);
+    window.__accountChecklistStartup = {
+      calls: events,
+      events: [],
+      pending: 0,
+      ready: 0,
+      resolveNext() {},
+      setSpriteStatus() {},
+      reset() {},
+      authenticate() {
+        receiveSession?.({ user: { id: userId }, getToken: async () => 'clerk-token' });
+      }
+    };
+  }, userId);
+
+  await expect.poll(() => page.evaluate(() => window.__accountChecklistStartup.calls)).toEqual([]);
+  await page.evaluate(() => window.__accountChecklistStartup.authenticate?.());
+  await expect.poll(() => page.evaluate(() => window.__accountChecklistStartup.calls))
+    .toEqual(['authenticated', 'pending']);
+});
 
 async function connectTestChecklist(
   page: Page,
