@@ -15,14 +15,20 @@ export type AccountChecklistCallbacks = {
   onPending(): void;
   onReady(): void;
   onSignedOut(): void;
-  onChecklist(checklist: AccountChecklist): void;
+  onChecklist(checklist: AccountChecklist | null): void;
   onError(error: Error): void;
 };
 
 export type AccountChecklistConnection = {
   setSpriteStatus(spriteId: string, status: 'not-found' | 'extracted' | 'mastered'): void;
   reset(): void;
+  reconcile(progress: AccountProgress, expectedRevision: number | null): void;
   close(): void;
+};
+
+export type AccountChecklistOptions = {
+  reconcileAnonymousProgress?: boolean;
+  shouldReconcileAnonymousProgress?(): boolean;
 };
 
 type AccountSession = {
@@ -35,6 +41,7 @@ type AccountChecklistClient = {
     fetchToken: () => Promise<string | null>,
     onChange: (isAuthenticated: boolean) => void
   ): void;
+  query(reference: unknown, args: unknown): Promise<AccountChecklist | null>;
   mutation(reference: unknown, args: unknown): Promise<AccountChecklist>;
   onUpdate(
     reference: unknown,
@@ -56,7 +63,8 @@ export type AccountChecklistDependencies = {
  * Convex's accepted write order rather than a local optimistic copy.
  */
 export function connectAccountChecklist(
-  callbacks: AccountChecklistCallbacks
+  callbacks: AccountChecklistCallbacks,
+  options: AccountChecklistOptions = {}
 ): AccountChecklistConnection | null {
   const convexUrl = import.meta.env.PUBLIC_CONVEX_URL;
   if (!convexUrl) return null;
@@ -64,7 +72,7 @@ export function connectAccountChecklist(
   return createAccountChecklistConnection(callbacks, {
     createClient: () => new ConvexClient(convexUrl),
     subscribeSession: (callback) => $sessionStore.subscribe(callback)
-  });
+  }, options);
 }
 
 /**
@@ -73,7 +81,8 @@ export function connectAccountChecklist(
  */
 export function createAccountChecklistConnection(
   callbacks: AccountChecklistCallbacks,
-  dependencies: AccountChecklistDependencies
+  dependencies: AccountChecklistDependencies,
+  options: AccountChecklistOptions = {}
 ): AccountChecklistConnection {
   const client = dependencies.createClient();
 
@@ -83,6 +92,7 @@ export function createAccountChecklistConnection(
   let closed = false;
   let userId: string | undefined;
   let latestRevision = -1;
+  let reconciliationPending = false;
 
   function stopChecklistUpdates() {
     stopChecklistSubscription?.();
@@ -112,6 +122,19 @@ export function createAccountChecklistConnection(
     );
   }
 
+  function loadChecklistForReconciliation(activeUserId: string) {
+    void client.query(api.checklists.get, {}).then((checklist) => {
+      if (closed || userId !== activeUserId) return;
+      initializing = false;
+      reconciliationPending = true;
+      if (checklist) latestRevision = checklist.revision;
+      callbacks.onChecklist(checklist);
+    }).catch((error) => {
+      initializing = false;
+      report(error);
+    });
+  }
+
   const stopSessionSubscription = dependencies.subscribeSession((session) => {
     client.setAuth(async () => session?.getToken({ template: 'convex' }) ?? null, (isAuthenticated) => {
       if (closed) return;
@@ -121,6 +144,7 @@ export function createAccountChecklistConnection(
         initializing = false;
         userId = undefined;
         latestRevision = -1;
+        reconciliationPending = false;
         stopChecklistUpdates();
         callbacks.onSignedOut();
         return;
@@ -130,12 +154,20 @@ export function createAccountChecklistConnection(
         ready = false;
         initializing = false;
         latestRevision = -1;
+        reconciliationPending = false;
         stopChecklistUpdates();
         userId = nextUserId;
       }
       if (ready || initializing) return;
       initializing = true;
       callbacks.onPending();
+      const shouldReconcile = options.shouldReconcileAnonymousProgress?.()
+        ?? options.reconcileAnonymousProgress
+        ?? false;
+      if (shouldReconcile) {
+        loadChecklistForReconciliation(nextUserId);
+        return;
+      }
       const cachedChecklist = loadAccountChecklistCache(nextUserId);
       if (cachedChecklist) {
         latestRevision = cachedChecklist.revision;
@@ -177,6 +209,30 @@ export function createAccountChecklistConnection(
         .catch((error) => {
           if (closed || userId !== resettingUserId) return;
           ready = true;
+          report(error);
+        });
+    },
+    reconcile(progress, expectedRevision) {
+      if (ready || closed || !userId || !reconciliationPending) return;
+      const reconcilingUserId = userId;
+      reconciliationPending = false;
+      callbacks.onPending();
+      void client.mutation(api.checklists.reconcile, { progress, expectedRevision })
+        .then((checklist) => {
+          if (closed || userId !== reconcilingUserId) return;
+          acceptConfirmedChecklist(checklist, true);
+          ready = true;
+          callbacks.onReady();
+          startChecklistUpdates();
+        })
+        .catch((error) => {
+          if (closed || userId !== reconcilingUserId) return;
+          if (error instanceof Error && /checklist is stale/i.test(error.message)) {
+            reconciliationPending = true;
+            loadChecklistForReconciliation(reconcilingUserId);
+            return;
+          }
+          reconciliationPending = true;
           report(error);
         });
     },

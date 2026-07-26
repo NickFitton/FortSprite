@@ -56,13 +56,14 @@ async function connectTestChecklist(
       onPending() { pending += 1; },
       onReady() { ready += 1; },
       onSignedOut() {},
-      onChecklist(checklist) { events.push(checklist); },
+      onChecklist(checklist) { if (checklist) events.push(checklist); },
       onError(error) { throw error; }
     };
     const dependencies: AccountChecklistDependencies = {
       createClient() {
         return {
           setAuth(_getToken, onChange) { onChange(true); },
+          query() { return Promise.resolve(null); },
           mutation(_reference, args) {
             calls.push(args);
             return new Promise<AccountChecklist>((resolve) => resolvers.push(resolve));
