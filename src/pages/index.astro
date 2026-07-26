@@ -251,6 +251,7 @@ const previewImage = new URL('/og-image.png', canonical).toString();
             const item = document.createElement('div');
             const value = document.createElement('strong');
             const detail = document.createElement('span');
+            item.className = 'sync-count';
             value.textContent = String(count);
             detail.textContent = `${label} saved sprites`;
             item.append(value, detail);
@@ -271,6 +272,10 @@ const previewImage = new URL('/og-image.png', canonical).toString();
             const heading = document.createElement('h3');
             const detail = document.createElement('p');
             const list = document.createElement('ul');
+            group.className = 'sync-difference';
+            heading.className = 'sync-difference-title';
+            detail.className = 'sync-difference-description';
+            list.className = 'sync-difference-list';
             heading.textContent = `${label} (${spriteIds.length})`;
             detail.textContent = description;
             spriteIds.forEach((spriteId) => {
@@ -285,6 +290,7 @@ const previewImage = new URL('/og-image.png', canonical).toString();
           });
           if (!reconciliationDifferences.childElementCount) {
             const same = document.createElement('p');
+            same.className = 'sync-no-differences';
             same.textContent = 'Both checklists contain the same sprite statuses.';
             reconciliationDifferences.append(same);
           }
@@ -1186,32 +1192,36 @@ const previewImage = new URL('/og-image.png', canonical).toString();
     margin: 18px 0;
   }
 
-  .sync-counts div,
-  .sync-differences section,
-  .sync-differences > p {
+  .sync-counts :global(.sync-count),
+  .sync-differences :global(.sync-difference),
+  .sync-differences :global(.sync-no-differences) {
     border: 2px solid rgba(255, 255, 255, 0.2);
     border-radius: 8px;
     background: rgba(7, 11, 36, 0.66);
   }
 
-  .sync-counts div {
+  .sync-counts :global(.sync-count) {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
     padding: 14px;
   }
 
-  .sync-counts strong,
-  .sync-counts span {
+  .sync-counts :global(.sync-count strong),
+  .sync-counts :global(.sync-count span) {
     display: block;
   }
 
-  .sync-counts strong {
+  .sync-counts :global(.sync-count strong) {
     color: var(--gold);
     font-size: 2rem;
     line-height: 1;
   }
 
-  .sync-counts span,
-  .sync-differences p,
-  .sync-differences li,
+  .sync-counts :global(.sync-count span),
+  .sync-differences :global(.sync-difference-description),
+  .sync-differences :global(.sync-difference-list li),
   .sync-note {
     font-family: Inter, ui-sans-serif, system-ui, sans-serif;
     font-size: 0.82rem;
@@ -1224,13 +1234,13 @@ const previewImage = new URL('/og-image.png', canonical).toString();
     gap: 10px;
   }
 
-  .sync-differences section,
-  .sync-differences > p {
+  .sync-differences :global(.sync-difference),
+  .sync-differences :global(.sync-no-differences) {
     margin: 0;
     padding: 12px 14px;
   }
 
-  .sync-differences h3 {
+  .sync-differences :global(.sync-difference-title) {
     margin: 0;
     color: var(--blue);
     font-family: Inter, ui-sans-serif, system-ui, sans-serif;
@@ -1238,12 +1248,12 @@ const previewImage = new URL('/og-image.png', canonical).toString();
     text-transform: uppercase;
   }
 
-  .sync-differences p {
+  .sync-differences :global(.sync-difference-description) {
     margin: 5px 0;
     color: var(--muted);
   }
 
-  .sync-differences ul {
+  .sync-differences :global(.sync-difference-list) {
     max-height: 112px;
     margin: 8px 0 0;
     padding-left: 18px;
