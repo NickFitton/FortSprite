@@ -85,9 +85,9 @@ test.describe('user story: reconcile an anonymous checklist after sign-in', () =
     await page.evaluate(() => window.__anonymousSyncStory?.signIn());
     const dialog = page.getByRole('dialog', { name: 'Choose how to sync your checklist' });
     await expect(dialog).toBeVisible();
-    await expect(dialog).toContainText('Anonymous additions (1)');
-    await expect(dialog).toContainText('Anonymous upgrades (1)');
-    await expect(dialog).toContainText('Account additions (1)');
+    await expect(dialog).toContainText('Merge preview');
+    await expect(dialog).toContainText('Add to account');
+    await expect(dialog).toContainText('Upgrade account');
     await dialog.screenshot({ path: screenshots.comparison });
 
     await dialog.getByRole('button', { name: 'Merge progress' }).click();

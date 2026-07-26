@@ -237,10 +237,10 @@ test('signed-in anonymous data prompt compares both checklists and merges only a
   await expect(dialog).toBeVisible();
   await expect(dialog).toContainText('Anonymous browser saved sprites');
   await expect(dialog).toContainText('Signed-in account saved sprites');
-  await expect(dialog).toContainText('Anonymous additions (1)');
-  await expect(dialog).toContainText('Anonymous upgrades (1)');
-  await expect(dialog).toContainText('Account additions (1)');
-  await expect(dialog).toContainText('burnt-peanut-base: browser Mastered, account Extracted');
+  await expect(dialog).toContainText('Merge preview');
+  await expect(dialog).toContainText('Add to account');
+  await expect(dialog).toContainText('Upgrade account');
+  await expect(dialog.getByRole('img', { name: 'Burnt Peanut Sprite' })).toBeVisible();
 
   await dialog.getByRole('button', { name: 'Merge progress' }).click();
   await expect.poll(() => page.evaluate(() => window.__fortspritePromptTest?.writes)).toEqual([{

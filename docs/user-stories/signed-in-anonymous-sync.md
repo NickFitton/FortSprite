@@ -10,7 +10,7 @@ Before signing in, the player has mastered Burnt Peanut in this browser. The che
 
 ## The player reviews the sync decision
 
-After sign-in completes, editing is blocked by the “Signed in with anonymous data” dialog. It compares saved sprite counts and lists browser additions, browser upgrades, and account-only sprites with their statuses. The player can merge, use the account checklist, or cancel and sign out.
+After sign-in completes, editing is blocked by the “Signed in with anonymous data” dialog. Its merge-preview table uses each affected variant’s artwork and shows browser status, saved account status, resulting merged status, and whether the merge adds, upgrades, or keeps the account entry. The player can merge, use the account checklist, or cancel and sign out.
 
 ![Comparison dialog](./signed-in-anonymous-sync/02-sync-comparison.png)
 
