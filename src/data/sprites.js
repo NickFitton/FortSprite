@@ -144,6 +144,20 @@ export const iconMaps = {
     Gummy: '/sprites/T_Icon_BR_Creature_Sprite_Seven_Candy_ui_L.webp',
     Galaxy: '/sprites/T_Icon_BR_Creature_Sprite_Seven_Galaxy_ui_L.webp',
     Holofoil: '/sprites/T_Icon_BR_Creature_Sprite_Seven_Holofoil_ui_L.webp'
+  },
+  llama: {
+    Base: '/sprites/T_Icon_BR_Creature_Sprite_Llama_ui_L.webp',
+    Gold: '/sprites/T_Icon_BR_Creature_Sprite_Llama_Gold_ui_L.webp',
+    Gummy: '/sprites/T_Icon_BR_Creature_Sprite_Llama_Candy_ui_L.webp',
+    Galaxy: '/sprites/T_Icon_BR_Creature_Sprite_Llama_Galaxy_ui_L.webp',
+    Gem: '/sprites/T_Icon_BR_Creature_Sprite_Llama_Gem_ui_L.webp'
+  },
+  peely: {
+    Base: '/sprites/T_Icon_BR_Creature_Sprite_Peely_ui_L.webp',
+    Gold: '/sprites/T_Icon_BR_Creature_Sprite_Peely_Gold_ui_L.webp',
+    Gummy: '/sprites/T_Icon_BR_Creature_Sprite_Peely_Candy_ui_L.webp',
+    Galaxy: '/sprites/T_Icon_BR_Creature_Sprite_Peely_Galaxy_ui_L.webp',
+    Holofoil: '/sprites/T_Icon_BR_Creature_Sprite_Peely_Holofoil_ui_L.webp'
   }
 };
 
@@ -293,6 +307,22 @@ export const spriteTypes = [
     unreleasedVariants: ['Gem', 'Cube', 'Quack'],
     images: iconMaps.seven
   },
+  {
+    key: 'llama',
+    name: 'Llama',
+    rarity: 'legendary',
+    ability: 'Effect details are not currently available.',
+    unreleasedVariants: ['Holofoil', 'Cube', 'Quack'],
+    images: iconMaps.llama
+  },
+  {
+    key: 'peely',
+    name: 'Peely',
+    rarity: 'legendary',
+    ability: 'Effect details are not currently available.',
+    unreleasedVariants: ['Gem', 'Cube', 'Quack'],
+    images: iconMaps.peely
+  },
 ];
 
 function levelEffectsFor(sprite) {
@@ -336,6 +366,13 @@ function levelEffectsFor(sprite) {
     { level: 4, effect: 'Effect details are not available yet.' },
     { level: 5, effect: 'Effect details are not available yet.' }
   ];
+}
+
+function unavailableLevelEffects() {
+  return Array.from({ length: 5 }, (_, index) => ({
+    level: index + 1,
+    effect: 'Effect details are not currently available.'
+  }));
 }
 
 export const specialSprites = [
@@ -395,6 +432,38 @@ export const specialSprites = [
       { level: 4, effect: '9 seconds of shield replenishment after eliminations.' },
       { level: 5, effect: '10 seconds of shield replenishment after eliminations.' }
     ]
+  },
+  {
+    key: 'john-wick',
+    id: 'john-wick-base',
+    name: 'John Wick Sprite',
+    family: 'John Wick',
+    variant: 'Base',
+    rarity: 'mythic',
+    ability: 'Knocking players reveals others nearby.',
+    released: false,
+    hasExactImage: true,
+    image: '/sprites/T_Icon_Reload_FillerGrunt_icon_L.webp',
+    levelEffects: [
+      { level: 1, effect: '3 seconds.' },
+      { level: 2, effect: '3.5 seconds.' },
+      { level: 3, effect: '4 seconds.' },
+      { level: 4, effect: '4.5 seconds.' },
+      { level: 5, effect: '5 seconds.' }
+    ]
+  },
+  {
+    key: 'ironmouse',
+    id: 'ironmouse-base',
+    name: 'Ironmouse Sprite',
+    family: 'Ironmouse',
+    variant: 'Base',
+    rarity: 'mythic',
+    ability: 'Unreleased sprite; effect details are not currently available.',
+    released: false,
+    hasExactImage: true,
+    image: '/sprites/T_Icon_BR_PedicureAntacid_L.webp',
+    levelEffects: unavailableLevelEffects()
   },
 ];
 
