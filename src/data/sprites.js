@@ -441,7 +441,7 @@ export const specialSprites = [
     variant: 'Base',
     rarity: 'mythic',
     ability: 'Knocking players reveals others nearby.',
-    released: false,
+    released: true,
     hasExactImage: true,
     image: '/sprites/T_Icon_Reload_FillerGrunt_icon_L.webp',
     levelEffects: [
