@@ -4,6 +4,19 @@ import { claimableSprites, specialSprites, spriteRows, sprites, variants } from 
 const regularSpriteKeys = ['llama', 'peely'];
 
 describe('new base sprites', () => {
+  it('includes the released Quack reward variants with their exact Fortnite.gg artwork', () => {
+    expect(
+      sprites
+        .filter(({ variant, hasExactImage }) => variant === 'Quack' && hasExactImage)
+        .map(({ id, released, hasExactImage }) => ({ id, released, hasExactImage }))
+    ).toEqual([
+      { id: 'water-quack', released: true, hasExactImage: true },
+      { id: 'earth-quack', released: true, hasExactImage: true },
+      { id: 'fire-quack', released: true, hasExactImage: true },
+      { id: 'zero-point-quack', released: true, hasExactImage: true }
+    ]);
+  });
+
   it('renders Llama and Peely as regular families with their scraped variants', () => {
     expect(spriteRows.filter(({ key }) => regularSpriteKeys.includes(key))).toHaveLength(2);
 

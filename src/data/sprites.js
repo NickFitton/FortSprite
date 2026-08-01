@@ -1,6 +1,6 @@
 export const variants = ['Base', 'Gold', 'Gummy', 'Galaxy', 'Holofoil', 'Cube', 'Gem', 'Quack'];
 export const releasedVariants = ['Base', 'Gold', 'Gummy', 'Galaxy', 'Holofoil'];
-export const unreleasedVariants = ['Gem', 'Quack'];
+export const unreleasedVariants = ['Gem'];
 
 export const iconMaps = {
   batman: {
@@ -17,7 +17,8 @@ export const iconMaps = {
     Gummy: '/sprites/T_Icon_BR_Creature_Sprite_Water_Candy_ui_L.webp',
     Galaxy: '/sprites/T_Icon_BR_Creature_Sprite_Water_Galaxy_ui_L.webp',
     Gem: '/sprites/T_Icon_BR_Creature_Sprite_Water_Gem_ui_L.webp',
-    Holofoil: '/sprites/T_Icon_BR_Creature_Sprite_Water_Holofoil_ui_L.webp'
+    Holofoil: '/sprites/T_Icon_BR_Creature_Sprite_Water_Holofoil_ui_L.webp',
+    Quack: '/sprites/T_Icon_BR_Creature_Sprite_Water_Quack_ui_L.webp'
   },
   earth: {
     Base: '/sprites/T_Icon_BR_Creature_Sprite_Earth_Ch7S3_UI_L.webp',
@@ -26,7 +27,8 @@ export const iconMaps = {
     Galaxy: '/sprites/T_Icon_BR_Creature_Sprite_Earth_Galaxy_ui_L.webp',
     Gem: '/sprites/T_Icon_BR_Creature_Sprite_Earth_Gem_ui_L.webp',
     Cube: '/sprites/T_Icon_BR_Creature_Sprite_Earth_Cube_ui_L.webp',
-    Holofoil: null
+    Holofoil: null,
+    Quack: '/sprites/T_Icon_BR_Creature_Sprite_Earth_Quack_ui_L.webp'
   },
   fire: {
     Base: '/sprites/T_Icon_BR_Creature_Sprite_Fire_Unvault_Ch7S3_ui_L.webp',
@@ -34,7 +36,8 @@ export const iconMaps = {
     Gummy: '/sprites/T_Icon_BR_Creature_Sprite_Fire_Candy_ui_L.webp',
     Galaxy: '/sprites/T_Icon_BR_Creature_Sprite_Fire_Galaxy_ui_L.webp',
     Cube: '/sprites/T_Icon_BR_Creature_Sprite_Fire_Cube_ui_L.webp',
-    Holofoil: '/sprites/T_Icon_BR_Creature_Sprite_Fire_Holofoil_ui_L.webp'
+    Holofoil: '/sprites/T_Icon_BR_Creature_Sprite_Fire_Holofoil_ui_L.webp',
+    Quack: '/sprites/T_Icon_BR_Creature_Sprite_Fire_Quack_ui_L.webp'
   },
   duck: {
     Base: '/sprites/T_Icon_BR_Duck_Default_L.webp',
@@ -167,6 +170,7 @@ export const spriteTypes = [
     name: 'Water',
     rarity: 'rare',
     ability: 'Replenishes shields while you and nearby teammates are standing in water.',
+    additionalReleasedVariants: ['Quack'],
     images: iconMaps.water
   },
   {
@@ -175,7 +179,7 @@ export const spriteTypes = [
     rarity: 'rare',
     ability: 'Gives a chance to find additional rare loot when opening chests.',
     unreleasedVariants: ['Holofoil'],
-    additionalReleasedVariants: ['Cube'],
+    additionalReleasedVariants: ['Cube', 'Quack'],
     images: iconMaps.earth
   },
   {
@@ -183,7 +187,7 @@ export const spriteTypes = [
     name: 'Fire',
     rarity: 'rare',
     ability: 'Creates a fiery burst after you deal enough damage to an enemy.',
-    additionalReleasedVariants: ['Cube'],
+    additionalReleasedVariants: ['Cube', 'Quack'],
     images: iconMaps.fire
   },
   {
@@ -248,6 +252,7 @@ export const spriteTypes = [
     rarity: 'mythic',
     ability: 'Spawns a Shield Bubble Jr. when you use a healing item on yourself, excluding splashes and grenades.',
     unreleasedVariants: ['Holofoil'],
+    additionalReleasedVariants: ['Quack'],
     images: iconMaps.zeroPoint
   },
   {
