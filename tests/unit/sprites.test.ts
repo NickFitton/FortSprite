@@ -36,18 +36,35 @@ describe('new base sprites', () => {
     ).toEqual(['Base', 'Gold', 'Gummy', 'Galaxy', 'Holofoil']);
   });
 
-  it('keeps the documented unreleased state out of the checklist', () => {
+  it('includes released special sprites while keeping unreleased variants out of the checklist', () => {
     expect(claimableSprites.map(({ id }) => id)).toEqual(
       expect.arrayContaining([
         'llama-base', 'llama-gold', 'llama-gummy', 'llama-galaxy',
-        'peely-base', 'peely-gold', 'peely-gummy', 'peely-galaxy', 'peely-holofoil'
+        'peely-base', 'peely-gold', 'peely-gummy', 'peely-galaxy', 'peely-holofoil',
+        'john-wick-base', 'ironmouse-base'
       ])
     );
     expect(claimableSprites.map(({ id }) => id)).not.toEqual(
-      expect.arrayContaining(['llama-gem', 'john-wick-base', 'ironmouse-base'])
+      expect.arrayContaining(['llama-gem'])
     );
     expect(specialSprites.map(({ key }) => key)).toEqual(
       expect.arrayContaining(['john-wick', 'ironmouse'])
     );
+  });
+
+  it('lists Ironmouse’s health-regeneration, Cloak, and low-gravity power at every level', () => {
+    const ironmouse = specialSprites.find(({ key }) => key === 'ironmouse');
+
+    expect(ironmouse).toMatchObject({
+      released: true,
+      ability: "When equipped, the Ironmouse Sprite gradually restores your health when low. While regenerating, you're cloaked and gain the low gravity effect.",
+      levelEffects: [
+        { level: 1, effect: 'Regenerates health up to 60.' },
+        { level: 2, effect: 'Regenerates health up to 70.' },
+        { level: 3, effect: 'Regenerates health up to 80.' },
+        { level: 4, effect: 'Regenerates health up to 90.' },
+        { level: 5, effect: 'Regenerates health up to 100.' }
+      ]
+    });
   });
 });

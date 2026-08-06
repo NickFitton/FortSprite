@@ -464,11 +464,17 @@ export const specialSprites = [
     family: 'Ironmouse',
     variant: 'Base',
     rarity: 'mythic',
-    ability: 'Unreleased sprite; effect details are not currently available.',
-    released: false,
+    ability: "When equipped, the Ironmouse Sprite gradually restores your health when low. While regenerating, you're cloaked and gain the low gravity effect.",
+    released: true,
     hasExactImage: true,
     image: '/sprites/T_Icon_BR_PedicureAntacid_L.webp',
-    levelEffects: unavailableLevelEffects()
+    levelEffects: [
+      { level: 1, effect: 'Regenerates health up to 60.' },
+      { level: 2, effect: 'Regenerates health up to 70.' },
+      { level: 3, effect: 'Regenerates health up to 80.' },
+      { level: 4, effect: 'Regenerates health up to 90.' },
+      { level: 5, effect: 'Regenerates health up to 100.' }
+    ]
   },
 ];
 
