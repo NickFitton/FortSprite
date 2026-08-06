@@ -4,6 +4,14 @@ import { claimableSprites, specialSprites, spriteRows, sprites, variants } from 
 const regularSpriteKeys = ['llama', 'peely'];
 
 describe('new base sprites', () => {
+  it('orders checklist rows to match the in-game sprite list', () => {
+    expect(spriteRows.slice(0, 22).map(({ key }) => key)).toEqual([
+      'john-wick', 'batman', 'water', 'earth', 'fire', 'duck', 'ghost',
+      'dream', 'demon', 'punk', 'king', 'burnt-peanut', 'vini-jr', 'fishy',
+      'striker', 'aura', 'boss', 'air', 'seven', 'pollo', 'llama', 'peely'
+    ]);
+  });
+
   it('includes the released Quack reward variants with their exact Fortnite.gg artwork', () => {
     expect(
       sprites
