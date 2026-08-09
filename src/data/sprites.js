@@ -1,4 +1,4 @@
-export const variants = ['Base', 'Gold', 'Gummy', 'Galaxy', 'Holofoil', 'Cube', 'Gem', 'Quack'];
+export const variants = ['Base', 'Cube', 'Gold', 'Quack', 'Gummy', 'Galaxy', 'Gem', 'Holofoil'];
 
 export const iconMaps = {
   batman: {
