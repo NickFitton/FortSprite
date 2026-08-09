@@ -565,6 +565,7 @@ const previewImage = new URL('/og-image.png', canonical).toString();
         ).filter((index) => index > 0)];
         const headerHeight = 34;
         const rowHeight = 104;
+        const summaryHeight = 52;
         const compactNameWidth = 38;
         const columnWidths = shareColumnIndexes.map((_, index) => index === 0 ? compactNameWidth : 76);
         const columnX = columnWidths.reduce((positions, columnWidth, index) => {
@@ -586,7 +587,8 @@ const previewImage = new URL('/og-image.png', canonical).toString();
         const columnCount = shareColumnIndexes.length;
         const rowCount = sourceRows.length;
         const width = columnWidths.reduce((total, columnWidth) => total + columnWidth, 0);
-        const height = headerHeight + rowCount * rowHeight;
+        const gridHeight = headerHeight + rowCount * rowHeight;
+        const height = summaryHeight + gridHeight;
         const canvas = document.createElement('canvas');
         canvas.width = Math.round(width * scale);
         canvas.height = Math.round(height * scale);
@@ -597,6 +599,33 @@ const previewImage = new URL('/og-image.png', canonical).toString();
         fillVerticalGradient(context, 0, 0, width, height, '#070b24', '#162b88');
         context.fillStyle = 'rgba(255, 255, 255, 0.18)';
         context.fillRect(0, 0, width, height);
+
+        const statusCounts = { 'not-found': 0, extracted: 0, mastered: 0 };
+        cards.forEach((card) => {
+          if (card.dataset.released !== 'true') return;
+          const status = card.dataset.status;
+          if (status in statusCounts) statusCounts[status] += 1;
+        });
+        const summaryItems = [
+          { label: 'Not found', count: statusCounts['not-found'], color: '#c8d6ff' },
+          { label: 'Extracted', count: statusCounts.extracted, color: '#37f58f' },
+          { label: 'Mastered', count: statusCounts.mastered, color: '#ffe34d' }
+        ];
+        const summaryItemWidth = width / summaryItems.length;
+        context.fillStyle = 'rgba(7, 11, 36, 0.94)';
+        context.fillRect(0, 0, width, summaryHeight);
+        context.fillStyle = 'rgba(255, 255, 255, 0.18)';
+        context.fillRect(0, summaryHeight - 1, width, 1);
+        context.textAlign = 'center';
+        context.textBaseline = 'middle';
+        summaryItems.forEach(({ label, count, color }, index) => {
+          const x = index * summaryItemWidth + summaryItemWidth / 2;
+          context.fillStyle = color;
+          context.font = '900 18px Inter, ui-sans-serif, system-ui, sans-serif';
+          context.fillText(String(count), x, 18);
+          context.font = '900 11px Inter, ui-sans-serif, system-ui, sans-serif';
+          context.fillText(label.toUpperCase(), x, 38);
+        });
 
         const imageEntries = await Promise.all(
           Array.from(matrix.querySelectorAll('.cell-art img')).map(async (node) => {
@@ -613,7 +642,9 @@ const previewImage = new URL('/og-image.png', canonical).toString();
           const columnIndex = index % columnCount;
           const rowIndex = Math.floor(index / columnCount);
           const x = columnX[columnIndex];
-          const y = rowIndex === 0 ? 0 : headerHeight + (rowIndex - 1) * rowHeight;
+          const y = rowIndex === 0
+            ? summaryHeight
+            : summaryHeight + headerHeight + (rowIndex - 1) * rowHeight;
           const cellWidth = columnWidths[columnIndex];
           const cellHeight = rowIndex === 0 ? headerHeight : rowHeight;
 
