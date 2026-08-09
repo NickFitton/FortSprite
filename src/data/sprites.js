@@ -531,21 +531,54 @@ export const spriteDetails = [
 
 export const claimableSprites = sprites.filter((sprite) => sprite.released);
 
-export const spriteRows = [
-  ...spriteTypes.map((sprite) => ({
+// Fortnite presents sprite families in this order. Keep this separate from the
+// source records so adding a family does not accidentally reshuffle the checklist.
+const spriteRowOrder = [
+  'john-wick',
+  'batman',
+  'water',
+  'earth',
+  'fire',
+  'duck',
+  'ghost',
+  'dream',
+  'demon',
+  'punk',
+  'king',
+  'burnt-peanut',
+  'vini-jr',
+  'fishy',
+  'striker',
+  'aura',
+  'boss',
+  'air',
+  'seven',
+  'pollo',
+  'llama',
+  'peely'
+];
+
+const spriteRowsByKey = new Map([
+  ...spriteTypes.map((sprite) => [sprite.key, {
     key: sprite.key,
     name: sprite.name,
     rarity: sprite.rarity,
     ability: sprite.ability,
     path: `/sprites/${sprite.key}/`,
     cells: variants.map((variant) => sprites.find((item) => item.family === sprite.name && item.variant === variant))
-  })),
-  ...specialSprites.map((sprite) => ({
+  }]),
+  ...specialSprites.map((sprite) => [sprite.key, {
     key: sprite.key,
     name: sprite.family,
     rarity: sprite.rarity,
     ability: sprite.ability,
     path: `/sprites/${sprite.key}/`,
     cells: variants.map((variant) => variant === 'Base' ? sprites.find((item) => item.id === sprite.id) : undefined)
-  }))
+  }])
+]);
+
+export const spriteRows = [
+  ...spriteRowOrder.map((key) => spriteRowsByKey.get(key)).filter(Boolean),
+  // Preserve newly added families until their in-game position is known.
+  ...[...spriteRowsByKey.values()].filter((row) => !spriteRowOrder.includes(row.key))
 ];
