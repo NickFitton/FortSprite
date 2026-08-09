@@ -44,16 +44,18 @@ describe('new base sprites', () => {
     ).toEqual(['Base', 'Gold', 'Gummy', 'Galaxy', 'Holofoil']);
   });
 
-  it('includes released special sprites while keeping unreleased variants out of the checklist', () => {
+  it('keeps every known sprite variant enabled in the checklist', () => {
+    expect(claimableSprites).toHaveLength(sprites.length);
     expect(claimableSprites.map(({ id }) => id)).toEqual(
       expect.arrayContaining([
+        'water-gem', 'earth-gem', 'duck-gem', 'demon-gem',
+        'zero-point-cube', 'zero-point-gem', 'zero-point-holofoil',
+        'aura-gem', 'grim-gem', 'grim-holofoil', 'llama-gem',
         'llama-base', 'llama-gold', 'llama-gummy', 'llama-galaxy',
         'peely-base', 'peely-gold', 'peely-gummy', 'peely-galaxy', 'peely-holofoil',
-        'john-wick-base', 'ironmouse-base'
+        'john-wick-base', 'ironmouse-base',
+        'water-cube', 'earth-holofoil', 'duck-holofoil', 'peely-gem'
       ])
-    );
-    expect(claimableSprites.map(({ id }) => id)).not.toEqual(
-      expect.arrayContaining(['llama-gem'])
     );
     expect(specialSprites.map(({ key }) => key)).toEqual(
       expect.arrayContaining(['john-wick', 'ironmouse'])

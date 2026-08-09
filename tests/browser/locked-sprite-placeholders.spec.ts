@@ -1,59 +1,30 @@
 import { expect, test } from '@playwright/test';
 
-test('locked sprites use their row base artwork as a placeholder', async ({ page }) => {
+test('all known sprite variants are claimable', async ({ page }) => {
   await page.goto('/');
 
-  const lockedImageSources = await page.locator('[data-sprite-row]').evaluateAll((rows) =>
-    rows.flatMap((row) => {
-      const baseImage = row.nextElementSibling?.querySelector('img')?.getAttribute('src');
-      const matrix = row.parentElement;
-      if (!matrix) return [];
-      const start = Array.from(matrix.children).indexOf(row);
-      const cells = Array.from(matrix.children).slice(start + 1, start + 9);
-
-      return cells
-        .filter((cell) => cell.getAttribute('data-released') === 'false')
-        .map((cell) => ({
-          baseImage,
-          image: cell.querySelector('img')?.getAttribute('src')
-        }));
-    })
-  );
-
-  expect(lockedImageSources.length).toBeGreaterThan(0);
-  expect(lockedImageSources).toEqual(
-    expect.arrayContaining([
-      expect.objectContaining({ baseImage: expect.any(String), image: expect.any(String) })
-    ])
-  );
-  for (const { baseImage, image } of lockedImageSources) {
-    expect(image).toBe(baseImage);
-  }
+  const cards = page.locator('[data-sprite-card]');
+  await expect(cards).not.toHaveCount(0);
+  await expect(page.locator('[data-sprite-card][data-released="false"]')).toHaveCount(0);
 });
 
-test('Gem sprites remain locked until the variant is released', async ({ page }) => {
+test('Gem sprites are claimable', async ({ page }) => {
   await page.goto('/');
 
-  const gemCells = await page.locator('[data-sprite-card][data-variant="Gem"]').evaluateAll((cells) =>
-    cells.map((cell) => ({
-      released: cell.getAttribute('data-released'),
-      status: cell.querySelector('[data-status-badge]')?.textContent?.trim()
-    }))
-  );
+  const gemCards = page.locator('[data-sprite-card][data-variant="Gem"]');
+  await expect(gemCards).not.toHaveCount(0);
+  expect(await gemCards.evaluateAll((cards) =>
+    cards.every((card) => card.getAttribute('data-released') === 'true' && card.getAttribute('role') === 'button')
+  )).toBe(true);
+});
 
-  expect(gemCells.length).toBeGreaterThan(0);
-  expect(gemCells).toEqual(
-    expect.arrayContaining([
-      expect.objectContaining({ released: 'false', status: 'Locked' })
-    ])
-  );
-  expect(gemCells.every((cell) => cell.released === 'false' && cell.status === 'Locked')).toBe(true);
+test('lists the available Holofoil Grim Sprite as claimable', async ({ page }) => {
+  await page.goto('/');
 
-  const waterBaseImage = page.locator('[data-sprite-card][data-id="water-base"] img');
-  const waterGem = page.locator('[data-sprite-card][data-id="water-gem"]');
-  const waterBaseSrc = await waterBaseImage.getAttribute('src');
-  if (!waterBaseSrc) throw new Error('Water base artwork is missing.');
-  await expect(waterGem.locator('img')).toHaveAttribute('src', waterBaseSrc);
-  await expect(waterGem.locator('img')).toHaveCSS('opacity', '0.5');
-  await expect(waterGem.locator('img')).toHaveCSS('filter', /brightness\(0\)/);
+  const grimHolofoil = page.locator('[data-sprite-card][data-id="grim-holofoil"]');
+  await expect(grimHolofoil).toHaveAttribute('data-released', 'true');
+  await expect(grimHolofoil).toHaveAttribute('data-exact-image', 'true');
+  await expect(grimHolofoil).toHaveAttribute('role', 'button');
+  await expect(grimHolofoil.locator('img')).toHaveAttribute('src', '/sprites/T_Icon_BR_GrimReaper_Holofoil_L.webp');
+  await expect(grimHolofoil.getByText('None', { exact: true })).toBeVisible();
 });

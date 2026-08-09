@@ -1,6 +1,4 @@
 export const variants = ['Base', 'Gold', 'Gummy', 'Galaxy', 'Holofoil', 'Cube', 'Gem', 'Quack'];
-export const releasedVariants = ['Base', 'Gold', 'Gummy', 'Galaxy', 'Holofoil'];
-export const unreleasedVariants = ['Gem'];
 
 export const iconMaps = {
   batman: {
@@ -132,7 +130,7 @@ export const iconMaps = {
     Gummy: '/sprites/T_Icon_BR_GrimReaper_Candy_L.webp',
     Galaxy: '/sprites/T_Icon_BR_GrimReaper_Galaxy_L.webp',
     Cube: '/sprites/T_Icon_BR_GrimReaper_Cube_L.webp',
-    Holofoil: null
+    Holofoil: '/sprites/T_Icon_BR_GrimReaper_Holofoil_L.webp'
   },
   air: {
     Base: '/sprites/T_Icon_BR_Air_Default_L.webp',
@@ -170,7 +168,6 @@ export const spriteTypes = [
     name: 'Water',
     rarity: 'rare',
     ability: 'Replenishes shields while you and nearby teammates are standing in water.',
-    additionalReleasedVariants: ['Quack'],
     images: iconMaps.water
   },
   {
@@ -178,8 +175,6 @@ export const spriteTypes = [
     name: 'Earth',
     rarity: 'rare',
     ability: 'Gives a chance to find additional rare loot when opening chests.',
-    unreleasedVariants: ['Holofoil'],
-    additionalReleasedVariants: ['Cube', 'Quack'],
     images: iconMaps.earth
   },
   {
@@ -187,7 +182,6 @@ export const spriteTypes = [
     name: 'Fire',
     rarity: 'rare',
     ability: 'Creates a fiery burst after you deal enough damage to an enemy.',
-    additionalReleasedVariants: ['Cube', 'Quack'],
     images: iconMaps.fire
   },
   {
@@ -195,7 +189,6 @@ export const spriteTypes = [
     name: 'Duck',
     rarity: 'epic',
     ability: 'Restores shields when you emote or jam.',
-    unreleasedVariants: ['Holofoil'],
     images: iconMaps.duck
   },
   {
@@ -210,8 +203,6 @@ export const spriteTypes = [
     name: 'Dream',
     rarity: 'legendary',
     ability: 'Gives a random item each level, with legendary loot at Level 5.',
-    unreleasedVariants: ['Holofoil'],
-    additionalReleasedVariants: ['Cube'],
     images: iconMaps.dream
   },
   {
@@ -219,7 +210,6 @@ export const spriteTypes = [
     name: 'Demon',
     rarity: 'epic',
     ability: 'Siphons health and shields when you eliminate an opponent.',
-    unreleasedVariants: ['Holofoil'],
     images: iconMaps.demon
   },
   {
@@ -227,7 +217,6 @@ export const spriteTypes = [
     name: 'Batman',
     rarity: 'mythic',
     ability: 'Grants the ability to launch in the air and deploy the Bat Cape.',
-    additionalReleasedVariants: ['Cube'],
     images: iconMaps.batman
   },
   {
@@ -235,8 +224,6 @@ export const spriteTypes = [
     name: 'Punk',
     rarity: 'legendary',
     ability: 'Possibly nothing... or infinitely something.',
-    unreleasedVariants: ['Holofoil'],
-    additionalReleasedVariants: ['Cube'],
     images: iconMaps.punk
   },
   {
@@ -251,8 +238,6 @@ export const spriteTypes = [
     name: 'Zero Point',
     rarity: 'mythic',
     ability: 'Spawns a Shield Bubble Jr. when you use a healing item on yourself, excluding splashes and grenades.',
-    unreleasedVariants: ['Holofoil'],
-    additionalReleasedVariants: ['Quack'],
     images: iconMaps.zeroPoint
   },
   {
@@ -260,8 +245,6 @@ export const spriteTypes = [
     name: 'Fishy',
     rarity: 'rare',
     ability: 'Greatly increases swim speed and briefly increases movement speed after taking damage.',
-    unreleasedVariants: ['Holofoil'],
-    additionalReleasedVariants: ['Cube'],
     images: iconMaps.fishy
   },
   {
@@ -276,7 +259,6 @@ export const spriteTypes = [
     name: 'Aura',
     rarity: 'epic',
     ability: 'Grants a Shock Rock charge after you deal enough damage to enemies.',
-    unreleasedVariants: ['Holofoil'],
     images: iconMaps.aura
   },
   {
@@ -284,8 +266,6 @@ export const spriteTypes = [
     name: 'Boss',
     rarity: 'legendary',
     ability: 'Increases your maximum health and shield.',
-    unreleasedVariants: ['Holofoil'],
-    additionalReleasedVariants: ['Cube'],
     images: iconMaps.boss
   },
   {
@@ -293,8 +273,6 @@ export const spriteTypes = [
     name: 'Grim',
     rarity: 'mythic',
     ability: 'Marks players who attack you for a duration.',
-    unreleasedVariants: ['Holofoil'],
-    additionalReleasedVariants: ['Cube'],
     images: iconMaps.grim
   },
   {
@@ -308,8 +286,7 @@ export const spriteTypes = [
     key: 'seven',
     name: 'Seven',
     rarity: 'legendary',
-    ability: 'Unreleased sprite; effects are not currently available.',
-    unreleasedVariants: ['Gem', 'Cube', 'Quack'],
+    ability: 'Effect details are not currently available.',
     images: iconMaps.seven
   },
   {
@@ -317,7 +294,6 @@ export const spriteTypes = [
     name: 'Llama',
     rarity: 'legendary',
     ability: 'Effect details are not currently available.',
-    unreleasedVariants: ['Holofoil', 'Cube', 'Quack'],
     images: iconMaps.llama
   },
   {
@@ -325,7 +301,6 @@ export const spriteTypes = [
     name: 'Peely',
     rarity: 'legendary',
     ability: 'Effect details are not currently available.',
-    unreleasedVariants: ['Gem', 'Cube', 'Quack'],
     images: iconMaps.peely
   },
 ];
@@ -495,10 +470,9 @@ export const sprites = [
         variant,
         rarity: variant === 'Base' ? sprite.rarity : 'special',
         ability: sprite.ability,
-        released: !sprite.unreleased
-          && !unreleasedVariants.includes(variant)
-          && (releasedVariants.includes(variant) || sprite.additionalReleasedVariants?.includes(variant))
-          && !sprite.unreleasedVariants?.includes(variant),
+        // FortSprite tracks every discovered variant. Availability changes in
+        // Fortnite should not hide a known variant or require a data release.
+        released: true,
         hasExactImage: Boolean(sprite.images[variant]),
         image,
         placeholderImage
