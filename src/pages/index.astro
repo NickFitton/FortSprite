@@ -558,11 +558,11 @@ const previewImage = new URL('/og-image.png', canonical).toString();
 
         const scale = Math.min(2, window.devicePixelRatio || 1);
         const elements = Array.from(matrix.children);
-        const sourceColumnCount = 9;
-        const shareColumns = ['Base', 'Gold', 'Gummy', 'Galaxy', 'Holofoil'];
-        const shareColumnIndexes = [0, ...shareColumns.map((variant) =>
-          elements.findIndex((element) => element.dataset.variantColumn === variant)
-        ).filter((index) => index > 0)];
+        const shareColumnIndexes = elements
+          .map((element, index) => element.classList.contains('matrix-header') ? index : -1)
+          .filter((index) => index >= 0);
+        const sourceColumnCount = shareColumnIndexes.length;
+        const brandHeight = 82;
         const headerHeight = 34;
         const rowHeight = 104;
         const summaryHeight = 52;
@@ -588,7 +588,8 @@ const previewImage = new URL('/og-image.png', canonical).toString();
         const rowCount = sourceRows.length;
         const width = columnWidths.reduce((total, columnWidth) => total + columnWidth, 0);
         const gridHeight = headerHeight + rowCount * rowHeight;
-        const height = summaryHeight + gridHeight;
+        const gridTop = brandHeight + summaryHeight;
+        const height = gridTop + gridHeight;
         const canvas = document.createElement('canvas');
         canvas.width = Math.round(width * scale);
         canvas.height = Math.round(height * scale);
@@ -599,6 +600,20 @@ const previewImage = new URL('/og-image.png', canonical).toString();
         fillVerticalGradient(context, 0, 0, width, height, '#070b24', '#162b88');
         context.fillStyle = 'rgba(255, 255, 255, 0.18)';
         context.fillRect(0, 0, width, height);
+
+        fillVerticalGradient(context, 0, 0, width, brandHeight, '#10275f', '#07122d');
+        context.fillStyle = '#ffffff';
+        context.font = '900 52px "Burbank Big Condensed", Impact, sans-serif';
+        context.textAlign = 'center';
+        context.textBaseline = 'middle';
+        context.shadowColor = '#1230a5';
+        context.shadowBlur = 0;
+        context.shadowOffsetY = 5;
+        context.fillText('FORTSPRITE', width / 2, brandHeight / 2 - 3);
+        context.shadowColor = 'rgba(0, 0, 0, 0.45)';
+        context.shadowOffsetY = 10;
+        context.fillText('FORTSPRITE', width / 2, brandHeight / 2 - 3);
+        context.shadowOffsetY = 0;
 
         const statusCounts = { 'not-found': 0, extracted: 0, mastered: 0 };
         cards.forEach((card) => {
@@ -613,18 +628,18 @@ const previewImage = new URL('/og-image.png', canonical).toString();
         ];
         const summaryItemWidth = width / summaryItems.length;
         context.fillStyle = 'rgba(7, 11, 36, 0.94)';
-        context.fillRect(0, 0, width, summaryHeight);
+        context.fillRect(0, brandHeight, width, summaryHeight);
         context.fillStyle = 'rgba(255, 255, 255, 0.18)';
-        context.fillRect(0, summaryHeight - 1, width, 1);
+        context.fillRect(0, gridTop - 1, width, 1);
         context.textAlign = 'center';
         context.textBaseline = 'middle';
         summaryItems.forEach(({ label, count, color }, index) => {
           const x = index * summaryItemWidth + summaryItemWidth / 2;
           context.fillStyle = color;
           context.font = '900 18px Inter, ui-sans-serif, system-ui, sans-serif';
-          context.fillText(String(count), x, 18);
+          context.fillText(String(count), x, brandHeight + 18);
           context.font = '900 11px Inter, ui-sans-serif, system-ui, sans-serif';
-          context.fillText(label.toUpperCase(), x, 38);
+          context.fillText(label.toUpperCase(), x, brandHeight + 38);
         });
 
         const imageEntries = await Promise.all(
@@ -643,8 +658,8 @@ const previewImage = new URL('/og-image.png', canonical).toString();
           const rowIndex = Math.floor(index / columnCount);
           const x = columnX[columnIndex];
           const y = rowIndex === 0
-            ? summaryHeight
-            : summaryHeight + headerHeight + (rowIndex - 1) * rowHeight;
+            ? gridTop
+            : gridTop + headerHeight + (rowIndex - 1) * rowHeight;
           const cellWidth = columnWidths[columnIndex];
           const cellHeight = rowIndex === 0 ? headerHeight : rowHeight;
 
