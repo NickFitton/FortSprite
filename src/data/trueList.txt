@@ -1,0 +1,117 @@
+John Wick
+Batman
+Cube Batman
+Gold Batman
+Gummy Batman
+Galaxy Batman
+Holofoil Batman
+Water
+Gold Water
+Quack Water
+Gummy Water
+Galaxy Water
+Gem Water
+Holofoil Water
+Earth
+Cube Earth
+Gold Earth
+Quack Earth
+Gummy Earth
+Galaxy Earth
+Gem Earth
+Fire
+Cube Fire
+Gold Fire
+Quack Fire
+Gummy Fire
+Galaxy Fire
+Holofoil Fire
+Duck
+Gold Duck
+Gummy Duck
+Galaxy Duck
+Gem Duck
+Ghost
+Gold Ghost
+Gummy Ghost
+Galaxy Ghost
+Holofoil Ghost
+Dream
+Cube Dream
+Gold Dream
+Gummy Dream
+Galaxy Dream
+Demon
+Gold Demon
+Gummy Demon
+Galaxy Demon
+Gem Demon
+Punk
+Cube Punk
+Gold Punk
+Gummy Punk
+Galaxy Punk
+King
+Gold King
+Gummy King
+Galaxy King
+Holofoil King
+Vini Jr.
+Burnt Peanut
+Zero Point
+Cube Zero Point
+Gold Zero Point
+Quack Zero Point
+Gummy Zero Point
+Galaxy Zero Point
+Gem Zero Point
+Holofoil Zero Point
+Fishy
+Cube Fishy
+Gold Fishy
+Gummy Fishy
+Galaxy Fishy
+Striker
+Gold Striker
+Gummy Striker
+Galaxy Striker
+Holofoil Striker
+Aura
+Gold Aura
+Gummy Aura
+Galaxy Aura
+Gem Aura
+Boss
+Cube Boss
+Gold Boss
+Gummy Boss
+Galaxy Boss
+Grim
+Cube Grim
+Gold Grim
+Gummy Grim
+Galaxy Grim
+Gem Grim
+Holofoil Grim
+Air
+Gold Air
+Gummy Air
+Galaxy Air
+Holofoil Air
+Seven
+Gold Seven
+Gummy Seven
+Galaxy Seven
+Holofoil Seven
+Ironmouse
+Pollo
+Llama
+Gold Llama
+Gummy Llama
+Galaxy Llama
+Gem Llama
+Peely
+Gold Peely
+Gummy Peely
+Galaxy Peely
+Holofoil Peely

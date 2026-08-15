@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { claimableSprites, specialSprites, spriteRows, sprites, variants } from '../../src/data/sprites.js';
+import {
+  claimableSprites,
+  selectableSpriteNames,
+  specialSprites,
+  spriteRows,
+  sprites,
+  variants
+} from '../../src/data/sprites.js';
 
 const regularSpriteKeys = ['llama', 'peely'];
 
@@ -44,18 +51,14 @@ describe('new base sprites', () => {
     ).toEqual(['Base', 'Gold', 'Gummy', 'Galaxy', 'Holofoil']);
   });
 
-  it('keeps every known sprite variant enabled in the checklist', () => {
-    expect(claimableSprites).toHaveLength(sprites.length);
-    expect(claimableSprites.map(({ id }) => id)).toEqual(
-      expect.arrayContaining([
-        'water-gem', 'earth-gem', 'duck-gem', 'demon-gem',
-        'zero-point-cube', 'zero-point-gem', 'zero-point-holofoil',
-        'aura-gem', 'grim-gem', 'grim-holofoil', 'llama-gem',
-        'llama-base', 'llama-gold', 'llama-gummy', 'llama-galaxy',
-        'peely-base', 'peely-gold', 'peely-gummy', 'peely-galaxy', 'peely-holofoil',
-        'john-wick-base', 'ironmouse-base',
-        'water-cube', 'earth-holofoil', 'duck-holofoil', 'peely-gem'
-      ])
+  it('only enables sprites listed in trueList.txt', () => {
+    const listNameFor = (sprite: { family: string; variant: string }) =>
+      sprite.variant === 'Base' ? sprite.family : `${sprite.variant} ${sprite.family}`;
+
+    expect(claimableSprites.map(listNameFor).sort()).toEqual([...selectableSpriteNames].sort());
+    expect(claimableSprites).toHaveLength(selectableSpriteNames.length);
+    expect(sprites.filter(({ released }) => !released).map(({ id }) => id)).toEqual(
+      expect.arrayContaining(['water-cube', 'earth-holofoil', 'duck-holofoil', 'punk-gem', 'peely-gem'])
     );
     expect(specialSprites.map(({ key }) => key)).toEqual(
       expect.arrayContaining(['john-wick', 'ironmouse'])

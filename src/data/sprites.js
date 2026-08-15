@@ -1,4 +1,18 @@
+import trueList from './trueList.txt?raw';
+
 export const variants = ['Base', 'Cube', 'Gold', 'Quack', 'Gummy', 'Galaxy', 'Gem', 'Holofoil'];
+
+/**
+ * The in-game availability list is maintained separately from artwork and
+ * sprite metadata. A listed name without a variant prefix is that family's
+ * base sprite (for example, "Water" means "Base Water").
+ */
+export const selectableSpriteNames = Object.freeze(
+  trueList
+    .split(/\r?\n/)
+    .map((name) => name.trim())
+    .filter(Boolean)
+);
 
 export const iconMaps = {
   batman: {
@@ -455,7 +469,7 @@ export const specialSprites = [
 
 export const burntPeanutSprite = specialSprites.find((sprite) => sprite.id === 'burnt-peanut-base');
 
-export const sprites = [
+const allSprites = [
   ...spriteTypes.flatMap((sprite) =>
     variants.flatMap((variant) => {
       const placeholderImage = sprite.images.Base;
@@ -481,6 +495,27 @@ export const sprites = [
   ),
   ...specialSprites
 ];
+
+function listNameFor(sprite) {
+  return sprite.variant === 'Base' ? sprite.family : `${sprite.variant} ${sprite.family}`;
+}
+
+const selectableSpriteNameSet = new Set(selectableSpriteNames);
+const configuredSpriteNames = new Set(allSprites.map(listNameFor));
+const unknownSelectableNames = selectableSpriteNames.filter((name) => !configuredSpriteNames.has(name));
+
+if (unknownSelectableNames.length > 0) {
+  throw new Error(`trueList.txt contains sprites without catalog records: ${unknownSelectableNames.join(', ')}`);
+}
+
+/**
+ * Retain every catalogued variant for reference, but only entries named in
+ * trueList.txt are interactive checklist items.
+ */
+export const sprites = allSprites.map((sprite) => ({
+  ...sprite,
+  released: selectableSpriteNameSet.has(listNameFor(sprite))
+}));
 
 export const spriteDetails = [
   ...spriteTypes.map((sprite) => ({

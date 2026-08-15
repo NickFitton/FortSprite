@@ -1,21 +1,22 @@
 import { expect, test } from '@playwright/test';
 
-test('all known sprite variants are claimable', async ({ page }) => {
+test('only sprites in the canonical availability list are selectable', async ({ page }) => {
   await page.goto('/');
 
   const cards = page.locator('[data-sprite-card]');
   await expect(cards).not.toHaveCount(0);
-  await expect(page.locator('[data-sprite-card][data-released="false"]')).toHaveCount(0);
+  await expect(page.locator('[data-sprite-card][data-released="false"]')).not.toHaveCount(0);
+  await expect(page.locator('[data-sprite-card][data-id="duck-holofoil"]')).toHaveAttribute('role', 'group');
+  await expect(page.locator('[data-sprite-card][data-id="duck-holofoil"]')).toHaveAttribute('data-released', 'false');
 });
 
-test('Gem sprites are claimable', async ({ page }) => {
+test('only listed Gem sprites are claimable', async ({ page }) => {
   await page.goto('/');
 
-  const gemCards = page.locator('[data-sprite-card][data-variant="Gem"]');
-  await expect(gemCards).not.toHaveCount(0);
-  expect(await gemCards.evaluateAll((cards) =>
-    cards.every((card) => card.getAttribute('data-released') === 'true' && card.getAttribute('role') === 'button')
-  )).toBe(true);
+  const listedGem = page.locator('[data-sprite-card][data-id="water-gem"]');
+  await expect(listedGem).toHaveAttribute('data-released', 'true');
+  await expect(listedGem).toHaveAttribute('role', 'button');
+  await expect(page.locator('[data-sprite-card][data-id="punk-gem"]')).toHaveAttribute('data-released', 'false');
 });
 
 test('lists the available Holofoil Grim Sprite as claimable', async ({ page }) => {
