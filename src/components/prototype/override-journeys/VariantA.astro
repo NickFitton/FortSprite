@@ -14,22 +14,27 @@ import {
 interface Props {
   role: 'anon' | 'player' | 'admin';
   editing: boolean;
+  /** 'mode' keeps administration inline on this page (variant A); 'office' sends admins elsewhere (variant D). */
+  adminEntry?: 'mode' | 'office';
+  officeHref?: string;
 }
 
-const { role, editing } = Astro.props;
+const { role, editing, adminEntry = 'mode', officeHref = '' } = Astro.props;
 const isAdmin = role === 'admin';
-const adminEditing = isAdmin && editing;
+const adminEditing = isAdmin && editing && adminEntry === 'mode';
 ---
 
 <div class="hub" data-editing={String(adminEditing)}>
   <nav class="top">
     <a class="brand" href="#">fortsprite</a>
     <div class="right">
-      {isAdmin && (
+      {isAdmin && (adminEntry === 'office' ? (
+        <a class="mode-toggle" href={officeHref}>Sprite admin ↗</a>
+      ) : (
         <a class="mode-toggle" href={adminEditing ? '?variant=A&role=admin' : '?variant=A&role=admin&editing=1'}>
           {adminEditing ? 'Done editing' : 'Edit catalogue'}
         </a>
-      )}
+      ))}
       {role === 'anon' ? (
         <><span class="chip-link">Sign in</span><span class="chip-solid">Sign up</span></>
       ) : (

@@ -7,13 +7,15 @@ import PrototypeSwitcher from '../../components/prototype/override-journeys/Prot
 import VariantA from '../../components/prototype/override-journeys/VariantA.astro';
 import VariantB from '../../components/prototype/override-journeys/VariantB.astro';
 import VariantC from '../../components/prototype/override-journeys/VariantC.astro';
+import VariantD from '../../components/prototype/override-journeys/VariantD.astro';
 
 if (!import.meta.env.DEV) return Astro.redirect('/');
 
 const names: Record<string, string> = {
   A: 'Season hub — one surface, admin is a mode',
   B: 'Library shell — sidebar destinations, admin is a room',
-  C: 'Mission control — progress first, admin is a back office'
+  C: 'Mission control — progress first, admin is a back office',
+  D: 'Hybrid — A\u2019s season hub + C\u2019s back office'
 };
 
 const params = Astro.url.searchParams;
@@ -36,6 +38,7 @@ const editing = params.get('editing') === '1';
     {variant === 'A' && <VariantA role={role} editing={editing} />}
     {variant === 'B' && <VariantB role={role} pane={pane} />}
     {variant === 'C' && <VariantC role={role} pane={pane} filter={filter} />}
+    {variant === 'D' && <VariantD role={role} pane={pane} />}
     <PrototypeSwitcher current={variant} names={names} role={role} />
   </body>
 </html>

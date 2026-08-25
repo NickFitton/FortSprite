@@ -1,0 +1,21 @@
+---
+// PROTOTYPE — variant D: the hybrid. Player surface is A's season hub (one board,
+// season pills, locked variants inline). Administration is C's separate back office
+// with its own plain chrome, entered from the hub and exited back to it.
+import AdminOffice from './AdminOffice.astro';
+import VariantA from './VariantA.astro';
+
+interface Props {
+  role: 'anon' | 'player' | 'admin';
+  pane: string;
+}
+
+const { role, pane } = Astro.props;
+const inOffice = role === 'admin' && pane === 'backoffice';
+---
+
+{inOffice ? (
+  <AdminOffice backHref="?variant=D&role=admin" />
+) : (
+  <VariantA role={role} editing={false} adminEntry="office" officeHref="?variant=D&role=admin&pane=backoffice" />
+)}

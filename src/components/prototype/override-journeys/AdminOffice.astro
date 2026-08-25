@@ -1,0 +1,105 @@
+---
+// PROTOTYPE — the separate administration back office. Deliberately plain chrome:
+// no arcade gradients, no Burbank, table-first. Shared by variants C and D.
+import { catalogue, currentSeason, historicalSeasons, releaseQueue, totals, variantDefinitions } from './stub-data.ts';
+
+interface Props {
+  backHref: string;
+}
+
+const { backHref } = Astro.props;
+---
+
+<div class="office">
+  <aside class="office-rail">
+    <p class="office-brand">fortsprite <span>admin</span></p>
+    <a class="office-link on" href="#">Catalogue</a>
+    <a class="office-link" href="#">Variant definitions</a>
+    <a class="office-link" href="#">Release queue <em>{releaseQueue.length}</em></a>
+    <a class="office-link" href="#">Chapter seasons</a>
+    <a class="office-link" href="#">Archived entries</a>
+    <a class="office-exit" href={backHref}>← Back to fortsprite</a>
+  </aside>
+  <main class="office-main">
+    <header class="office-head">
+      <div>
+        <p class="office-crumb">Chapter seasons / Chapter {currentSeason.chapter} Season {currentSeason.season} — {currentSeason.title}</p>
+        <h1>Catalogue</h1>
+      </div>
+      <div class="office-head-actions">
+        <select class="office-select"><option>{currentSeason.title} (current)</option>{historicalSeasons.map((season) => <option>{season.title}</option>)}</select>
+        <button class="office-primary" type="button">New sprite</button>
+      </div>
+    </header>
+
+    <div class="office-stats">
+      <div><b>{catalogue.length}</b><span>Sprites</span></div>
+      <div><b>{totals.released}</b><span>Released variants</span></div>
+      <div><b>{totals.locked}</b><span>Locked variants</span></div>
+      <div><b>{variantDefinitions.filter((definition) => !definition.archived).length}</b><span>Active definitions</span></div>
+    </div>
+
+    <table class="office-table">
+      <thead><tr><th></th><th>Sprite</th><th>Rarity</th><th>Variants</th><th>Locked</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>
+        {catalogue.map((sprite) => (
+          <tr>
+            <td><img src={sprite.variants[0].image} alt="" loading="lazy" /></td>
+            <td class="strong">{sprite.name}</td>
+            <td>{sprite.rarity}</td>
+            <td>{sprite.variants.map((variant) => (
+              <span class:list={['office-pill', { locked: variant.locked }]}>{variant.label}</span>
+            ))}</td>
+            <td>{sprite.variants.filter((variant) => variant.locked).length}</td>
+            <td>{sprite.fullyLocked ? <span class="office-tag amber">Unreleased</span> : <span class="office-tag green">Live</span>}</td>
+            <td class="office-actions"><a href="#">Edit</a><a href="#">Release…</a><a href="#">Archive</a></td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </main>
+</div>
+
+<style>
+  .office {
+    display: grid;
+    grid-template-columns: 232px 1fr;
+    min-height: 100vh;
+    background: #f4f5f8;
+    color: #1c2030;
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  }
+
+  .office-rail { display: flex; flex-direction: column; gap: 2px; padding: 20px 12px; background: #1c2030; }
+  .office-brand { margin: 0 0 20px 10px; color: #fff; font-size: 1rem; font-weight: 900; }
+  .office-brand span { color: #8fa0c8; font-weight: 500; }
+  .office-link { display: flex; justify-content: space-between; border-radius: 6px; padding: 9px 12px; color: #c8d0e4; font-size: 0.84rem; text-decoration: none; }
+  .office-link.on { background: #2e3552; color: #fff; }
+  .office-link em { border-radius: 999px; padding: 0 8px; background: #d97706; color: #fff; font-size: 0.7rem; font-style: normal; }
+  .office-exit { margin-top: auto; padding: 10px 12px; color: #8fa0c8; font-size: 0.8rem; text-decoration: none; }
+
+  .office-main { padding: 26px 30px 120px; }
+  .office-head { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 20px; }
+  .office-head h1 { margin: 0; color: #1c2030; font-size: 1.7rem; font-weight: 800; }
+  .office-crumb { margin: 0 0 4px; color: #6b7490; font-size: 0.76rem; }
+  .office-head-actions { display: flex; gap: 10px; }
+  .office-select { border: 1px solid #ccd2e0; border-radius: 6px; padding: 8px 10px; background: #fff; color: #1c2030; font-size: 0.82rem; }
+  .office-primary { border: 0; border-radius: 6px; padding: 9px 16px; background: #2f57d8; color: #fff; cursor: pointer; font-size: 0.82rem; font-weight: 700; }
+
+  .office-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 180px)); gap: 12px; margin-bottom: 20px; }
+  .office-stats div { border: 1px solid #e0e4ee; border-radius: 8px; padding: 12px 14px; background: #fff; }
+  .office-stats b { display: block; font-size: 1.5rem; }
+  .office-stats span { color: #6b7490; font-size: 0.74rem; }
+
+  .office-table { width: 100%; border: 1px solid #e0e4ee; border-collapse: collapse; background: #fff; font-size: 0.82rem; }
+  .office-table th { padding: 10px 12px; border-bottom: 1px solid #e0e4ee; background: #fafbfd; color: #6b7490; font-size: 0.72rem; text-align: left; text-transform: uppercase; }
+  .office-table td { padding: 8px 12px; border-bottom: 1px solid #eef0f6; vertical-align: middle; }
+  .office-table img { width: 30px; height: 30px; object-fit: contain; }
+  .office-table .strong { font-weight: 700; }
+  .office-pill { display: inline-block; margin: 1px 3px 1px 0; border: 1px solid #d5dae7; border-radius: 999px; padding: 1px 8px; font-size: 0.7rem; }
+  .office-pill.locked { border-style: dashed; border-color: #e0a33a; color: #a86c00; }
+  .office-tag { border-radius: 4px; padding: 2px 8px; font-size: 0.72rem; font-weight: 700; }
+  .office-tag.green { background: #dcf6e6; color: #10693c; }
+  .office-tag.amber { background: #fdefd4; color: #8a5a00; }
+  .office-actions a { margin-right: 10px; color: #2f57d8; font-size: 0.78rem; text-decoration: none; }
+</style>
