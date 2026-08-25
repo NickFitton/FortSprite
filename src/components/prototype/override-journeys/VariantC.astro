@@ -1,0 +1,398 @@
+---
+// PROTOTYPE — variant C: "Mission control". The player surface is progress-first: a
+// completion ring, next-up cards and a release timeline come before the grid, which
+// is reached through filter chips. Season history is de-emphasised into a small
+// dropdown. Administration is a SEPARATE back-office with its own plain chrome,
+// reached from the account menu.
+import {
+  catalogue,
+  chapterSeasons,
+  completion,
+  currentSeason,
+  historicalSeasons,
+  lockedVariants,
+  nextUp,
+  releaseQueue,
+  releasedVariants,
+  totals,
+  variantDefinitions
+} from './stub-data.ts';
+
+interface Props {
+  role: 'anon' | 'player' | 'admin';
+  pane: string;
+  filter: string;
+}
+
+const { role, pane, filter } = Astro.props;
+const isAdmin = role === 'admin';
+const backoffice = isAdmin && pane === 'backoffice';
+const activeFilter = filter || 'missing';
+
+const href = (params: Record<string, string>) =>
+  `?variant=C&role=${role}&${Object.entries(params).map(([key, value]) => `${key}=${value}`).join('&')}`;
+
+const filters = [
+  { id: 'missing', label: 'Still missing', count: totals.missing },
+  { id: 'extracted', label: 'Extracted', count: totals.extracted },
+  { id: 'mastered', label: 'Mastered', count: totals.mastered },
+  { id: 'locked', label: 'Locked', count: totals.locked },
+  { id: 'all', label: 'Everything', count: totals.released + totals.locked }
+];
+
+const shown =
+  activeFilter === 'all'
+    ? [...releasedVariants, ...lockedVariants]
+    : activeFilter === 'locked'
+      ? lockedVariants
+      : releasedVariants.filter(
+          (variant) => variant.progress === (activeFilter === 'missing' ? 'none' : activeFilter)
+        );
+
+const timeline = ['3 Sep', '10 Sep', '17 Sep', '24 Sep'].map((date) => ({
+  date,
+  count: lockedVariants.filter((variant) => variant.unlocksOn === date).length,
+  sample: lockedVariants.filter((variant) => variant.unlocksOn === date).slice(0, 4)
+}));
+---
+
+{backoffice ? (
+  <div class="office">
+    <aside class="office-rail">
+      <p class="office-brand">fortsprite <span>admin</span></p>
+      <a class="office-link on" href="#">Catalogue</a>
+      <a class="office-link" href="#">Variant definitions</a>
+      <a class="office-link" href="#">Release queue <em>{releaseQueue.length}</em></a>
+      <a class="office-link" href="#">Chapter seasons</a>
+      <a class="office-link" href="#">Archived entries</a>
+      <a class="office-exit" href={href({ pane: 'player' })}>← Back to fortsprite</a>
+    </aside>
+    <main class="office-main">
+      <header class="office-head">
+        <div>
+          <p class="office-crumb">Chapter seasons / Chapter {currentSeason.chapter} Season {currentSeason.season} — {currentSeason.title}</p>
+          <h1>Catalogue</h1>
+        </div>
+        <div class="office-head-actions">
+          <select class="office-select"><option>{currentSeason.title} (current)</option>{historicalSeasons.map((season) => <option>{season.title}</option>)}</select>
+          <button class="office-primary" type="button">New sprite</button>
+        </div>
+      </header>
+
+      <div class="office-stats">
+        <div><b>{catalogue.length}</b><span>Sprites</span></div>
+        <div><b>{totals.released}</b><span>Released variants</span></div>
+        <div><b>{totals.locked}</b><span>Locked variants</span></div>
+        <div><b>{variantDefinitions.filter((definition) => !definition.archived).length}</b><span>Active definitions</span></div>
+      </div>
+
+      <table class="office-table">
+        <thead><tr><th></th><th>Sprite</th><th>Rarity</th><th>Variants</th><th>Locked</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody>
+          {catalogue.map((sprite) => (
+            <tr>
+              <td><img src={sprite.variants[0].image} alt="" loading="lazy" /></td>
+              <td class="strong">{sprite.name}</td>
+              <td>{sprite.rarity}</td>
+              <td>{sprite.variants.map((variant) => (
+                <span class:list={['office-pill', { locked: variant.locked }]}>{variant.label}</span>
+              ))}</td>
+              <td>{sprite.variants.filter((variant) => variant.locked).length}</td>
+              <td>{sprite.fullyLocked ? <span class="office-tag amber">Unreleased</span> : <span class="office-tag green">Live</span>}</td>
+              <td class="office-actions"><a href="#">Edit</a><a href="#">Release…</a><a href="#">Archive</a></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </main>
+  </div>
+) : (
+  <div class="mission">
+    <nav class="top">
+      <a class="brand" href="#">fortsprite</a>
+      <div class="right">
+        <span class="season-select">{currentSeason.title} ▾</span>
+        {role === 'anon' ? (
+          <><span class="chip-link">Sign in</span><span class="chip-solid">Sign up</span></>
+        ) : (
+          <details class="menu">
+            <summary><span class="avatar">{isAdmin ? 'A' : 'P'}</span></summary>
+            <div class="menu-body">
+              <span>Account</span>
+              <span>Reset checklist</span>
+              {isAdmin && <a href={href({ pane: 'backoffice' })} class="menu-admin">Sprite admin ↗</a>}
+              <span>Sign out</span>
+            </div>
+          </details>
+        )}
+      </div>
+    </nav>
+
+    <section class="dash">
+      <div class="ring-wrap">
+        <div class="ring" style={`--pct:${completion}`}><span>{completion}<small>%</small></span></div>
+        <p class="ring-note">{totals.mastered} of {totals.released} mastered in {currentSeason.title}</p>
+      </div>
+      <div class="next">
+        <p class="eyebrow">Closest to complete</p>
+        <div class="next-cards">
+          {nextUp.map((entry) => (
+            <article class="next-card">
+              <img src={entry.sprite.variants[0].image} alt="" loading="lazy" />
+              <div>
+                <h2>{entry.sprite.name}</h2>
+                <p>{entry.remaining} left of {entry.total}</p>
+                <div class="mini-bar"><i style={`width:${(entry.done / entry.total) * 100}%`}></i></div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <section class="timeline" aria-label="Release schedule">
+      <p class="eyebrow">Coming this season</p>
+      <div class="track">
+        {timeline.map((stop) => (
+          <div class="stop">
+            <span class="date">{stop.date}</span>
+            <div class="stop-art">{stop.sample.map((variant) => <img src={variant.image} alt="" loading="lazy" />)}</div>
+            <span class="count">{stop.count} unlock{stop.count === 1 ? '' : 's'}</span>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <section class="board">
+      <div class="chips" role="tablist">
+        {filters.map((item) => (
+          <a class:list={['filter', { on: activeFilter === item.id }]} href={href({ pane: 'player', filter: item.id })} role="tab">
+            {item.label}<em>{item.count}</em>
+          </a>
+        ))}
+      </div>
+      <div class="tiles">
+        {shown.map((variant) => (
+          <article class:list={['tile', variant.locked ? 'locked' : variant.progress]}>
+            <img src={variant.image} alt={variant.name} loading="lazy" />
+            <span class="tile-name">{variant.name.replace(' Sprite', '')}</span>
+            <span class="tile-state">{variant.locked ? `Unlocks ${variant.unlocksOn}` : variant.progress === 'none' ? 'Tap to mark' : variant.progress}</span>
+          </article>
+        ))}
+      </div>
+      <p class="past-note">
+        Looking for an older season? {historicalSeasons.map((season) => <a href="#">{season.title}</a>)}
+      </p>
+    </section>
+  </div>
+)}
+
+<style>
+  /* ---- player: mission control ---- */
+  .mission { width: min(1240px, calc(100% - 32px)); margin: 0 auto; padding: 24px 0 120px; }
+
+  .top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+  .brand { color: var(--gold); font-size: 1.5rem; text-decoration: none; text-transform: uppercase; }
+  .right { display: flex; gap: 12px; align-items: center; }
+
+  .season-select {
+    border: 2px solid rgba(255, 255, 255, 0.22);
+    border-radius: 999px;
+    padding: 7px 14px;
+    font-family: Inter, sans-serif;
+    font-size: 0.76rem;
+    font-weight: 900;
+  }
+
+  .chip-link, .chip-solid {
+    border-radius: 8px;
+    padding: 9px 14px;
+    font-family: Inter, sans-serif;
+    font-size: 0.76rem;
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+
+  .chip-link { border: 2px solid rgba(255, 255, 255, 0.24); }
+  .chip-solid { background: linear-gradient(180deg, var(--gold), #f39c12); color: #171000; }
+
+  .menu { position: relative; }
+  .menu summary { list-style: none; cursor: pointer; }
+  .menu summary::-webkit-details-marker { display: none; }
+  .avatar { display: grid; place-content: center; width: 36px; height: 36px; border-radius: 50%; background: var(--panel-2); font-family: Inter, sans-serif; }
+
+  .menu-body {
+    position: absolute;
+    top: 44px; right: 0;
+    z-index: 5;
+    display: grid;
+    gap: 2px;
+    width: 210px;
+    border: 2px solid rgba(255, 255, 255, 0.18);
+    border-radius: 10px;
+    padding: 8px;
+    background: #0b1030;
+    font-family: Inter, sans-serif;
+    font-size: 0.8rem;
+  }
+
+  .menu-body span, .menu-body a { padding: 8px 10px; border-radius: 6px; color: var(--text); text-decoration: none; }
+  .menu-body span:hover, .menu-body a:hover { background: rgba(54, 88, 216, 0.3); }
+  .menu-admin { color: var(--pink) !important; font-weight: 900; }
+
+  .dash {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 22px;
+    align-items: center;
+    margin-bottom: 18px;
+    border: 3px solid rgba(255, 255, 255, 0.16);
+    border-radius: 12px;
+    padding: 20px;
+    background: linear-gradient(135deg, rgba(40, 215, 255, 0.16), rgba(159, 92, 255, 0.26)), rgba(7, 11, 36, 0.72);
+  }
+
+  .ring-wrap { display: grid; justify-items: center; gap: 10px; }
+
+  .ring {
+    display: grid;
+    place-content: center;
+    width: 168px; height: 168px;
+    border-radius: 50%;
+    background: conic-gradient(var(--green) calc(var(--pct) * 1%), rgba(255, 255, 255, 0.12) 0);
+  }
+
+  .ring span {
+    display: grid;
+    place-content: center;
+    width: 132px; height: 132px;
+    border-radius: 50%;
+    background: #070b24;
+    font-size: 2.8rem;
+  }
+
+  .ring small { font-size: 1.1rem; }
+  .ring-note { margin: 0; color: var(--muted); font-family: Inter, sans-serif; font-size: 0.74rem; text-align: center; }
+
+  .eyebrow { margin: 0 0 10px; color: var(--gold); font-family: Inter, sans-serif; font-size: 0.68rem; font-weight: 900; text-transform: uppercase; }
+  .next-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+
+  .next-card {
+    display: grid;
+    grid-template-columns: 56px 1fr;
+    gap: 12px;
+    align-items: center;
+    border-radius: 10px;
+    padding: 12px;
+    background: rgba(7, 11, 36, 0.62);
+  }
+
+  .next-card img { width: 52px; height: 52px; object-fit: contain; }
+  .next-card h2 { margin: 0; font-size: 1.15rem; }
+  .next-card p { margin: 0 0 6px; color: var(--muted); font-family: Inter, sans-serif; font-size: 0.7rem; }
+  .mini-bar { height: 6px; border-radius: 999px; background: rgba(255, 255, 255, 0.14); }
+  .mini-bar i { display: block; height: 100%; border-radius: 999px; background: var(--green); }
+
+  .timeline { margin-bottom: 20px; }
+  .track { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(180px, 1fr); gap: 12px; overflow-x: auto; padding-bottom: 6px; }
+
+  .stop {
+    display: grid;
+    gap: 8px;
+    border-left: 3px solid var(--gold);
+    border-radius: 0 10px 10px 0;
+    padding: 12px 14px;
+    background: rgba(18, 26, 74, 0.5);
+  }
+
+  .date { font-family: Inter, sans-serif; font-size: 0.82rem; font-weight: 900; }
+  .stop-art { display: flex; gap: 4px; }
+  .stop-art img { width: 34px; height: 34px; object-fit: contain; filter: brightness(0.32) saturate(0); }
+  .count { color: var(--muted); font-family: Inter, sans-serif; font-size: 0.68rem; text-transform: uppercase; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+
+  .filter {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    border: 2px solid rgba(255, 255, 255, 0.18);
+    border-radius: 999px;
+    padding: 8px 16px;
+    color: var(--text);
+    text-decoration: none;
+    font-family: Inter, sans-serif;
+    font-size: 0.78rem;
+    font-weight: 900;
+  }
+
+  .filter em { color: var(--muted); font-style: normal; font-size: 0.7rem; }
+  .filter.on { border-color: var(--blue); background: rgba(40, 215, 255, 0.18); }
+
+  .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(126px, 1fr)); gap: 10px; }
+
+  .tile {
+    display: grid;
+    justify-items: center;
+    gap: 4px;
+    border: 2px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    padding: 12px 8px 10px;
+    background: rgba(7, 11, 36, 0.58);
+    text-align: center;
+  }
+
+  .tile img { width: 62px; height: 62px; object-fit: contain; }
+  .tile-name { font-size: 1rem; }
+  .tile-state { color: var(--muted); font-family: Inter, sans-serif; font-size: 0.62rem; text-transform: uppercase; }
+  .tile.extracted { border-color: var(--blue); }
+  .tile.mastered { border-color: var(--green); }
+  .tile.locked { border-style: dashed; border-color: rgba(255, 227, 77, 0.5); }
+  .tile.locked img { filter: brightness(0.3) saturate(0); }
+
+  .past-note { margin-top: 22px; color: var(--muted); font-family: Inter, sans-serif; font-size: 0.76rem; }
+  .past-note a { margin-left: 10px; color: var(--blue); }
+
+  /* ---- admin: plain back-office, deliberately not arcade ---- */
+  .office {
+    display: grid;
+    grid-template-columns: 232px 1fr;
+    min-height: 100vh;
+    background: #f4f5f8;
+    color: #1c2030;
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  }
+
+  .office-rail { display: flex; flex-direction: column; gap: 2px; padding: 20px 12px; background: #1c2030; }
+  .office-brand { margin: 0 0 20px 10px; color: #fff; font-size: 1rem; font-weight: 900; letter-spacing: 0.02em; }
+  .office-brand span { color: #8fa0c8; font-weight: 500; }
+  .office-link { display: flex; justify-content: space-between; border-radius: 6px; padding: 9px 12px; color: #c8d0e4; font-size: 0.84rem; text-decoration: none; }
+  .office-link.on { background: #2e3552; color: #fff; }
+  .office-link em { border-radius: 999px; padding: 0 8px; background: #d97706; color: #fff; font-size: 0.7rem; font-style: normal; }
+  .office-exit { margin-top: auto; padding: 10px 12px; color: #8fa0c8; font-size: 0.8rem; text-decoration: none; }
+
+  .office-main { padding: 26px 30px 120px; }
+  .office-head { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 20px; }
+  .office-head h1 { margin: 0; color: #1c2030; font-family: Inter, sans-serif; font-size: 1.7rem; font-weight: 800; }
+  .office-crumb { margin: 0 0 4px; color: #6b7490; font-size: 0.76rem; }
+  .office-head-actions { display: flex; gap: 10px; }
+  .office-select { border: 1px solid #ccd2e0; border-radius: 6px; padding: 8px 10px; background: #fff; color: #1c2030; font-size: 0.82rem; }
+  .office-primary { border: 0; border-radius: 6px; padding: 9px 16px; background: #2f57d8; color: #fff; cursor: pointer; font-size: 0.82rem; font-weight: 700; }
+
+  .office-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 180px)); gap: 12px; margin-bottom: 20px; }
+  .office-stats div { border: 1px solid #e0e4ee; border-radius: 8px; padding: 12px 14px; background: #fff; }
+  .office-stats b { display: block; font-size: 1.5rem; }
+  .office-stats span { color: #6b7490; font-size: 0.74rem; }
+
+  .office-table { width: 100%; border: 1px solid #e0e4ee; border-collapse: collapse; background: #fff; font-size: 0.82rem; }
+  .office-table th { padding: 10px 12px; border-bottom: 1px solid #e0e4ee; background: #fafbfd; color: #6b7490; font-size: 0.72rem; text-align: left; text-transform: uppercase; }
+  .office-table td { padding: 8px 12px; border-bottom: 1px solid #eef0f6; vertical-align: middle; }
+  .office-table img { width: 30px; height: 30px; object-fit: contain; }
+  .office-table .strong { font-weight: 700; }
+  .office-pill { display: inline-block; margin: 1px 3px 1px 0; border: 1px solid #d5dae7; border-radius: 999px; padding: 1px 8px; font-size: 0.7rem; }
+  .office-pill.locked { border-style: dashed; border-color: #e0a33a; color: #a86c00; }
+  .office-tag { border-radius: 4px; padding: 2px 8px; font-size: 0.72rem; font-weight: 700; }
+  .office-tag.green { background: #dcf6e6; color: #10693c; }
+  .office-tag.amber { background: #fdefd4; color: #8a5a00; }
+  .office-actions a { margin-right: 10px; color: #2f57d8; font-size: 0.78rem; text-decoration: none; }
+</style>

@@ -1,0 +1,417 @@
+---
+// PROTOTYPE — variant B: "Library shell". A persistent left rail turns every part of
+// the product into a named destination: current season, upcoming (locked) content,
+// past seasons, and — for admins — separate catalogue / definitions / release rooms
+// inside the same shell. Content is a dense list, not a matrix.
+import {
+  catalogue,
+  chapterSeasons,
+  currentSeason,
+  historicalSeasons,
+  lockedVariants,
+  releaseQueue,
+  totals,
+  variantDefinitions
+} from './stub-data.ts';
+
+interface Props {
+  role: 'anon' | 'player' | 'admin';
+  pane: string;
+}
+
+const { role, pane } = Astro.props;
+const isAdmin = role === 'admin';
+const active = pane || 'catalogue';
+
+const href = (target: string) => `?variant=B&role=${role}&pane=${target}`;
+
+const upcomingByDate = ['3 Sep', '10 Sep', '17 Sep', '24 Sep'].map((date) => ({
+  date,
+  entries: lockedVariants.filter((variant) => variant.unlocksOn === date)
+}));
+
+const playerNav = [
+  { id: 'catalogue', label: 'Override', hint: 'Current season', badge: `${totals.released}` },
+  { id: 'upcoming', label: 'Upcoming', hint: 'Locked content', badge: `${totals.locked}` },
+  { id: 'past', label: 'Past seasons', hint: 'Read-only', badge: `${historicalSeasons.length}` }
+];
+
+const adminNav = [
+  { id: 'admin-catalogue', label: 'Catalogue', hint: 'Sprites & variants', badge: `${catalogue.length}` },
+  { id: 'admin-definitions', label: 'Variant definitions', hint: 'Season list', badge: `${variantDefinitions.length}` },
+  { id: 'admin-releases', label: 'Releases', hint: 'Awaiting release', badge: `${releaseQueue.length}` },
+  { id: 'admin-season', label: 'Season settings', hint: 'Current season', badge: '' }
+];
+---
+
+<div class="shell">
+  <aside class="rail">
+    <a class="brand" href="#">fortsprite</a>
+
+    <p class="rail-label">Player</p>
+    {playerNav.map((item) => (
+      <a class:list={['rail-item', { on: active === item.id }]} href={href(item.id)}>
+        <span class="rail-name">{item.label}</span>
+        <span class="rail-hint">{item.hint}</span>
+        {item.badge && <span class="rail-badge">{item.badge}</span>}
+      </a>
+    ))}
+
+    {isAdmin && (
+      <>
+        <p class="rail-label admin">Sprite admin</p>
+        {adminNav.map((item) => (
+          <a class:list={['rail-item admin', { on: active === item.id }]} href={href(item.id)}>
+            <span class="rail-name">{item.label}</span>
+            <span class="rail-hint">{item.hint}</span>
+            {item.badge && <span class="rail-badge">{item.badge}</span>}
+          </a>
+        ))}
+      </>
+    )}
+
+    <div class="rail-foot">
+      {role === 'anon' ? <span class="rail-user">Signed out — progress stays on this device</span> : (
+        <span class="rail-user"><span class="avatar">{isAdmin ? 'A' : 'P'}</span>{isAdmin ? 'Admin account' : 'Player account'}</span>
+      )}
+    </div>
+  </aside>
+
+  <main class="pane">
+    {active === 'catalogue' && (
+      <>
+        <header class="pane-head">
+          <div>
+            <p class="crumb">Chapter {currentSeason.chapter} · Season {currentSeason.season}</p>
+            <h1>{currentSeason.title}</h1>
+          </div>
+          <div class="meter">
+            <span>{totals.mastered}/{totals.released} mastered</span>
+            <div class="bar"><i style={`width:${(totals.mastered / totals.released) * 100}%`}></i></div>
+          </div>
+        </header>
+        <div class="list">
+          {catalogue.filter((sprite) => !sprite.fullyLocked).map((sprite) => (
+            <article class="row">
+              <img class="row-art" src={sprite.variants[0].image} alt={sprite.name} loading="lazy" />
+              <div class="row-main">
+                <h2>{sprite.name}</h2>
+                <p>{sprite.ability}</p>
+              </div>
+              <div class="chips">
+                {sprite.variants.map((variant) => (
+                  <span class:list={['chip', variant.locked ? 'locked' : variant.progress]} title={variant.name}>
+                    {variant.label}
+                  </span>
+                ))}
+              </div>
+            </article>
+          ))}
+        </div>
+      </>
+    )}
+
+    {active === 'upcoming' && (
+      <>
+        <header class="pane-head">
+          <div><p class="crumb">{currentSeason.title}</p><h1>Upcoming</h1></div>
+          <p class="pane-note">{totals.locked} locked entries. They appear in the catalogue once released.</p>
+        </header>
+        {upcomingByDate.map((group) => (
+          <section class="group">
+            <h3>{group.date}</h3>
+            <div class="tiles">
+              {group.entries.map((variant) => (
+                <div class="tile">
+                  <img src={variant.image} alt="" loading="lazy" />
+                  <span>{variant.name}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+        ))}
+      </>
+    )}
+
+    {active === 'past' && (
+      <>
+        <header class="pane-head"><div><p class="crumb">Archive</p><h1>Past seasons</h1></div></header>
+        <div class="season-cards">
+          {chapterSeasons.map((season) => (
+            <article class:list={['season-card', { on: season.current }]}>
+              <p class="crumb">Chapter {season.chapter} · Season {season.season}</p>
+              <h2>{season.title}</h2>
+              <p class="pane-note">{season.spriteCount} sprites</p>
+              <span class="link">{season.current ? 'Current season' : 'Open read-only'}</span>
+            </article>
+          ))}
+        </div>
+      </>
+    )}
+
+    {active === 'admin-catalogue' && (
+      <>
+        <header class="pane-head">
+          <div><p class="crumb admin">Sprite admin · {currentSeason.title}</p><h1>Catalogue</h1></div>
+          <button class="primary" type="button">New sprite</button>
+        </header>
+        <table class="grid">
+          <thead><tr><th>Sprite</th><th>Rarity</th><th>Variants</th><th>Locked</th><th>Progress recorded</th><th></th></tr></thead>
+          <tbody>
+            {catalogue.map((sprite) => (
+              <tr>
+                <td class="cell-name"><img src={sprite.variants[0].image} alt="" loading="lazy" />{sprite.name}</td>
+                <td>{sprite.rarity}</td>
+                <td>{sprite.variants.length}</td>
+                <td>{sprite.variants.filter((variant) => variant.locked).length}</td>
+                <td>{sprite.fullyLocked ? '—' : 'yes'}</td>
+                <td class="actions"><span class="link">Edit</span><span class="link">{sprite.fullyLocked ? 'Delete' : 'Archive'}</span></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </>
+    )}
+
+    {active === 'admin-definitions' && (
+      <>
+        <header class="pane-head">
+          <div><p class="crumb admin">Sprite admin · {currentSeason.title}</p><h1>Variant definitions</h1></div>
+          <button class="primary" type="button">Add definition</button>
+        </header>
+        <p class="pane-note">Renaming a definition changes its displayed name everywhere in this season. Definitions in use are archived, not deleted.</p>
+        <table class="grid">
+          <thead><tr><th>Definition</th><th>Displayed as</th><th>State</th><th></th></tr></thead>
+          <tbody>
+            {variantDefinitions.map((definition) => (
+              <tr class:list={{ archived: definition.archived }}>
+                <td>{definition.name}</td>
+                <td>{definition.label}</td>
+                <td>{definition.archived ? `Archived · ${definition.uses} historical uses` : 'Active'}</td>
+                <td class="actions"><span class="link">Rename</span>{!definition.archived && <span class="link">Archive</span>}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </>
+    )}
+
+    {active === 'admin-releases' && (
+      <>
+        <header class="pane-head">
+          <div><p class="crumb admin">Sprite admin · {currentSeason.title}</p><h1>Releases</h1></div>
+          <p class="pane-note">Release is one-way. Withdrawing an entry afterwards means archiving it.</p>
+        </header>
+        <div class="queue">
+          {releaseQueue.map((entry) => (
+            <article class="queue-row">
+              <img src={entry.variant.image} alt="" loading="lazy" />
+              <div>
+                <h2>{entry.variant.name}</h2>
+                <p class="pane-note">{entry.sprite.name} · {entry.variant.label} · scheduled {entry.variant.unlocksOn}</p>
+              </div>
+              <button class="primary" type="button">Release…</button>
+            </article>
+          ))}
+        </div>
+      </>
+    )}
+
+    {active === 'admin-season' && (
+      <>
+        <header class="pane-head"><div><p class="crumb admin">Sprite admin</p><h1>Season settings</h1></div></header>
+        <div class="season-cards">
+          {chapterSeasons.map((season) => (
+            <article class:list={['season-card', { on: season.current }]}>
+              <p class="crumb">Chapter {season.chapter} · Season {season.season}</p>
+              <h2>{season.title}</h2>
+              <span class="link">{season.current ? 'Current — shown to every player' : 'Make current'}</span>
+            </article>
+          ))}
+          <article class="season-card new"><span class="link">+ New chapter season</span></article>
+        </div>
+      </>
+    )}
+  </main>
+</div>
+
+<style>
+  .shell {
+    display: grid;
+    grid-template-columns: 268px 1fr;
+    gap: 0;
+    min-height: 100vh;
+  }
+
+  .rail {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 22px 14px 100px;
+    border-right: 2px solid rgba(255, 255, 255, 0.12);
+    background: rgba(7, 11, 36, 0.78);
+  }
+
+  .brand { margin-bottom: 18px; color: var(--gold); font-size: 1.4rem; text-decoration: none; text-transform: uppercase; }
+
+  .rail-label {
+    margin: 16px 0 6px 8px;
+    color: var(--muted);
+    font-family: Inter, sans-serif;
+    font-size: 0.62rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .rail-label.admin { color: var(--pink); }
+
+  .rail-item {
+    position: relative;
+    display: grid;
+    border-radius: 8px;
+    padding: 9px 12px;
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  .rail-item:hover { background: rgba(54, 88, 216, 0.24); }
+  .rail-item.on { background: rgba(40, 215, 255, 0.18); box-shadow: inset 3px 0 0 var(--blue); }
+  .rail-item.admin.on { background: rgba(255, 79, 216, 0.16); box-shadow: inset 3px 0 0 var(--pink); }
+  .rail-name { font-family: Inter, sans-serif; font-size: 0.88rem; font-weight: 900; }
+  .rail-hint { color: var(--muted); font-family: Inter, sans-serif; font-size: 0.68rem; }
+
+  .rail-badge {
+    position: absolute;
+    top: 12px; right: 12px;
+    border-radius: 999px;
+    padding: 1px 8px;
+    background: rgba(255, 255, 255, 0.14);
+    font-family: Inter, sans-serif;
+    font-size: 0.64rem;
+  }
+
+  .rail-foot { margin-top: auto; padding: 12px 8px 0; border-top: 1px solid rgba(255, 255, 255, 0.12); }
+  .rail-user { display: flex; gap: 8px; align-items: center; color: var(--muted); font-family: Inter, sans-serif; font-size: 0.72rem; }
+  .avatar { display: grid; place-content: center; width: 28px; height: 28px; border-radius: 50%; background: var(--panel-2); color: var(--text); }
+
+  .pane { padding: 26px 30px 120px; overflow-x: auto; }
+
+  .pane-head {
+    display: flex;
+    gap: 20px;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.12);
+  }
+
+  h1 { margin: 0; font-size: 3rem; line-height: 0.95; }
+  h2 { margin: 0; font-size: 1.25rem; }
+  h3 { margin: 0 0 8px; color: var(--gold); font-size: 1.1rem; }
+  .crumb { margin: 0 0 4px; color: var(--muted); font-family: Inter, sans-serif; font-size: 0.7rem; text-transform: uppercase; }
+  .crumb.admin { color: var(--pink); }
+  .pane-note { margin: 0; max-width: 60ch; color: var(--muted); font-family: Inter, sans-serif; font-size: 0.76rem; }
+
+  .meter { min-width: 220px; font-family: Inter, sans-serif; font-size: 0.74rem; }
+  .bar { margin-top: 6px; height: 8px; border-radius: 999px; background: rgba(255, 255, 255, 0.14); }
+  .bar i { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--blue), var(--green)); }
+
+  .list { display: grid; gap: 6px; }
+
+  .row {
+    display: grid;
+    grid-template-columns: 52px minmax(180px, 1fr) minmax(300px, 1.2fr);
+    gap: 14px;
+    align-items: center;
+    border-radius: 8px;
+    padding: 8px 12px;
+    background: rgba(18, 26, 74, 0.5);
+  }
+
+  .row-art { width: 46px; height: 46px; object-fit: contain; }
+  .row-main h2 { font-size: 1.2rem; }
+  .row-main p { margin: 2px 0 0; color: var(--muted); font-family: Inter, sans-serif; font-size: 0.7rem; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 5px; justify-content: flex-end; }
+
+  .chip {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 999px;
+    padding: 3px 10px;
+    font-family: Inter, sans-serif;
+    font-size: 0.66rem;
+    font-weight: 900;
+  }
+
+  .chip.extracted { border-color: var(--blue); background: rgba(40, 215, 255, 0.2); }
+  .chip.mastered { border-color: var(--green); background: rgba(55, 245, 143, 0.2); }
+  .chip.locked { border-style: dashed; border-color: rgba(255, 227, 77, 0.5); color: rgba(255, 227, 77, 0.8); }
+
+  .group { margin-bottom: 22px; }
+  .tiles { display: flex; flex-wrap: wrap; gap: 10px; }
+
+  .tile {
+    display: grid;
+    justify-items: center;
+    gap: 6px;
+    width: 128px;
+    border: 2px dashed rgba(255, 227, 77, 0.45);
+    border-radius: 8px;
+    padding: 10px 6px;
+    background: rgba(7, 11, 36, 0.5);
+    font-family: Inter, sans-serif;
+    font-size: 0.66rem;
+    text-align: center;
+  }
+
+  .tile img { width: 54px; height: 54px; object-fit: contain; filter: brightness(0.3) saturate(0); }
+
+  .season-cards { display: flex; flex-wrap: wrap; gap: 14px; }
+
+  .season-card {
+    width: 240px;
+    border: 2px solid rgba(255, 255, 255, 0.16);
+    border-radius: 10px;
+    padding: 16px;
+    background: rgba(18, 26, 74, 0.55);
+  }
+
+  .season-card.on { border-color: var(--blue); }
+  .season-card.new { display: grid; place-content: center; border-style: dashed; }
+  .link { color: var(--blue); cursor: pointer; font-family: Inter, sans-serif; font-size: 0.74rem; font-weight: 900; }
+
+  .grid { width: 100%; border-collapse: collapse; font-family: Inter, sans-serif; font-size: 0.78rem; }
+  .grid th { padding: 8px 10px; border-bottom: 2px solid rgba(255, 255, 255, 0.18); color: var(--muted); font-size: 0.66rem; text-align: left; text-transform: uppercase; }
+  .grid td { padding: 8px 10px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+  .grid tr.archived { opacity: 0.55; }
+  .cell-name { display: flex; gap: 10px; align-items: center; }
+  .cell-name img { width: 30px; height: 30px; object-fit: contain; }
+  .actions { display: flex; gap: 12px; }
+
+  .queue { display: grid; gap: 8px; }
+  .queue-row {
+    display: grid;
+    grid-template-columns: 56px 1fr auto;
+    gap: 14px;
+    align-items: center;
+    border: 2px dashed rgba(255, 227, 77, 0.4);
+    border-radius: 8px;
+    padding: 10px 14px;
+  }
+  .queue-row img { width: 48px; height: 48px; object-fit: contain; filter: brightness(0.35) saturate(0); }
+
+  .primary {
+    border: 0;
+    border-radius: 8px;
+    padding: 10px 16px;
+    background: linear-gradient(180deg, var(--gold), #f39c12);
+    color: #171000;
+    cursor: pointer;
+    font-family: Inter, sans-serif;
+    font-size: 0.76rem;
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+</style>

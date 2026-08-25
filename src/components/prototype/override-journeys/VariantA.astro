@@ -1,0 +1,332 @@
+---
+// PROTOTYPE — variant A: "Season hub". One surface for everyone. Seasons are peer
+// pills at the top, locked variants sit inline in the matrix, and administration is
+// a MODE toggled on the same page rather than a separate place.
+import {
+  activeDefinitions,
+  catalogue,
+  cellsFor,
+  chapterSeasons,
+  currentSeason,
+  totals
+} from './stub-data.ts';
+
+interface Props {
+  role: 'anon' | 'player' | 'admin';
+  editing: boolean;
+}
+
+const { role, editing } = Astro.props;
+const isAdmin = role === 'admin';
+const adminEditing = isAdmin && editing;
+---
+
+<div class="hub" data-editing={String(adminEditing)}>
+  <nav class="top">
+    <a class="brand" href="#">fortsprite</a>
+    <div class="right">
+      {isAdmin && (
+        <a class="mode-toggle" href={adminEditing ? '?variant=A&role=admin' : '?variant=A&role=admin&editing=1'}>
+          {adminEditing ? 'Done editing' : 'Edit catalogue'}
+        </a>
+      )}
+      {role === 'anon' ? (
+        <><span class="chip-link">Sign in</span><span class="chip-solid">Sign up</span></>
+      ) : (
+        <><span class="chip-link">Reset checklist</span><span class="avatar">{isAdmin ? 'A' : 'P'}</span></>
+      )}
+    </div>
+  </nav>
+
+  <div class="seasons" role="tablist" aria-label="Chapter seasons">
+    {chapterSeasons.map((season) => (
+      <span class:list={['season-pill', { on: season.current }]} role="tab" aria-selected={season.current}>
+        <strong>C{season.chapter} S{season.season}</strong>
+        <span>{season.title}</span>
+        {season.current && <em>Current</em>}
+      </span>
+    ))}
+    {adminEditing && <span class="season-pill add">+ New chapter season</span>}
+  </div>
+
+  {adminEditing && (
+    <div class="admin-strip">
+      <span class="admin-tag">Editing {currentSeason.title}</span>
+      <span class="admin-action">Variant definitions ({activeDefinitions.length})</span>
+      <span class="admin-action">Set current season</span>
+      <span class="admin-action">Archived entries</span>
+      <span class="admin-note">Player view stays live while you edit.</span>
+    </div>
+  )}
+
+  <header class="hero">
+    <div>
+      <p class="eyebrow">Chapter {currentSeason.chapter} Season {currentSeason.season}</p>
+      <h1>{currentSeason.title}</h1>
+      <p class="intro">Every sprite in the current season. Locked variants stay on the board so you can see what is coming.</p>
+    </div>
+    <div class="summary">
+      <div><span>{totals.missing}</span><small>Not found</small></div>
+      <div><span>{totals.extracted}</span><small>Extracted</small></div>
+      <div><span>{totals.mastered}</span><small>Mastered</small></div>
+      <div class="locked-stat"><span>{totals.locked}</span><small>Locked</small></div>
+    </div>
+  </header>
+
+  <section class="matrix-wrap" aria-label="Sprite checklist">
+    <div class="matrix" style={`--cols:${activeDefinitions.length}`}>
+      <div class="head sprite-head">Sprite</div>
+      {activeDefinitions.map((definition) => (
+        <div class="head">
+          {definition.label}
+          {adminEditing && <button class="mini" type="button">edit</button>}
+        </div>
+      ))}
+
+      {catalogue.map((sprite) => (
+        <>
+          <article class:list={['sprite', { dim: sprite.fullyLocked }]}>
+            <p class="element">{sprite.rarity}</p>
+            <h2>{sprite.name}</h2>
+            {adminEditing ? (
+              <div class="row-actions">
+                <button class="mini" type="button">Edit sprite</button>
+                <button class="mini" type="button">Archive</button>
+              </div>
+            ) : (
+              <p class="ability">{sprite.ability}</p>
+            )}
+          </article>
+          {cellsFor(sprite).map((cell) =>
+            cell ? (
+              <div class:list={['cell', cell.locked ? 'locked' : cell.progress]}>
+                <img src={cell.image} alt={cell.name} loading="lazy" decoding="async" />
+                {cell.locked ? (
+                  adminEditing ? (
+                    <button class="release" type="button">Release</button>
+                  ) : (
+                    <span class="badge lock">Locked · {cell.unlocksOn}</span>
+                  )
+                ) : (
+                  <span class="badge">{cell.progress === 'none' ? 'None' : cell.progress}</span>
+                )}
+              </div>
+            ) : (
+              <div class="cell empty">{adminEditing ? <button class="mini plus" type="button">+</button> : '-'}</div>
+            )
+          )}
+        </>
+      ))}
+
+      {adminEditing && (
+        <>
+          <article class="sprite add-sprite"><button class="mini plus wide" type="button">+ Add sprite</button></article>
+          {activeDefinitions.map(() => <div class="cell empty ghost"></div>)}
+        </>
+      )}
+    </div>
+  </section>
+</div>
+
+<style>
+  .hub {
+    width: min(1320px, calc(100% - 32px));
+    margin: 0 auto;
+    padding: 26px 0 120px;
+  }
+
+  .top {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .brand {
+    color: var(--gold);
+    font-size: 1.55rem;
+    text-decoration: none;
+    text-transform: uppercase;
+  }
+
+  .right { display: flex; gap: 10px; align-items: center; }
+
+  .chip-link, .chip-solid, .mode-toggle {
+    display: inline-flex;
+    align-items: center;
+    min-height: 38px;
+    border-radius: 8px;
+    padding: 0 14px;
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+    font-size: 0.78rem;
+    font-weight: 900;
+    text-decoration: none;
+    text-transform: uppercase;
+  }
+
+  .chip-link { border: 2px solid rgba(255, 255, 255, 0.24); color: var(--text); }
+  .chip-solid { background: linear-gradient(180deg, var(--gold), #f39c12); color: #171000; }
+  .mode-toggle { border: 2px solid var(--pink); background: rgba(255, 79, 216, 0.16); color: #ffd9f4; }
+  .avatar {
+    display: grid;
+    place-content: center;
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: var(--panel-2);
+    font-family: Inter, sans-serif;
+    font-size: 0.8rem;
+  }
+
+  .seasons { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+
+  .season-pill {
+    display: inline-flex;
+    gap: 8px;
+    align-items: baseline;
+    border: 2px solid rgba(255, 255, 255, 0.18);
+    border-radius: 999px;
+    padding: 8px 16px;
+    background: rgba(7, 11, 36, 0.6);
+    font-family: Inter, sans-serif;
+    font-size: 0.82rem;
+  }
+
+  .season-pill.on { border-color: var(--blue); background: rgba(40, 215, 255, 0.16); }
+  .season-pill em { color: var(--blue); font-size: 0.7rem; font-style: normal; text-transform: uppercase; }
+  .season-pill.add { border-style: dashed; color: var(--muted); }
+
+  .admin-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 14px;
+    border: 2px solid var(--pink);
+    border-radius: 8px;
+    padding: 10px 14px;
+    background: rgba(255, 79, 216, 0.1);
+    font-family: Inter, sans-serif;
+    font-size: 0.8rem;
+  }
+
+  .admin-tag { color: var(--pink); font-weight: 900; text-transform: uppercase; }
+  .admin-action { border-bottom: 1px dashed rgba(255, 255, 255, 0.4); cursor: pointer; }
+  .admin-note { margin-left: auto; color: var(--muted); }
+
+  .hero {
+    display: grid;
+    grid-template-columns: 1fr minmax(280px, 460px);
+    gap: 24px;
+    align-items: end;
+    margin-bottom: 18px;
+    border: 3px solid rgba(255, 255, 255, 0.18);
+    border-radius: 8px;
+    padding: 22px;
+    background: linear-gradient(135deg, rgba(40, 215, 255, 0.18), rgba(159, 92, 255, 0.3)), rgba(7, 11, 36, 0.72);
+  }
+
+  h1 { margin: 0; font-size: clamp(3rem, 7vw, 5.6rem); line-height: 0.9; text-shadow: 0 5px 0 #1230a5; }
+  .intro { max-width: 46ch; color: var(--muted); font-family: Inter, sans-serif; font-size: 0.9rem; }
+
+  .summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; text-align: center; }
+  .summary div { border: 2px solid rgba(255, 255, 255, 0.16); border-radius: 8px; padding: 10px 6px; background: rgba(7, 11, 36, 0.6); }
+  .summary span { display: block; font-size: 1.9rem; }
+  .summary small { color: var(--muted); font-family: Inter, sans-serif; font-size: 0.64rem; text-transform: uppercase; }
+  .locked-stat { border-color: rgba(255, 227, 77, 0.5) !important; }
+
+  .matrix-wrap { overflow-x: auto; }
+
+  .matrix {
+    display: grid;
+    grid-template-columns: minmax(190px, 1fr) repeat(var(--cols), minmax(84px, 1fr));
+    gap: 6px;
+    min-width: 900px;
+  }
+
+  .head {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    padding: 8px 4px;
+    background: rgba(29, 47, 119, 0.8);
+    font-family: Inter, sans-serif;
+    font-size: 0.7rem;
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+
+  .sprite-head { justify-content: flex-start; padding-left: 12px; }
+
+  .sprite {
+    border-radius: 6px;
+    padding: 10px 12px;
+    background: rgba(7, 11, 36, 0.62);
+  }
+
+  .sprite.dim { opacity: 0.72; border-left: 3px solid var(--gold); }
+  .sprite h2 { margin: 0 0 4px; font-size: 1.3rem; }
+  .element { margin: 0 0 2px; color: var(--gold); font-family: Inter, sans-serif; font-size: 0.62rem; text-transform: uppercase; }
+  .ability { margin: 0; color: var(--muted); font-family: Inter, sans-serif; font-size: 0.7rem; line-height: 1.35; }
+  .row-actions { display: flex; gap: 6px; }
+
+  .cell {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: 4px;
+    border: 2px solid rgba(255, 255, 255, 0.12);
+    border-radius: 6px;
+    padding: 8px 4px 6px;
+    background: rgba(7, 11, 36, 0.55);
+  }
+
+  .cell img { width: 54px; height: 54px; object-fit: contain; }
+  .cell.extracted { border-color: var(--blue); box-shadow: inset 0 0 0 2px rgba(40, 215, 255, 0.24); }
+  .cell.mastered { border-color: var(--green); box-shadow: inset 0 0 0 2px rgba(55, 245, 143, 0.24); }
+  .cell.locked img { filter: brightness(0.25) saturate(0); }
+  .cell.locked { border-style: dashed; border-color: rgba(255, 227, 77, 0.55); }
+  .cell.empty { display: grid; place-content: center; border-style: dashed; color: rgba(255, 255, 255, 0.3); }
+  .cell.empty.ghost { opacity: 0.35; }
+
+  .badge {
+    font-family: Inter, sans-serif;
+    font-size: 0.58rem;
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+
+  .badge.lock { color: var(--gold); }
+
+  .mini {
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 5px;
+    padding: 3px 7px;
+    background: rgba(255, 79, 216, 0.15);
+    color: #ffd9f4;
+    cursor: pointer;
+    font-family: Inter, sans-serif;
+    font-size: 0.62rem;
+    text-transform: uppercase;
+  }
+
+  .mini.plus { padding: 4px 10px; font-size: 0.8rem; }
+  .mini.wide { width: 100%; }
+
+  .release {
+    border: 0;
+    border-radius: 5px;
+    padding: 4px 8px;
+    background: linear-gradient(180deg, var(--gold), #f39c12);
+    color: #171000;
+    cursor: pointer;
+    font-family: Inter, sans-serif;
+    font-size: 0.6rem;
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+
+  .add-sprite { display: grid; place-content: center; border: 2px dashed rgba(255, 79, 216, 0.6); background: transparent; }
+</style>
