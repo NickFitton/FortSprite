@@ -1,0 +1,68 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Season {
+  id            Int     @id @default(autoincrement())
+  chapterNumber Int
+  seasonNumber  Int
+  name          String
+  isPublic      Boolean
+
+  variants        Variant[]
+  sprites         Sprite[]
+  spriteVariants  SpriteVariant[]
+  userCollections UserCollection[]
+}
+
+model Variant {
+  id             Int             @id @default(autoincrement())
+  seasonId       Int
+  season         Season          @relation(fields: [seasonId], references: [id])
+  name           String
+  effect         String
+  order          Int?
+  spriteVariants SpriteVariant[]
+}
+
+model Sprite {
+  id             Int             @id @default(autoincrement())
+  seasonId       Int
+  season         Season          @relation(fields: [seasonId], references: [id])
+  name           String
+  description    String
+  order          Int?
+  imageUrl       String?
+  spriteVariants SpriteVariant[]
+}
+
+model SpriteVariant {
+  id              Int              @id @default(autoincrement())
+  seasonId        Int
+  variantId       Int
+  spriteId        Int
+  season          Season           @relation(fields: [seasonId], references: [id])
+  variant         Variant          @relation(fields: [variantId], references: [id])
+  sprite          Sprite           @relation(fields: [spriteId], references: [id])
+  userCollections UserCollection[]
+}
+
+model UserCollection {
+  id              Int              @id @default(autoincrement())
+  seasonId        Int
+  spriteVariantId Int
+  season          Season           @relation(fields: [seasonId], references: [id])
+  spriteVariant   SpriteVariant    @relation(fields: [spriteVariantId], references: [id])
+  status          CollectionStatus
+}
+
+enum CollectionStatus {
+  NOT_FOUND
+  EXTRACTED
+  MASTERED
+}
