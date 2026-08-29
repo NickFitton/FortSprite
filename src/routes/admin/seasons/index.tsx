@@ -1,6 +1,11 @@
 import { useForm } from "@tanstack/react-form";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  useNavigate,
+  useRouter,
+} from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
+import { useState } from "react";
 import * as z from "zod";
 import { Button } from "#/components/ui/button";
 import {
@@ -27,7 +32,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Field,
@@ -36,7 +40,6 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 const getSeasons = createServerFn({ method: "GET" }).handler(async () => {
   return prisma.season.findMany({
@@ -50,6 +53,25 @@ const getSeasons = createServerFn({ method: "GET" }).handler(async () => {
   });
 });
 
+const createSeasonFormSchema = z.object({
+  name: z.string().trim().min(1, "Enter a season name."),
+  chapter: z.number().int().positive("Enter a positive chapter number."),
+  season: z.number().int().positive("Enter a positive season number."),
+});
+
+const createSeason = createServerFn({ method: "POST" })
+  .validator(createSeasonFormSchema)
+  .handler(async ({ data }) => {
+    return prisma.season.create({
+      data: {
+        name: data.name,
+        chapterNumber: data.chapter,
+        seasonNumber: data.season,
+        isPublic: false,
+      },
+    });
+  });
+
 export const Route = createFileRoute("/admin/seasons/")({
   component: RouteComponent,
   loader: () => getSeasons(),
@@ -57,7 +79,9 @@ export const Route = createFileRoute("/admin/seasons/")({
 
 function RouteComponent() {
   const navigate = useNavigate({ from: "/admin/seasons/" });
+  const router = useRouter();
   const seasons = Route.useLoaderData();
+  const [open, setOpen] = useState<boolean>(false);
   return (
     <div className="flex w-full flex-1 flex-col items-center justify-center">
       <Card className="w-128">
@@ -84,7 +108,7 @@ function RouteComponent() {
                         onClick={() =>
                           navigate({
                             to: "/admin/seasons/$seasonId",
-                            params: { seasonId },
+                            params: { seasonId: String(seasonId) },
                           })
                         }
                       >
@@ -98,44 +122,57 @@ function RouteComponent() {
           </ItemGroup>
         </CardContent>
         <CardFooter>
-          <CreateSeasonDialog />
-          <BugReportForm />
+          <Button onClick={() => setOpen(true)}>Create</Button>
         </CardFooter>
       </Card>
+      <CreateSeasonDialog
+        open={open}
+        onOpenChange={setOpen}
+        onCreated={() => router.invalidate()}
+      />
     </div>
   );
 }
 
-const createSeasonFormSchema = z.object({
-  name: z.string(),
-  // chapter: z.number().positive(),
-  // season: z.number().positive(),
-});
-
-function CreateSeasonDialog() {
+function CreateSeasonDialog({
+  open,
+  onOpenChange,
+  onCreated,
+}: {
+  open: boolean;
+  onOpenChange: (state: boolean) => void;
+  onCreated: () => Promise<void>;
+}) {
   const form = useForm({
     defaultValues: {
-      name: "7",
-      // chapter: 6,
-      // season: 5,
+      name: "",
+      chapter: 0,
+      season: 0,
     },
     validators: {
       onSubmit: createSeasonFormSchema,
     },
     onSubmit: async ({ value }) => {
-      toast.add({
-        title: "You submitted the following values:",
-        description: (
-          <pre className="mt-2 w-[320px] overflow-x-auto rounded-md bg-code p-4 text-code-foreground">
-            <code>{JSON.stringify(value, null, 2)}</code>
-          </pre>
-        ),
-      });
+      try {
+        await createSeason({ data: value });
+        await onCreated();
+        form.reset();
+        onOpenChange(false);
+        toast.add({
+          title: "Season created",
+          description: `${value.name.trim()} is ready to manage.`,
+        });
+      } catch (error) {
+        console.error("Failed to create season:", error);
+        toast.add({
+          title: "Couldn't create season",
+          description: "Please try again.",
+        });
+      }
     },
   });
   return (
-    <Dialog>
-      <DialogTrigger render={<Button variant="outline">Create</Button>} />
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
           <DialogTitle>Create season</DialogTitle>
@@ -148,9 +185,8 @@ function CreateSeasonDialog() {
           }}
         >
           <FieldGroup>
-            <form.Field
-              name="name"
-              children={(field) => {
+            <form.Field name="name">
+              {(field) => {
                 const isInvalid =
                   field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
@@ -172,96 +208,82 @@ function CreateSeasonDialog() {
                   </Field>
                 );
               }}
-            />
+            </form.Field>
+            <Field orientation="horizontal">
+              <form.Field name="chapter">
+                {(field) => {
+                  const isInvalid =
+                    field.state.meta.isTouched && !field.state.meta.isValid;
+
+                  return (
+                    <Field>
+                      <FieldLabel htmlFor="chapter">Chapter</FieldLabel>
+                      <Input
+                        id={field.name}
+                        name={field.name}
+                        type="number"
+                        min={1}
+                        step={1}
+                        value={field.state.value || ""}
+                        onBlur={field.handleBlur}
+                        onChange={(e) =>
+                          field.handleChange(
+                            e.target.value === "" ? 0 : e.target.valueAsNumber,
+                          )
+                        }
+                        aria-invalid={isInvalid}
+                        placeholder="7"
+                        autoComplete="off"
+                      />
+                      {isInvalid && (
+                        <FieldError errors={field.state.meta.errors} />
+                      )}
+                    </Field>
+                  );
+                }}
+              </form.Field>
+              <form.Field name="season">
+                {(field) => {
+                  const isInvalid =
+                    field.state.meta.isTouched && !field.state.meta.isValid;
+
+                  return (
+                    <Field>
+                      <FieldLabel htmlFor="season">Season</FieldLabel>
+                      <Input
+                        id={field.name}
+                        name={field.name}
+                        type="number"
+                        min={1}
+                        step={1}
+                        value={field.state.value || ""}
+                        onBlur={field.handleBlur}
+                        onChange={(e) =>
+                          field.handleChange(
+                            e.target.value === "" ? 0 : e.target.valueAsNumber,
+                          )
+                        }
+                        aria-invalid={isInvalid}
+                        placeholder="4"
+                        autoComplete="off"
+                      />
+                      {isInvalid && (
+                        <FieldError errors={field.state.meta.errors} />
+                      )}
+                    </Field>
+                  );
+                }}
+              </form.Field>
+            </Field>
           </FieldGroup>
         </form>
-        <Field orientation="horizontal">
-          <Button type="submit" id="create-session-form">
-            Save changes
-          </Button>
-        </Field>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-const formSchema = z.object({
-  title: z
-    .string()
-    .min(5, "Bug title must be at least 5 characters.")
-    .max(32, "Bug title must be at most 32 characters."),
-});
-
-export function BugReportForm() {
-  const form = useForm({
-    defaultValues: {
-      name: "",
-    },
-    validators: {
-      onSubmit: createSeasonFormSchema,
-    },
-    onSubmit: async ({ value }) => {
-      toast.add({
-        title: "You submitted the following values:",
-        description: (
-          <pre className="mt-2 w-[320px] overflow-x-auto rounded-md bg-code p-4 text-code-foreground">
-            <code>{JSON.stringify(value, null, 2)}</code>
-          </pre>
-        ),
-      });
-    },
-  });
-
-  return (
-    <Dialog>
-      <DialogTrigger render={<Button variant="outline">Create</Button>} />
-      <DialogContent className="sm:max-w-sm">
-        <DialogHeader>
-          <DialogTitle>Bug Report</DialogTitle>
-        </DialogHeader>
-        <form
-          id="bug-report-form"
-          onSubmit={(e) => {
-            e.preventDefault();
-            form.handleSubmit();
-          }}
-        >
-          <FieldGroup>
-            <form.Field
-              name="name"
-              children={(field) => {
-                const isInvalid =
-                  field.state.meta.isTouched && !field.state.meta.isValid;
-                return (
-                  <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>Bug Title</FieldLabel>
-                    <Input
-                      id={field.name}
-                      name={field.name}
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      aria-invalid={isInvalid}
-                      placeholder="Login button not working on mobile"
-                      autoComplete="off"
-                    />
-                    {isInvalid && (
-                      <FieldError errors={field.state.meta.errors} />
-                    )}
-                  </Field>
-                );
-              }}
-            />
-          </FieldGroup>
-        </form>
-        <Field orientation="horizontal">
-          <Button type="button" variant="outline" onClick={() => form.reset()}>
-            Reset
-          </Button>
-          <Button type="submit" form="bug-report-form">
-            Submit
-          </Button>
-        </Field>
+        <DialogFooter>
+          <Field orientation="horizontal">
+            <Button type="submit" form="create-session-form">
+              Save changes
+            </Button>
+          </Field>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
@@ -269,56 +291,4 @@ export function BugReportForm() {
 
 /*
 
-            <form.Field
-              name="chapter"
-              children={(field) => {
-                const isInvalid =
-                  field.state.meta.isTouched && !field.state.meta.isValid;
-
-                return (
-                  <Field>
-                    <FieldLabel htmlFor="chapter">Chapter</FieldLabel>
-                    <Input
-                      id={field.name}
-                      name={field.name}
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      aria-invalid={isInvalid}
-                      placeholder="7"
-                      autoComplete="off"
-                    />
-                    {isInvalid && (
-                      <FieldError errors={field.state.meta.errors} />
-                    )}
-                  </Field>
-                );
-              }}
-            />
-            <form.Field
-              name="season"
-              children={(field) => {
-                const isInvalid =
-                  field.state.meta.isTouched && !field.state.meta.isValid;
-
-                return (
-                  <Field>
-                    <FieldLabel htmlFor="season">Season</FieldLabel>
-                    <Input
-                      id={field.name}
-                      name={field.name}
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      aria-invalid={isInvalid}
-                      placeholder="4"
-                      autoComplete="off"
-                    />
-                    {isInvalid && (
-                      <FieldError errors={field.state.meta.errors} />
-                    )}
-                  </Field>
-                );
-              }}
-            />
 */
