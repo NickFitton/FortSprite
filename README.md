@@ -46,6 +46,11 @@ applies Prisma migrations, deploys Convex functions, and then builds and deploys
 the app to Vercel. Vercel's Git-triggered deployments are disabled in
 `vercel.json` so it cannot deploy ahead of the database migration.
 
+Before any deployment step, the workflow checks that its GitHub secrets and
+required Vercel production variables are present, verifies read-only access to
+Prisma and Convex, and completes the Vercel build. A failure leaves Prisma,
+Convex, and the live Vercel deployment unchanged.
+
 Create a protected GitHub `production` environment and add these secrets:
 
 - `DATABASE_URL`: the Prisma Postgres production connection string.

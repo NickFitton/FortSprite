@@ -41,6 +41,69 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Verify GitHub production secrets
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          set -euo pipefail
+          required=(
+            DATABASE_URL
+            CONVEX_DEPLOY_KEY
+            VERCEL_TOKEN
+            VERCEL_ORG_ID
+            VERCEL_PROJECT_ID
+          )
+
+          for name in "${required[@]}"; do
+            if [[ -z "${!name:-}" ]]; then
+              echo "::error title=Missing production secret::$name is required"
+              exit 1
+            fi
+          done
+
+          case "$DATABASE_URL" in
+            postgres://*|postgresql://*) ;;
+            *)
+              echo "::error title=Invalid DATABASE_URL::DATABASE_URL must be a PostgreSQL connection string"
+              exit 1
+              ;;
+          esac
+
+      - name: Verify Prisma database access
+        run: printf 'SELECT 1;' | pnpm exec prisma db execute --stdin
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      - name: Verify Convex deployment access
+        run: pnpm exec convex deploy --dry-run --typecheck enable
+        env:
+          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
+
+      - name: Pull Vercel production configuration
+        run: pnpm dlx vercel@latest pull --yes --environment=production --token="${{ secrets.VERCEL_TOKEN }}"
+
+      - name: Verify Vercel production variables
+        run: |
+          set -euo pipefail
+          required=(
+            DATABASE_URL
+            VITE_CLERK_PUBLISHABLE_KEY
+            CLERK_SECRET_KEY
+            VITE_CONVEX_URL
+          )
+
+          for name in "${required[@]}"; do
+            if ! grep -q "^${name}=" .vercel/.env.production.local; then
+              echo "::error title=Missing Vercel production variable::$name is required"
+              exit 1
+            fi
+          done
+
+      - name: Build Vercel production output
+        run: pnpm dlx vercel@latest build --prod --token="${{ secrets.VERCEL_TOKEN }}"
+
       - name: Apply Prisma migrations
         run: pnpm exec prisma migrate deploy
         env:
@@ -50,12 +113,6 @@ jobs:
         run: pnpm exec convex deploy --typecheck enable
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
-
-      - name: Pull Vercel production configuration
-        run: pnpm dlx vercel@latest pull --yes --environment=production --token="${{ secrets.VERCEL_TOKEN }}"
-
-      - name: Build Vercel production output
-        run: pnpm dlx vercel@latest build --prod --token="${{ secrets.VERCEL_TOKEN }}"
 
       - name: Deploy prebuilt output to Vercel
         run: pnpm dlx vercel@latest deploy --prebuilt --prod --token="${{ secrets.VERCEL_TOKEN }}"
