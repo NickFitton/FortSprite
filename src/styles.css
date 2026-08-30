@@ -197,6 +197,37 @@ pre code {
   margin-inline: auto;
 }
 
+.season-detail {
+  container-type: inline-size;
+  container-name: season-detail;
+}
+
+.sprite-variant-table {
+  container-type: inline-size;
+  container-name: sprite-variant-table;
+}
+
+@container season-detail (min-width: 64rem) {
+  .season-detail__header {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+
+  .season-detail__overview {
+    width: 20rem;
+    flex-shrink: 0;
+    align-self: flex-start;
+  }
+}
+
+@container sprite-variant-table (min-width: 44rem) {
+  .sprite-variant-cell {
+    width: 150px;
+    height: 150px;
+  }
+}
+
 .display-title {
   font-family: "Fraunces", Georgia, serif;
 }

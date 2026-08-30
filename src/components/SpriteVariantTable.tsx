@@ -93,66 +93,71 @@ export function SpriteVariantTable<
   }, [userCollections]);
 
   return (
-    <Table className="w-fit">
-      <TableCaption>A list of all possible sprites.</TableCaption>
-      <TableHeader>
-        <TableRow>
-          <TableHead className="w-[100px]">Sprite</TableHead>
-          {variants.map((variant) => (
-            <TableHead key={variant.id}>{variant.name}</TableHead>
-          ))}
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {sprites.map((sprite) => {
-          const byVariant = byVariantBySprite.get(sprite.id);
-          return (
-            <TableRow key={sprite.id}>
-              <TableHead className="font-medium">{sprite.name}</TableHead>
-              {variants.map((variant) => {
-                const spriteVariant = byVariant?.get(variant.id);
-                const status = spriteVariant
-                  ? spriteVariant.isReleased
-                    ? "Released"
-                    : "Unreleased"
-                  : "Undefined";
-                const collectionStatus = spriteVariant
-                  ? collectionStatusBySpriteVariantId.get(spriteVariant.id)
-                  : undefined;
+    <div className="sprite-variant-table">
+      <Table className="w-fit">
+        <TableCaption>A list of all possible sprites.</TableCaption>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-[100px]">Sprite</TableHead>
+            {variants.map((variant) => (
+              <TableHead key={variant.id}>{variant.name}</TableHead>
+            ))}
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {sprites.map((sprite) => {
+            const byVariant = byVariantBySprite.get(sprite.id);
+            return (
+              <TableRow key={sprite.id}>
+                <TableHead className="font-medium">{sprite.name}</TableHead>
+                {variants.map((variant) => {
+                  const spriteVariant = byVariant?.get(variant.id);
+                  const status = spriteVariant
+                    ? spriteVariant.isReleased
+                      ? "Released"
+                      : "Unreleased"
+                    : "Undefined";
+                  const collectionStatus = spriteVariant
+                    ? collectionStatusBySpriteVariantId.get(spriteVariant.id)
+                    : undefined;
 
-                return (
-                  <TableCell key={`${sprite.id}-${variant.id}`} className="p-0">
-                    <button
-                      type="button"
-                      className={`flex min-h-10 cursor-pointer items-center text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset ${
-                        collectionStatus === "MASTERED"
-                          ? "bg-yellow-200 hover:bg-yellow-300 dark:bg-yellow-400/30 dark:hover:bg-yellow-400/40"
-                          : collectionStatus === "EXTRACTED"
-                            ? "bg-green-200 hover:bg-green-300 dark:bg-green-400/30 dark:hover:bg-green-400/40"
-                            : "hover:bg-muted/50"
-                      }`}
-                      onClick={() =>
-                        onClick({ sprite, variant, spriteVariant })
-                      }
+                  return (
+                    <TableCell
+                      key={`${sprite.id}-${variant.id}`}
+                      className="p-0"
                     >
-                      <SpriteVariantCell
-                        imageStorageId={spriteVariant?.imageStorageId}
-                        label={`${sprite.name} ${variant.name}`}
-                        status={
-                          hideReleasedStatus && status === "Released"
-                            ? undefined
-                            : status
+                      <button
+                        type="button"
+                        className={`flex min-h-10 cursor-pointer items-center text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset ${
+                          collectionStatus === "MASTERED"
+                            ? "bg-yellow-200 hover:bg-yellow-300 dark:bg-yellow-400/30 dark:hover:bg-yellow-400/40"
+                            : collectionStatus === "EXTRACTED"
+                              ? "bg-green-200 hover:bg-green-300 dark:bg-green-400/30 dark:hover:bg-green-400/40"
+                              : "hover:bg-muted/50"
+                        }`}
+                        onClick={() =>
+                          onClick({ sprite, variant, spriteVariant })
                         }
-                      />
-                    </button>
-                  </TableCell>
-                );
-              })}
-            </TableRow>
-          );
-        })}
-      </TableBody>
-    </Table>
+                      >
+                        <SpriteVariantCell
+                          imageStorageId={spriteVariant?.imageStorageId}
+                          label={`${sprite.name} ${variant.name}`}
+                          status={
+                            hideReleasedStatus && status === "Released"
+                              ? undefined
+                              : status
+                          }
+                        />
+                      </button>
+                    </TableCell>
+                  );
+                })}
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+    </div>
   );
 }
 
@@ -184,7 +189,7 @@ function SpriteVariantCell({
   }, [imageUrl]);
 
   return (
-    <div className="relative size-24 shrink-0 sm:size-[150px]">
+    <div className="sprite-variant-cell relative size-24 shrink-0">
       {isImageLoading && (
         <Skeleton
           aria-hidden="true"

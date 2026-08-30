@@ -1,7 +1,14 @@
 import { useUser } from "@clerk/tanstack-react-start";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { Cell, Label, Pie, PieChart, Tooltip } from "recharts";
+import {
+  Cell,
+  Label,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+} from "recharts";
 import { SpriteVariantTable } from "#/components/SpriteVariantTable";
 import { Card, CardContent, CardHeader } from "#/components/ui/card";
 import { Separator } from "#/components/ui/separator";
@@ -93,10 +100,10 @@ function SeasonPage() {
   }, []);
 
   return (
-    <main className="page-wrap px-4 py-12">
-      <section>
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-          <div>
+    <main className="page-wrap px-4 py-8 sm:py-12">
+      <section className="season-detail">
+        <div className="season-detail__header flex flex-col gap-8">
+          <div className="min-w-0 max-w-2xl">
             <p className="island-kicker mb-2">
               Chapter {season.chapterNumber} · Season {season.seasonNumber}
             </p>
@@ -119,9 +126,12 @@ function SeasonPage() {
                 setOverviewView(value);
               }
             }}
-            className="w-full sm:w-80 sm:shrink-0 gap-0"
+            className="season-detail__overview w-full max-w-md self-center gap-0"
           >
-            <TabsList aria-label="Released sprite overview display">
+            <TabsList
+              aria-label="Released sprite overview display"
+              className="w-full"
+            >
               <TabsTrigger value="stats">Stats</TabsTrigger>
               <TabsTrigger value="chart">Chart</TabsTrigger>
             </TabsList>
@@ -135,15 +145,15 @@ function SeasonPage() {
             >
               <div ref={overviewContentRef}>
                 <TabsContent value="stats" className="pt-4">
-                  <Card className="p-2">
-                    <div className="flex flex-row justify-center items-center gap-4">
+                  <Card className="gap-3 p-3">
+                    <div className="flex items-center justify-between gap-4">
                       <span>Released sprites</span>
                       <span className="text-lg font-semibold text-[var(--sea-ink)]">
                         {releasedSpriteCount}
                       </span>
                     </div>
                     <Separator />
-                    <div className="grid grid-cols-3 gap-x-3 gap-y-3 text-center text-sm">
+                    <div className="grid grid-cols-1 gap-2 text-sm min-[380px]:grid-cols-3 min-[380px]:gap-x-3 min-[380px]:gap-y-3 min-[380px]:text-center">
                       <div>
                         <dt className="text-muted-foreground">Not found</dt>
                         <dd className="font-semibold text-[var(--sea-ink)]">
@@ -166,36 +176,38 @@ function SeasonPage() {
                   </Card>
                 </TabsContent>
                 <TabsContent value="chart" className="pt-4">
-                  <Card className="flex flex-col items-center">
-                    <PieChart
-                      width={256}
-                      height={190}
-                      accessibilityLayer
-                      title="Released sprite collection progress"
-                    >
-                      <Pie
-                        data={releasedSpriteChartData}
-                        dataKey="value"
-                        nameKey="name"
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={55}
-                        outerRadius={78}
-                        paddingAngle={3}
-                        stroke="none"
-                      >
-                        {releasedSpriteChartData.map((entry) => (
-                          <Cell key={entry.name} fill={entry.color} />
-                        ))}
-                        <Label
-                          value={releasedSpriteCount}
-                          position="center"
-                          className="fill-[var(--sea-ink)] text-xl font-semibold"
-                        />
-                      </Pie>
-                      <Tooltip />
-                    </PieChart>
-                    <ul className="grid w-full grid-cols-3 gap-2 text-center text-xs">
+                  <Card className="items-center gap-3 p-3">
+                    <div className="h-48 w-full max-w-64">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart
+                          accessibilityLayer
+                          title="Released sprite collection progress"
+                        >
+                          <Pie
+                            data={releasedSpriteChartData}
+                            dataKey="value"
+                            nameKey="name"
+                            cx="50%"
+                            cy="50%"
+                            innerRadius="58%"
+                            outerRadius="82%"
+                            paddingAngle={3}
+                            stroke="none"
+                          >
+                            {releasedSpriteChartData.map((entry) => (
+                              <Cell key={entry.name} fill={entry.color} />
+                            ))}
+                            <Label
+                              value={releasedSpriteCount}
+                              position="center"
+                              className="fill-[var(--sea-ink)] text-xl font-semibold"
+                            />
+                          </Pie>
+                          <Tooltip />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                    <ul className="grid w-full grid-cols-1 gap-1 text-sm min-[380px]:grid-cols-3 min-[380px]:gap-2 min-[380px]:text-center min-[380px]:text-xs">
                       {releasedSpriteChartData.map((entry) => (
                         <li key={entry.name}>
                           <span
@@ -218,9 +230,9 @@ function SeasonPage() {
             </div>
           </Tabs>
         </div>
-        <Card className="mt-8 max-sm:gap-0 max-sm:overflow-visible max-sm:rounded-none max-sm:bg-transparent max-sm:py-0 max-sm:ring-0">
-          <CardHeader className="max-sm:px-0"></CardHeader>
-          <CardContent className="max-sm:-mx-4 max-sm:px-0">
+        <Card className="mt-8 max-lg:gap-0 max-lg:overflow-visible max-lg:rounded-none max-lg:bg-transparent max-lg:py-0 max-lg:ring-0">
+          <CardHeader className="max-lg:px-0"></CardHeader>
+          <CardContent className="max-lg:-mx-4 max-lg:px-0">
             <SpriteVariantTable
               sprites={season.sprites}
               variants={season.variants}
