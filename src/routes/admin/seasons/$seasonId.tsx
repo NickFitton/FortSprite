@@ -32,9 +32,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 import { api } from "../../../../convex/_generated/api";
 import type { Id } from "../../../../convex/_generated/dataModel";
 
@@ -150,6 +156,52 @@ const saveSpriteVariant = createServerFn({ method: "POST" })
     });
   });
 
+const createSpriteFormSchema = z.object({
+  name: z.string().trim().min(1, "Enter a sprite name."),
+  description: z.string().trim().min(1, "Enter a sprite description."),
+});
+
+const createSprite = createServerFn({ method: "POST" })
+  .validator(
+    createSpriteFormSchema.extend({
+      seasonId: z.number().int().positive(),
+    }),
+  )
+  .handler(async ({ data }) => {
+    await requireAdmin();
+
+    return prisma.sprite.create({
+      data: {
+        seasonId: data.seasonId,
+        name: data.name,
+        description: data.description,
+      },
+    });
+  });
+
+const createVariantFormSchema = z.object({
+  name: z.string().trim().min(1, "Enter a variant name."),
+  effect: z.string().trim().min(1, "Enter a variant effect."),
+});
+
+const createVariant = createServerFn({ method: "POST" })
+  .validator(
+    createVariantFormSchema.extend({
+      seasonId: z.number().int().positive(),
+    }),
+  )
+  .handler(async ({ data }) => {
+    await requireAdmin();
+
+    return prisma.variant.create({
+      data: {
+        seasonId: data.seasonId,
+        name: data.name,
+        effect: data.effect,
+      },
+    });
+  });
+
 export const Route = createFileRoute("/admin/seasons/$seasonId")({
   component: RouteComponent,
   loader: ({ params }) => getSeasonSpriteVariables({ data: params.seasonId }),
@@ -159,7 +211,9 @@ function RouteComponent() {
   const router = useRouter();
   const { seasonId } = Route.useParams();
   const { sprites, variants, spriteVariants } = Route.useLoaderData();
-  const [, setOpen] = useState<"createSprite" | "editSprite" | undefined>();
+  const [open, setOpen] = useState<
+    "createSprite" | "createVariant" | undefined
+  >();
   const [selectedSpriteVariant, setSelectedSpriteVariant] = useState<{
     sprite: (typeof sprites)[number];
     variant: (typeof variants)[number];
@@ -226,6 +280,9 @@ function RouteComponent() {
                 </Item>
               ))}
             </CardContent>
+            <CardFooter>
+              <Button onClick={() => setOpen("createVariant")}>Create</Button>
+            </CardFooter>
           </Card>
         </TabsContent>
         <TabsContent value="spriteVariants">
@@ -247,6 +304,32 @@ function RouteComponent() {
           </Card>
         </TabsContent>
       </Tabs>
+      <CreateSpriteDialog
+        open={open === "createSprite"}
+        seasonId={Number(seasonId)}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) {
+            setOpen(undefined);
+          }
+        }}
+        onCreated={async () => {
+          await router.invalidate();
+          setOpen(undefined);
+        }}
+      />
+      <CreateVariantDialog
+        open={open === "createVariant"}
+        seasonId={Number(seasonId)}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) {
+            setOpen(undefined);
+          }
+        }}
+        onCreated={async () => {
+          await router.invalidate();
+          setOpen(undefined);
+        }}
+      />
       {selectedSpriteVariant && (
         <ManageSpriteVariantDialog
           key={`${selectedSpriteVariant.sprite.id}-${selectedSpriteVariant.variant.id}-${selectedSpriteVariant.spriteVariant?.id ?? "new"}`}
@@ -265,6 +348,189 @@ function RouteComponent() {
         />
       )}
     </div>
+  );
+}
+
+function CreateSpriteDialog({
+  open,
+  seasonId,
+  onOpenChange,
+  onCreated,
+}: {
+  open: boolean;
+  seasonId: number;
+  onOpenChange: (open: boolean) => void;
+  onCreated: () => Promise<void>;
+}) {
+  const form = useForm({
+    defaultValues: {
+      name: "",
+      description: "",
+    },
+    validators: { onSubmit: createSpriteFormSchema },
+    onSubmit: async ({ value }) => {
+      try {
+        await createSprite({ data: { ...value, seasonId } });
+        await onCreated();
+        form.reset();
+        toast.add({
+          title: "Sprite created",
+          description: `${value.name.trim()} is ready for variants.`,
+        });
+      } catch (error) {
+        console.error("Failed to create sprite:", error);
+        toast.add({
+          title: "Couldn't create sprite",
+          description: "Please try again.",
+        });
+      }
+    },
+  });
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Create sprite</DialogTitle>
+          <DialogDescription>
+            Add a sprite to this season before setting up its variants.
+          </DialogDescription>
+        </DialogHeader>
+        <form
+          id="create-sprite-form"
+          onSubmit={(event) => {
+            event.preventDefault();
+            form.handleSubmit();
+          }}
+        >
+          <FieldGroup>
+            <FormTextField form={form} name="name" label="Name" />
+            <FormTextField
+              form={form}
+              name="description"
+              label="Description"
+              multiline
+            />
+          </FieldGroup>
+        </form>
+        <DialogFooter>
+          <Button type="submit" form="create-sprite-form">
+            Create sprite
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function CreateVariantDialog({
+  open,
+  seasonId,
+  onOpenChange,
+  onCreated,
+}: {
+  open: boolean;
+  seasonId: number;
+  onOpenChange: (open: boolean) => void;
+  onCreated: () => Promise<void>;
+}) {
+  const form = useForm({
+    defaultValues: {
+      name: "",
+      effect: "",
+    },
+    validators: { onSubmit: createVariantFormSchema },
+    onSubmit: async ({ value }) => {
+      try {
+        await createVariant({ data: { ...value, seasonId } });
+        await onCreated();
+        form.reset();
+        toast.add({
+          title: "Variant created",
+          description: `${value.name.trim()} can now be assigned to sprites.`,
+        });
+      } catch (error) {
+        console.error("Failed to create variant:", error);
+        toast.add({
+          title: "Couldn't create variant",
+          description: "Please try again.",
+        });
+      }
+    },
+  });
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Create variant</DialogTitle>
+          <DialogDescription>
+            Add a variant that can be assigned to every sprite in this season.
+          </DialogDescription>
+        </DialogHeader>
+        <form
+          id="create-variant-form"
+          onSubmit={(event) => {
+            event.preventDefault();
+            form.handleSubmit();
+          }}
+        >
+          <FieldGroup>
+            <FormTextField form={form} name="name" label="Name" />
+            <FormTextField form={form} name="effect" label="Effect" multiline />
+          </FieldGroup>
+        </form>
+        <DialogFooter>
+          <Button type="submit" form="create-variant-form">
+            Create variant
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function FormTextField({
+  form,
+  name,
+  label,
+  multiline = false,
+}: {
+  form: ReturnType<typeof useForm>;
+  name: "name" | "description" | "effect";
+  label: string;
+  multiline?: boolean;
+}) {
+  return (
+    <form.Field name={name}>
+      {(field) => {
+        const isInvalid =
+          field.state.meta.isTouched && !field.state.meta.isValid;
+        const inputProps = {
+          id: field.name,
+          name: field.name,
+          value: field.state.value,
+          onBlur: field.handleBlur,
+          onChange: (
+            event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+          ) => field.handleChange(event.target.value),
+          "aria-invalid": isInvalid,
+          autoComplete: "off",
+        };
+
+        return (
+          <Field data-invalid={isInvalid}>
+            <FieldLabel htmlFor={field.name}>{label}</FieldLabel>
+            {multiline ? (
+              <Textarea {...inputProps} />
+            ) : (
+              <Input {...inputProps} />
+            )}
+            {isInvalid && <FieldError errors={field.state.meta.errors} />}
+          </Field>
+        );
+      }}
+    </form.Field>
   );
 }
 
