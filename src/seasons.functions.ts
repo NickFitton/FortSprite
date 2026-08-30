@@ -6,6 +6,7 @@ import { prisma } from "#/db";
 export const getSidebarSeasons = createServerFn({ method: "GET" }).handler(
   async () => {
     return prisma.season.findMany({
+      where: { isPublic: true },
       select: {
         id: true,
         name: true,
