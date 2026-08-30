@@ -82,7 +82,7 @@ jobs:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
 
       - name: Pull Vercel production configuration
-        run: pnpm dlx vercel@latest pull --yes --environment=production --debug --token="${{ secrets.VERCEL_TOKEN }}"
+        run: pnpm dlx vercel@latest pull --yes --environment=production --token="${{ secrets.VERCEL_TOKEN }}"
 
       - name: Verify Vercel production variables
         run: |
@@ -102,7 +102,12 @@ jobs:
           done
 
       - name: Build Vercel production output
-        run: pnpm dlx vercel@latest build --prod --token="${{ secrets.VERCEL_TOKEN }}"
+        run: >
+          pnpm dlx vercel@latest env run
+          --environment=production
+          --token="${{ secrets.VERCEL_TOKEN }}"
+          --
+          env NITRO_PRESET=vercel pnpm run build
 
       - name: Apply Prisma migrations
         run: pnpm exec prisma migrate deploy
