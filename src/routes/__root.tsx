@@ -8,8 +8,7 @@ import {
 } from "#/components/ui/sidebar";
 import { Toaster } from "#/components/ui/toast";
 import { TooltipProvider } from "#/components/ui/tooltip";
-import Footer from "../components/Footer";
-import Header from "../components/Header";
+import Header from "../components/Sidebar";
 import ClerkProvider from "../integrations/clerk/provider";
 import ConvexProvider from "../integrations/convex/provider";
 import { getSidebarSeasons } from "../seasons.functions";
@@ -67,7 +66,6 @@ function RootDocument({ children }: { children: React.ReactNode }) {
                       </span>
                     </header>
                     <main className="flex flex-1 flex-col">{children}</main>
-                    <Footer />
                   </div>
                 </SidebarInset>
               </SidebarProvider>

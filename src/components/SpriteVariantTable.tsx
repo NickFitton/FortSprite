@@ -1,5 +1,6 @@
 import { useQuery } from "convex/react";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Skeleton } from "#/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -123,9 +124,9 @@ export function SpriteVariantTable<
                       type="button"
                       className={`flex min-h-10 cursor-pointer items-center text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset ${
                         collectionStatus === "MASTERED"
-                          ? "bg-green-200 hover:bg-green-300 dark:bg-green-400/30 dark:hover:bg-green-400/40"
+                          ? "bg-yellow-200 hover:bg-yellow-300 dark:bg-yellow-400/30 dark:hover:bg-yellow-400/40"
                           : collectionStatus === "EXTRACTED"
-                            ? "bg-yellow-200 hover:bg-yellow-300 dark:bg-yellow-400/30 dark:hover:bg-yellow-400/40"
+                            ? "bg-green-200 hover:bg-green-300 dark:bg-green-400/30 dark:hover:bg-green-400/40"
                             : "hover:bg-muted/50"
                       }`}
                       onClick={() =>
@@ -158,19 +159,40 @@ function SpriteVariantCell({
   label: string;
   status: string;
 }) {
+  const imageRef = useRef<HTMLImageElement>(null);
   const storedImageUrl = useQuery(
     api.storage.getUrl,
     imageStorageId ? { storageId: imageStorageId as Id<"_storage"> } : "skip",
   );
+  const imageUrl = storedImageUrl ?? "/Default.webp";
+  const [loadedImageUrl, setLoadedImageUrl] = useState<string | null>(null);
+
+  const isImageLoading =
+    (Boolean(imageStorageId) && storedImageUrl === undefined) ||
+    loadedImageUrl !== imageUrl;
+
+  useEffect(() => {
+    if (imageRef.current?.complete) {
+      setLoadedImageUrl(imageUrl);
+    }
+  }, [imageUrl]);
 
   return (
-    <div className="relative size-[150px] shrink-0">
+    <div className="relative size-24 shrink-0 sm:size-[150px]">
+      {isImageLoading && (
+        <Skeleton
+          aria-hidden="true"
+          className="absolute inset-0 size-full rounded-none"
+        />
+      )}
       <img
-        src={storedImageUrl ?? "/Default.webp"}
+        ref={imageRef}
+        src={imageUrl}
         alt={label}
-        className={`size-full object-contain ${
-          imageStorageId ? "" : "brightness-0"
-        }`}
+        className={`absolute inset-0 size-full object-contain transition-opacity duration-150 ${
+          isImageLoading ? "opacity-0" : "opacity-100"
+        } ${imageStorageId ? "" : "brightness-0"}`}
+        onLoad={() => setLoadedImageUrl(imageUrl)}
       />
       <span className="absolute right-2 bottom-2 rounded-full bg-background/90 px-2 py-1 text-xs font-medium shadow-sm">
         {status}

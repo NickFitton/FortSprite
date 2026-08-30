@@ -3,13 +3,7 @@ import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Cell, Label, Pie, PieChart, Tooltip } from "recharts";
 import { SpriteVariantTable } from "#/components/SpriteVariantTable";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "#/components/ui/card";
+import { Card, CardContent, CardHeader } from "#/components/ui/card";
 import { Separator } from "#/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs";
 import { toast } from "#/components/ui/toast";
@@ -28,9 +22,7 @@ function SeasonPage() {
   const router = useRouter();
   const { isSignedIn } = useUser();
   const [isRecordingExtraction, setIsRecordingExtraction] = useState(false);
-  const [overviewView, setOverviewView] = useState<"numbers" | "chart">(
-    "numbers",
-  );
+  const [overviewView, setOverviewView] = useState<"stats" | "chart">("stats");
   const [overviewContentHeight, setOverviewContentHeight] = useState<number>();
   const overviewContentRef = useRef<HTMLDivElement>(null);
   const collectionStatusBySpriteVariantId = new Map(
@@ -73,12 +65,12 @@ function SeasonPage() {
     {
       name: "Extracted",
       value: releasedSpriteOverview.extracted,
-      color: "#eab308",
+      color: "#16a34a",
     },
     {
       name: "Mastered",
       value: releasedSpriteOverview.mastered,
-      color: "#16a34a",
+      color: "#eab308",
     },
   ];
 
@@ -103,7 +95,7 @@ function SeasonPage() {
   return (
     <main className="page-wrap px-4 py-12">
       <section>
-        <div className="flex flex-row gap-6 justify-between items-center">
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="island-kicker mb-2">
               Chapter {season.chapterNumber} · Season {season.seasonNumber}
@@ -118,14 +110,14 @@ function SeasonPage() {
           <Tabs
             value={overviewView}
             onValueChange={(value) => {
-              if (value === "numbers" || value === "chart") {
+              if (value === "stats" || value === "chart") {
                 setOverviewView(value);
               }
             }}
             className="w-full sm:w-80 sm:shrink-0 gap-0"
           >
             <TabsList aria-label="Released sprite overview display">
-              <TabsTrigger value="numbers">Numbers</TabsTrigger>
+              <TabsTrigger value="stats">Stats</TabsTrigger>
               <TabsTrigger value="chart">Chart</TabsTrigger>
             </TabsList>
             <div
@@ -137,7 +129,7 @@ function SeasonPage() {
               }
             >
               <div ref={overviewContentRef}>
-                <TabsContent value="numbers" className="pt-4">
+                <TabsContent value="stats" className="pt-4">
                   <Card className="p-2">
                     <div className="flex flex-row justify-center items-center gap-4">
                       <span>Released sprites</span>
@@ -155,13 +147,13 @@ function SeasonPage() {
                       </div>
                       <div>
                         <dt className="text-muted-foreground">Extracted</dt>
-                        <dd className="font-semibold text-yellow-700 dark:text-yellow-300">
+                        <dd className="font-semibold text-green-700 dark:text-green-300">
                           {releasedSpriteOverview.extracted}
                         </dd>
                       </div>
                       <div>
                         <dt className="text-muted-foreground">Mastered</dt>
-                        <dd className="font-semibold text-green-700 dark:text-green-300">
+                        <dd className="font-semibold text-yellow-700 dark:text-yellow-300">
                           {releasedSpriteOverview.mastered}
                         </dd>
                       </div>
@@ -221,14 +213,9 @@ function SeasonPage() {
             </div>
           </Tabs>
         </div>
-        <Card className="mt-8">
-          <CardHeader>
-            <CardTitle>Sprite Variants</CardTitle>
-            <CardDescription>
-              Browse the sprite variants available in this season.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+        <Card className="mt-8 max-sm:gap-0 max-sm:overflow-visible max-sm:rounded-none max-sm:bg-transparent max-sm:py-0 max-sm:ring-0">
+          <CardHeader className="max-sm:px-0"></CardHeader>
+          <CardContent className="max-sm:-mx-4 max-sm:px-0">
             <SpriteVariantTable
               sprites={season.sprites}
               variants={season.variants}

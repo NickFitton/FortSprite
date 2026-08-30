@@ -10,11 +10,8 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AboutRouteImport } from './routes/about'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as SeasonsRouteImport } from './routes/seasons'
-import { Route as DemoClerkRouteImport } from './routes/demo/clerk'
-import { Route as DemoPrismaRouteImport } from './routes/demo/prisma'
 import { Route as SeasonsSeasonIdRouteImport } from './routes/seasons/$seasonId'
 import { Route as AdminSeasonsIndexRouteImport } from './routes/admin/seasons/index'
 import { Route as AdminSeasonsSeasonIdRouteImport } from './routes/admin/seasons/$seasonId'
@@ -22,11 +19,6 @@ import { Route as AdminSeasonsSeasonIdRouteImport } from './routes/admin/seasons
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AboutRoute = AboutRouteImport.update({
-  id: '/about',
-  path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -37,16 +29,6 @@ const AdminRoute = AdminRouteImport.update({
 const SeasonsRoute = SeasonsRouteImport.update({
   id: '/seasons',
   path: '/seasons',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DemoClerkRoute = DemoClerkRouteImport.update({
-  id: '/demo/clerk',
-  path: '/demo/clerk',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DemoPrismaRoute = DemoPrismaRouteImport.update({
-  id: '/demo/prisma',
-  path: '/demo/prisma',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SeasonsSeasonIdRoute = SeasonsSeasonIdRouteImport.update({
@@ -67,22 +49,16 @@ const AdminSeasonsSeasonIdRoute = AdminSeasonsSeasonIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
   '/seasons': typeof SeasonsRouteWithChildren
-  '/demo/clerk': typeof DemoClerkRoute
-  '/demo/prisma': typeof DemoPrismaRoute
   '/seasons/$seasonId': typeof SeasonsSeasonIdRoute
   '/admin/seasons/$seasonId': typeof AdminSeasonsSeasonIdRoute
   '/admin/seasons/': typeof AdminSeasonsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
   '/seasons': typeof SeasonsRouteWithChildren
-  '/demo/clerk': typeof DemoClerkRoute
-  '/demo/prisma': typeof DemoPrismaRoute
   '/seasons/$seasonId': typeof SeasonsSeasonIdRoute
   '/admin/seasons/$seasonId': typeof AdminSeasonsSeasonIdRoute
   '/admin/seasons': typeof AdminSeasonsIndexRoute
@@ -90,11 +66,8 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
   '/seasons': typeof SeasonsRouteWithChildren
-  '/demo/clerk': typeof DemoClerkRoute
-  '/demo/prisma': typeof DemoPrismaRoute
   '/seasons/$seasonId': typeof SeasonsSeasonIdRoute
   '/admin/seasons/$seasonId': typeof AdminSeasonsSeasonIdRoute
   '/admin/seasons/': typeof AdminSeasonsIndexRoute
@@ -103,33 +76,24 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/about'
     | '/admin'
     | '/seasons'
-    | '/demo/clerk'
-    | '/demo/prisma'
     | '/seasons/$seasonId'
     | '/admin/seasons/$seasonId'
     | '/admin/seasons/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/about'
     | '/admin'
     | '/seasons'
-    | '/demo/clerk'
-    | '/demo/prisma'
     | '/seasons/$seasonId'
     | '/admin/seasons/$seasonId'
     | '/admin/seasons'
   id:
     | '__root__'
     | '/'
-    | '/about'
     | '/admin'
     | '/seasons'
-    | '/demo/clerk'
-    | '/demo/prisma'
     | '/seasons/$seasonId'
     | '/admin/seasons/$seasonId'
     | '/admin/seasons/'
@@ -137,11 +101,8 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AboutRoute: typeof AboutRoute
   AdminRoute: typeof AdminRouteWithChildren
   SeasonsRoute: typeof SeasonsRouteWithChildren
-  DemoClerkRoute: typeof DemoClerkRoute
-  DemoPrismaRoute: typeof DemoPrismaRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -151,13 +112,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -172,20 +126,6 @@ declare module '@tanstack/react-router' {
       path: '/seasons'
       fullPath: '/seasons'
       preLoaderRoute: typeof SeasonsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/demo/clerk': {
-      id: '/demo/clerk'
-      path: '/demo/clerk'
-      fullPath: '/demo/clerk'
-      preLoaderRoute: typeof DemoClerkRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/demo/prisma': {
-      id: '/demo/prisma'
-      path: '/demo/prisma'
-      fullPath: '/demo/prisma'
-      preLoaderRoute: typeof DemoPrismaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/seasons/$seasonId': {
@@ -237,11 +177,8 @@ const SeasonsRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AboutRoute: AboutRoute,
   AdminRoute: AdminRouteWithChildren,
   SeasonsRoute: SeasonsRouteWithChildren,
-  DemoClerkRoute: DemoClerkRoute,
-  DemoPrismaRoute: DemoPrismaRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

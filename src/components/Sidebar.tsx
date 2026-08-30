@@ -1,18 +1,15 @@
 import { useUser } from "@clerk/tanstack-react-start";
 import { Link, useMatchRoute } from "@tanstack/react-router";
 import {
-  BookOpenIcon,
   CalendarDaysIcon,
-  CircleHelpIcon,
-  FlaskConicalIcon,
   FolderCogIcon,
   HomeIcon,
   LeafIcon,
 } from "lucide-react";
 import ClerkHeader from "../integrations/clerk/header-user.tsx";
-import ThemeToggle from "./ThemeToggle";
+import ThemeToggle from "./ThemeToggle.tsx";
 import {
-  Sidebar,
+  Sidebar as BaseSidebar,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
@@ -24,15 +21,9 @@ import {
   SidebarMenuItem,
   SidebarRail,
   SidebarTrigger,
-} from "./ui/sidebar";
+} from "./ui/sidebar.tsx";
 
-const navigation = [
-  { title: "Home", to: "/", icon: HomeIcon },
-  { title: "About", to: "/about", icon: CircleHelpIcon },
-  { title: "Docs", to: "/", icon: BookOpenIcon },
-  { title: "Clerk demo", to: "/demo/clerk", icon: FlaskConicalIcon },
-  { title: "Prisma demo", to: "/demo/prisma", icon: FlaskConicalIcon },
-] as const;
+const navigation = [{ title: "Home", to: "/", icon: HomeIcon }] as const;
 
 const adminNavigation = {
   title: "Admin",
@@ -40,7 +31,7 @@ const adminNavigation = {
   icon: FolderCogIcon,
 } as const;
 
-export default function Header({
+export default function Sidebar({
   seasons,
 }: {
   seasons: Array<{
@@ -58,7 +49,7 @@ export default function Header({
       : navigation;
 
   return (
-    <Sidebar collapsible="icon" className="border-[var(--line)]">
+    <BaseSidebar collapsible="icon" className="border-[var(--line)]">
       <SidebarHeader className="flex-row items-center justify-between p-3 group-data-[collapsible=icon]:justify-center">
         <Link
           to="/"
@@ -152,6 +143,6 @@ export default function Header({
         </div>
       </SidebarFooter>
       <SidebarRail />
-    </Sidebar>
+    </BaseSidebar>
   );
 }
