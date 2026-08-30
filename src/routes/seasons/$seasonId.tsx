@@ -30,7 +30,7 @@ function SeasonPage() {
   const season = Route.useLoaderData();
   const router = useRouter();
   const { isSignedIn } = useUser();
-  const [isRecordingExtraction, setIsRecordingExtraction] = useState(false);
+  const recordingSpriteVariantIdsRef = useRef(new Set<number>());
   const [isSavingProgressImage, setIsSavingProgressImage] = useState(false);
   const [overviewView, setOverviewView] = useState<"stats" | "chart">("stats");
   const [overviewContentHeight, setOverviewContentHeight] = useState<number>();
@@ -354,7 +354,10 @@ function SeasonPage() {
               userCollections={season.userCollections}
               hideReleasedStatus
               onClick={async ({ sprite, variant, spriteVariant }) => {
-                if (!spriteVariant || isRecordingExtraction) {
+                if (
+                  !spriteVariant ||
+                  recordingSpriteVariantIdsRef.current.has(spriteVariant.id)
+                ) {
                   return;
                 }
 
@@ -368,7 +371,7 @@ function SeasonPage() {
                 }
 
                 try {
-                  setIsRecordingExtraction(true);
+                  recordingSpriteVariantIdsRef.current.add(spriteVariant.id);
                   const collection = await advanceSpriteVariantCollection({
                     data: {
                       seasonId: season.id,
@@ -397,7 +400,7 @@ function SeasonPage() {
                     description: "Please try again.",
                   });
                 } finally {
-                  setIsRecordingExtraction(false);
+                  recordingSpriteVariantIdsRef.current.delete(spriteVariant.id);
                 }
               }}
             />
