@@ -1,5 +1,6 @@
 import { useUser } from "@clerk/tanstack-react-start";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { Download } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import {
   Cell,
@@ -10,6 +11,7 @@ import {
   Tooltip,
 } from "recharts";
 import { SpriteVariantTable } from "#/components/SpriteVariantTable";
+import { Button } from "#/components/ui/button";
 import { Card, CardContent, CardHeader } from "#/components/ui/card";
 import { Separator } from "#/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs";
@@ -29,8 +31,10 @@ function SeasonPage() {
   const router = useRouter();
   const { isSignedIn } = useUser();
   const [isRecordingExtraction, setIsRecordingExtraction] = useState(false);
+  const [isSavingProgressImage, setIsSavingProgressImage] = useState(false);
   const [overviewView, setOverviewView] = useState<"stats" | "chart">("stats");
   const [overviewContentHeight, setOverviewContentHeight] = useState<number>();
+  const progressCaptureRef = useRef<HTMLElement>(null);
   const overviewContentRef = useRef<HTMLDivElement>(null);
   const collectionStatusBySpriteVariantId = new Map(
     season.userCollections.map((collection) => [
@@ -99,9 +103,107 @@ function SeasonPage() {
     return () => resizeObserver.disconnect();
   }, []);
 
+  const saveProgressImage = async () => {
+    const progressCapture = progressCaptureRef.current;
+
+    if (!progressCapture || isSavingProgressImage) {
+      return;
+    }
+
+    const previouslySelectedOverviewView = overviewView;
+    setIsSavingProgressImage(true);
+    const capturePadding = 32;
+    const captureContentWidth = 1080;
+    const rootStyles = getComputedStyle(document.documentElement);
+    const captureBackground = rootStyles.getPropertyValue("--bg-base").trim();
+    const captureSurfaceColor = rootStyles.getPropertyValue("--foam").trim();
+    const captureHost = document.createElement("div");
+    const captureSurface = document.createElement("div");
+
+    try {
+      // The shared image always includes the numeric progress summary, even if
+      // the user was viewing the optional chart on screen.
+      setOverviewView("stats");
+      await new Promise<void>((resolve) => {
+        requestAnimationFrame(() => requestAnimationFrame(resolve));
+      });
+      await document.fonts?.ready;
+
+      const captureContent = progressCapture.cloneNode(true) as HTMLElement;
+      captureContent
+        .querySelectorAll<HTMLElement>("[data-save-progress-image-control]")
+        .forEach((control) => control.remove());
+      const overviewContent = captureContent.querySelector<HTMLElement>(
+        "[data-progress-image-overview-content]",
+      );
+
+      if (overviewContent) {
+        overviewContent.style.height = "auto";
+      }
+
+      captureContent.style.width = `${captureContentWidth}px`;
+      captureContent.style.maxWidth = "none";
+      captureSurface.append(captureContent);
+      captureSurface.style.cssText = [
+        "box-sizing: border-box",
+        `width: ${captureContentWidth + capturePadding * 2}px`,
+        `padding: ${capturePadding}px`,
+        `background: linear-gradient(165deg, ${captureSurfaceColor}, ${captureBackground})`,
+      ].join(";");
+      captureHost.style.cssText = [
+        "position: fixed",
+        "top: 0",
+        "left: 0",
+        "opacity: 0",
+        "pointer-events: none",
+      ].join(";");
+      captureHost.append(captureSurface);
+      document.body.append(captureHost);
+      await Promise.all(
+        Array.from(captureContent.querySelectorAll("img")).map((image) =>
+          image.decode().catch(() => undefined),
+        ),
+      );
+      await new Promise<void>((resolve) => {
+        requestAnimationFrame(() => requestAnimationFrame(resolve));
+      });
+
+      const { toPng } = await import("html-to-image");
+      const image = await toPng(captureSurface, {
+        backgroundColor: captureBackground,
+        cacheBust: true,
+        pixelRatio: 2,
+      });
+      const link = document.createElement("a");
+      const safeSeasonName = season.name
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "");
+
+      link.href = image;
+      link.download = `${safeSeasonName || "season"}-progress.png`;
+      link.click();
+      toast.add({
+        title: "Progress image saved",
+        description: "Your season progress PNG has been downloaded.",
+      });
+    } catch (error) {
+      console.error("Failed to save progress image:", error);
+      toast.add({
+        title: "Couldn't save progress image",
+        description: "Please try again once the sprites have loaded.",
+      });
+    } finally {
+      captureHost.remove();
+      setOverviewView(previouslySelectedOverviewView);
+      setIsSavingProgressImage(false);
+    }
+  };
+
   return (
     <main className="page-wrap px-4 py-8 sm:py-12">
-      <section className="season-detail">
+      <section ref={progressCaptureRef} className="season-detail">
         <div className="season-detail__header flex flex-col gap-8">
           <div className="min-w-0 max-w-2xl">
             <p className="island-kicker mb-2">
@@ -118,6 +220,17 @@ function SeasonPage() {
                 Historic chapter progress will be displayed here soon.
               </p>
             )}
+            <Button
+              type="button"
+              variant="outline"
+              className="mt-5"
+              onClick={saveProgressImage}
+              disabled={isSavingProgressImage}
+              data-save-progress-image-control="true"
+            >
+              <Download aria-hidden="true" />
+              {isSavingProgressImage ? "Saving image…" : "Save progress image"}
+            </Button>
           </div>
           <Tabs
             value={overviewView}
@@ -136,6 +249,7 @@ function SeasonPage() {
               <TabsTrigger value="chart">Chart</TabsTrigger>
             </TabsList>
             <div
+              data-progress-image-overview-content="true"
               className="overflow-hidden transition-[height] duration-300 ease-out motion-reduce:transition-none"
               style={
                 overviewContentHeight === undefined
