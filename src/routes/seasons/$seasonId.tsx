@@ -1,6 +1,6 @@
 import { useUser } from "@clerk/tanstack-react-start";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Cell, Label, Pie, PieChart, Tooltip } from "recharts";
 import { SpriteVariantTable } from "#/components/SpriteVariantTable";
 import {
@@ -28,6 +28,11 @@ function SeasonPage() {
   const router = useRouter();
   const { isSignedIn } = useUser();
   const [isRecordingExtraction, setIsRecordingExtraction] = useState(false);
+  const [overviewView, setOverviewView] = useState<"numbers" | "chart">(
+    "numbers",
+  );
+  const [overviewContentHeight, setOverviewContentHeight] = useState<number>();
+  const overviewContentRef = useRef<HTMLDivElement>(null);
   const collectionStatusBySpriteVariantId = new Map(
     season.userCollections.map((collection) => [
       collection.spriteVariantId,
@@ -77,6 +82,24 @@ function SeasonPage() {
     },
   ];
 
+  useEffect(() => {
+    const content = overviewContentRef.current;
+
+    if (!content) {
+      return;
+    }
+
+    const updateHeight = () => {
+      setOverviewContentHeight(content.getBoundingClientRect().height);
+    };
+    const resizeObserver = new ResizeObserver(updateHeight);
+
+    updateHeight();
+    resizeObserver.observe(content);
+
+    return () => resizeObserver.disconnect();
+  }, []);
+
   return (
     <main className="page-wrap px-4 py-12">
       <section>
@@ -93,93 +116,109 @@ function SeasonPage() {
             </p>
           </div>
           <Tabs
-            defaultValue="numbers"
+            value={overviewView}
+            onValueChange={(value) => {
+              if (value === "numbers" || value === "chart") {
+                setOverviewView(value);
+              }
+            }}
             className="w-full sm:w-80 sm:shrink-0 gap-0"
           >
             <TabsList aria-label="Released sprite overview display">
               <TabsTrigger value="numbers">Numbers</TabsTrigger>
               <TabsTrigger value="chart">Chart</TabsTrigger>
             </TabsList>
-            <TabsContent value="numbers" className="mt-4">
-              <Card className="p-2">
-                <div className="flex flex-row justify-center items-center gap-4">
-                  <span>Released sprites</span>
-                  <span className="text-lg font-semibold text-[var(--sea-ink)]">
-                    {releasedSpriteCount}
-                  </span>
-                </div>
-                <Separator />
-                <div className="grid grid-cols-3 gap-x-3 gap-y-3 text-center text-sm">
-                  <div>
-                    <dt className="text-muted-foreground">Not found</dt>
-                    <dd className="font-semibold text-[var(--sea-ink)]">
-                      {releasedSpriteOverview.notFound}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-muted-foreground">Extracted</dt>
-                    <dd className="font-semibold text-yellow-700 dark:text-yellow-300">
-                      {releasedSpriteOverview.extracted}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-muted-foreground">Mastered</dt>
-                    <dd className="font-semibold text-green-700 dark:text-green-300">
-                      {releasedSpriteOverview.mastered}
-                    </dd>
-                  </div>
-                </div>
-              </Card>
-            </TabsContent>
-            <TabsContent value="chart" className="mt-4">
-              <Card className="flex flex-col items-center">
-                <PieChart
-                  width={256}
-                  height={190}
-                  accessibilityLayer
-                  title="Released sprite collection progress"
-                >
-                  <Pie
-                    data={releasedSpriteChartData}
-                    dataKey="value"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={55}
-                    outerRadius={78}
-                    paddingAngle={3}
-                    stroke="none"
-                  >
-                    {releasedSpriteChartData.map((entry) => (
-                      <Cell key={entry.name} fill={entry.color} />
-                    ))}
-                    <Label
-                      value={releasedSpriteCount}
-                      position="center"
-                      className="fill-[var(--sea-ink)] text-xl font-semibold"
-                    />
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-                <ul className="grid w-full grid-cols-3 gap-2 text-center text-xs">
-                  {releasedSpriteChartData.map((entry) => (
-                    <li key={entry.name}>
-                      <span
-                        aria-hidden="true"
-                        className="mr-1 inline-block size-2 rounded-full"
-                        style={{ backgroundColor: entry.color }}
-                      />
-                      <span className="text-muted-foreground">
-                        {entry.name}
+            <div
+              className="overflow-hidden transition-[height] duration-300 ease-out motion-reduce:transition-none"
+              style={
+                overviewContentHeight === undefined
+                  ? undefined
+                  : { height: overviewContentHeight }
+              }
+            >
+              <div ref={overviewContentRef}>
+                <TabsContent value="numbers" className="pt-4">
+                  <Card className="p-2">
+                    <div className="flex flex-row justify-center items-center gap-4">
+                      <span>Released sprites</span>
+                      <span className="text-lg font-semibold text-[var(--sea-ink)]">
+                        {releasedSpriteCount}
                       </span>
-                      <span className="ml-1 font-semibold text-[var(--sea-ink)]">
-                        {entry.value}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </Card>
-            </TabsContent>
+                    </div>
+                    <Separator />
+                    <div className="grid grid-cols-3 gap-x-3 gap-y-3 text-center text-sm">
+                      <div>
+                        <dt className="text-muted-foreground">Not found</dt>
+                        <dd className="font-semibold text-[var(--sea-ink)]">
+                          {releasedSpriteOverview.notFound}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-muted-foreground">Extracted</dt>
+                        <dd className="font-semibold text-yellow-700 dark:text-yellow-300">
+                          {releasedSpriteOverview.extracted}
+                        </dd>
+                      </div>
+                      <div>
+                        <dt className="text-muted-foreground">Mastered</dt>
+                        <dd className="font-semibold text-green-700 dark:text-green-300">
+                          {releasedSpriteOverview.mastered}
+                        </dd>
+                      </div>
+                    </div>
+                  </Card>
+                </TabsContent>
+                <TabsContent value="chart" className="pt-4">
+                  <Card className="flex flex-col items-center">
+                    <PieChart
+                      width={256}
+                      height={190}
+                      accessibilityLayer
+                      title="Released sprite collection progress"
+                    >
+                      <Pie
+                        data={releasedSpriteChartData}
+                        dataKey="value"
+                        nameKey="name"
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={55}
+                        outerRadius={78}
+                        paddingAngle={3}
+                        stroke="none"
+                      >
+                        {releasedSpriteChartData.map((entry) => (
+                          <Cell key={entry.name} fill={entry.color} />
+                        ))}
+                        <Label
+                          value={releasedSpriteCount}
+                          position="center"
+                          className="fill-[var(--sea-ink)] text-xl font-semibold"
+                        />
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                    <ul className="grid w-full grid-cols-3 gap-2 text-center text-xs">
+                      {releasedSpriteChartData.map((entry) => (
+                        <li key={entry.name}>
+                          <span
+                            aria-hidden="true"
+                            className="mr-1 inline-block size-2 rounded-full"
+                            style={{ backgroundColor: entry.color }}
+                          />
+                          <span className="text-muted-foreground">
+                            {entry.name}
+                          </span>
+                          <span className="ml-1 font-semibold text-[var(--sea-ink)]">
+                            {entry.value}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </Card>
+                </TabsContent>
+              </div>
+            </div>
           </Tabs>
         </div>
         <Card className="mt-8">
