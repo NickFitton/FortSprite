@@ -15,6 +15,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as SeasonsRouteImport } from './routes/seasons'
 import { Route as DemoClerkRouteImport } from './routes/demo/clerk'
 import { Route as DemoPrismaRouteImport } from './routes/demo/prisma'
+import { Route as SeasonsSeasonIdRouteImport } from './routes/seasons/$seasonId'
 import { Route as AdminSeasonsIndexRouteImport } from './routes/admin/seasons/index'
 import { Route as AdminSeasonsSeasonIdRouteImport } from './routes/admin/seasons/$seasonId'
 
@@ -48,6 +49,11 @@ const DemoPrismaRoute = DemoPrismaRouteImport.update({
   path: '/demo/prisma',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SeasonsSeasonIdRoute = SeasonsSeasonIdRouteImport.update({
+  id: '/$seasonId',
+  path: '/$seasonId',
+  getParentRoute: () => SeasonsRoute,
+} as any)
 const AdminSeasonsIndexRoute = AdminSeasonsIndexRouteImport.update({
   id: '/seasons/',
   path: '/seasons/',
@@ -63,9 +69,10 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
-  '/seasons': typeof SeasonsRoute
+  '/seasons': typeof SeasonsRouteWithChildren
   '/demo/clerk': typeof DemoClerkRoute
   '/demo/prisma': typeof DemoPrismaRoute
+  '/seasons/$seasonId': typeof SeasonsSeasonIdRoute
   '/admin/seasons/$seasonId': typeof AdminSeasonsSeasonIdRoute
   '/admin/seasons/': typeof AdminSeasonsIndexRoute
 }
@@ -73,9 +80,10 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
-  '/seasons': typeof SeasonsRoute
+  '/seasons': typeof SeasonsRouteWithChildren
   '/demo/clerk': typeof DemoClerkRoute
   '/demo/prisma': typeof DemoPrismaRoute
+  '/seasons/$seasonId': typeof SeasonsSeasonIdRoute
   '/admin/seasons/$seasonId': typeof AdminSeasonsSeasonIdRoute
   '/admin/seasons': typeof AdminSeasonsIndexRoute
 }
@@ -84,9 +92,10 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/admin': typeof AdminRouteWithChildren
-  '/seasons': typeof SeasonsRoute
+  '/seasons': typeof SeasonsRouteWithChildren
   '/demo/clerk': typeof DemoClerkRoute
   '/demo/prisma': typeof DemoPrismaRoute
+  '/seasons/$seasonId': typeof SeasonsSeasonIdRoute
   '/admin/seasons/$seasonId': typeof AdminSeasonsSeasonIdRoute
   '/admin/seasons/': typeof AdminSeasonsIndexRoute
 }
@@ -99,6 +108,7 @@ export interface FileRouteTypes {
     | '/seasons'
     | '/demo/clerk'
     | '/demo/prisma'
+    | '/seasons/$seasonId'
     | '/admin/seasons/$seasonId'
     | '/admin/seasons/'
   fileRoutesByTo: FileRoutesByTo
@@ -109,6 +119,7 @@ export interface FileRouteTypes {
     | '/seasons'
     | '/demo/clerk'
     | '/demo/prisma'
+    | '/seasons/$seasonId'
     | '/admin/seasons/$seasonId'
     | '/admin/seasons'
   id:
@@ -119,6 +130,7 @@ export interface FileRouteTypes {
     | '/seasons'
     | '/demo/clerk'
     | '/demo/prisma'
+    | '/seasons/$seasonId'
     | '/admin/seasons/$seasonId'
     | '/admin/seasons/'
   fileRoutesById: FileRoutesById
@@ -127,7 +139,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
   AdminRoute: typeof AdminRouteWithChildren
-  SeasonsRoute: typeof SeasonsRoute
+  SeasonsRoute: typeof SeasonsRouteWithChildren
   DemoClerkRoute: typeof DemoClerkRoute
   DemoPrismaRoute: typeof DemoPrismaRoute
 }
@@ -176,6 +188,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DemoPrismaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/seasons/$seasonId': {
+      id: '/seasons/$seasonId'
+      path: '/$seasonId'
+      fullPath: '/seasons/$seasonId'
+      preLoaderRoute: typeof SeasonsSeasonIdRouteImport
+      parentRoute: typeof SeasonsRoute
+    }
     '/admin/seasons/': {
       id: '/admin/seasons/'
       path: '/seasons'
@@ -205,11 +224,22 @@ const AdminRouteChildren: AdminRouteChildren = {
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
+interface SeasonsRouteChildren {
+  SeasonsSeasonIdRoute: typeof SeasonsSeasonIdRoute
+}
+
+const SeasonsRouteChildren: SeasonsRouteChildren = {
+  SeasonsSeasonIdRoute: SeasonsSeasonIdRoute,
+}
+
+const SeasonsRouteWithChildren =
+  SeasonsRoute._addFileChildren(SeasonsRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   AdminRoute: AdminRouteWithChildren,
-  SeasonsRoute: SeasonsRoute,
+  SeasonsRoute: SeasonsRouteWithChildren,
   DemoClerkRoute: DemoClerkRoute,
   DemoPrismaRoute: DemoPrismaRoute,
 }

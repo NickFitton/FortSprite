@@ -40,6 +40,7 @@ export type UserCollectionSumAggregateOutputType = {
 
 export type UserCollectionMinAggregateOutputType = {
   id: number | null
+  userId: string | null
   seasonId: number | null
   spriteVariantId: number | null
   status: $Enums.CollectionStatus | null
@@ -47,6 +48,7 @@ export type UserCollectionMinAggregateOutputType = {
 
 export type UserCollectionMaxAggregateOutputType = {
   id: number | null
+  userId: string | null
   seasonId: number | null
   spriteVariantId: number | null
   status: $Enums.CollectionStatus | null
@@ -54,6 +56,7 @@ export type UserCollectionMaxAggregateOutputType = {
 
 export type UserCollectionCountAggregateOutputType = {
   id: number
+  userId: number
   seasonId: number
   spriteVariantId: number
   status: number
@@ -75,6 +78,7 @@ export type UserCollectionSumAggregateInputType = {
 
 export type UserCollectionMinAggregateInputType = {
   id?: true
+  userId?: true
   seasonId?: true
   spriteVariantId?: true
   status?: true
@@ -82,6 +86,7 @@ export type UserCollectionMinAggregateInputType = {
 
 export type UserCollectionMaxAggregateInputType = {
   id?: true
+  userId?: true
   seasonId?: true
   spriteVariantId?: true
   status?: true
@@ -89,6 +94,7 @@ export type UserCollectionMaxAggregateInputType = {
 
 export type UserCollectionCountAggregateInputType = {
   id?: true
+  userId?: true
   seasonId?: true
   spriteVariantId?: true
   status?: true
@@ -183,6 +189,7 @@ export type UserCollectionGroupByArgs<ExtArgs extends runtime.Types.Extensions.I
 
 export type UserCollectionGroupByOutputType = {
   id: number
+  userId: string
   seasonId: number
   spriteVariantId: number
   status: $Enums.CollectionStatus
@@ -213,6 +220,7 @@ export type UserCollectionWhereInput = {
   OR?: Prisma.UserCollectionWhereInput[]
   NOT?: Prisma.UserCollectionWhereInput | Prisma.UserCollectionWhereInput[]
   id?: Prisma.IntFilter<"UserCollection"> | number
+  userId?: Prisma.StringFilter<"UserCollection"> | string
   seasonId?: Prisma.IntFilter<"UserCollection"> | number
   spriteVariantId?: Prisma.IntFilter<"UserCollection"> | number
   status?: Prisma.EnumCollectionStatusFilter<"UserCollection"> | $Enums.CollectionStatus
@@ -222,6 +230,7 @@ export type UserCollectionWhereInput = {
 
 export type UserCollectionOrderByWithRelationInput = {
   id?: Prisma.SortOrder
+  userId?: Prisma.SortOrder
   seasonId?: Prisma.SortOrder
   spriteVariantId?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -231,18 +240,21 @@ export type UserCollectionOrderByWithRelationInput = {
 
 export type UserCollectionWhereUniqueInput = Prisma.AtLeast<{
   id?: number
+  userId_spriteVariantId?: Prisma.UserCollectionUserIdSpriteVariantIdCompoundUniqueInput
   AND?: Prisma.UserCollectionWhereInput | Prisma.UserCollectionWhereInput[]
   OR?: Prisma.UserCollectionWhereInput[]
   NOT?: Prisma.UserCollectionWhereInput | Prisma.UserCollectionWhereInput[]
+  userId?: Prisma.StringFilter<"UserCollection"> | string
   seasonId?: Prisma.IntFilter<"UserCollection"> | number
   spriteVariantId?: Prisma.IntFilter<"UserCollection"> | number
   status?: Prisma.EnumCollectionStatusFilter<"UserCollection"> | $Enums.CollectionStatus
   season?: Prisma.XOR<Prisma.SeasonScalarRelationFilter, Prisma.SeasonWhereInput>
   spriteVariant?: Prisma.XOR<Prisma.SpriteVariantScalarRelationFilter, Prisma.SpriteVariantWhereInput>
-}, "id">
+}, "id" | "userId_spriteVariantId">
 
 export type UserCollectionOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
+  userId?: Prisma.SortOrder
   seasonId?: Prisma.SortOrder
   spriteVariantId?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -258,12 +270,14 @@ export type UserCollectionScalarWhereWithAggregatesInput = {
   OR?: Prisma.UserCollectionScalarWhereWithAggregatesInput[]
   NOT?: Prisma.UserCollectionScalarWhereWithAggregatesInput | Prisma.UserCollectionScalarWhereWithAggregatesInput[]
   id?: Prisma.IntWithAggregatesFilter<"UserCollection"> | number
+  userId?: Prisma.StringWithAggregatesFilter<"UserCollection"> | string
   seasonId?: Prisma.IntWithAggregatesFilter<"UserCollection"> | number
   spriteVariantId?: Prisma.IntWithAggregatesFilter<"UserCollection"> | number
   status?: Prisma.EnumCollectionStatusWithAggregatesFilter<"UserCollection"> | $Enums.CollectionStatus
 }
 
 export type UserCollectionCreateInput = {
+  userId: string
   status: $Enums.CollectionStatus
   season: Prisma.SeasonCreateNestedOneWithoutUserCollectionsInput
   spriteVariant: Prisma.SpriteVariantCreateNestedOneWithoutUserCollectionsInput
@@ -271,12 +285,14 @@ export type UserCollectionCreateInput = {
 
 export type UserCollectionUncheckedCreateInput = {
   id?: number
+  userId: string
   seasonId: number
   spriteVariantId: number
   status: $Enums.CollectionStatus
 }
 
 export type UserCollectionUpdateInput = {
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumCollectionStatusFieldUpdateOperationsInput | $Enums.CollectionStatus
   season?: Prisma.SeasonUpdateOneRequiredWithoutUserCollectionsNestedInput
   spriteVariant?: Prisma.SpriteVariantUpdateOneRequiredWithoutUserCollectionsNestedInput
@@ -284,6 +300,7 @@ export type UserCollectionUpdateInput = {
 
 export type UserCollectionUncheckedUpdateInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
   seasonId?: Prisma.IntFieldUpdateOperationsInput | number
   spriteVariantId?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumCollectionStatusFieldUpdateOperationsInput | $Enums.CollectionStatus
@@ -291,17 +308,20 @@ export type UserCollectionUncheckedUpdateInput = {
 
 export type UserCollectionCreateManyInput = {
   id?: number
+  userId: string
   seasonId: number
   spriteVariantId: number
   status: $Enums.CollectionStatus
 }
 
 export type UserCollectionUpdateManyMutationInput = {
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumCollectionStatusFieldUpdateOperationsInput | $Enums.CollectionStatus
 }
 
 export type UserCollectionUncheckedUpdateManyInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
   seasonId?: Prisma.IntFieldUpdateOperationsInput | number
   spriteVariantId?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumCollectionStatusFieldUpdateOperationsInput | $Enums.CollectionStatus
@@ -317,8 +337,14 @@ export type UserCollectionOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
+export type UserCollectionUserIdSpriteVariantIdCompoundUniqueInput = {
+  userId: string
+  spriteVariantId: number
+}
+
 export type UserCollectionCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  userId?: Prisma.SortOrder
   seasonId?: Prisma.SortOrder
   spriteVariantId?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -332,6 +358,7 @@ export type UserCollectionAvgOrderByAggregateInput = {
 
 export type UserCollectionMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  userId?: Prisma.SortOrder
   seasonId?: Prisma.SortOrder
   spriteVariantId?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -339,6 +366,7 @@ export type UserCollectionMaxOrderByAggregateInput = {
 
 export type UserCollectionMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  userId?: Prisma.SortOrder
   seasonId?: Prisma.SortOrder
   spriteVariantId?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -439,12 +467,14 @@ export type EnumCollectionStatusFieldUpdateOperationsInput = {
 }
 
 export type UserCollectionCreateWithoutSeasonInput = {
+  userId: string
   status: $Enums.CollectionStatus
   spriteVariant: Prisma.SpriteVariantCreateNestedOneWithoutUserCollectionsInput
 }
 
 export type UserCollectionUncheckedCreateWithoutSeasonInput = {
   id?: number
+  userId: string
   spriteVariantId: number
   status: $Enums.CollectionStatus
 }
@@ -480,18 +510,21 @@ export type UserCollectionScalarWhereInput = {
   OR?: Prisma.UserCollectionScalarWhereInput[]
   NOT?: Prisma.UserCollectionScalarWhereInput | Prisma.UserCollectionScalarWhereInput[]
   id?: Prisma.IntFilter<"UserCollection"> | number
+  userId?: Prisma.StringFilter<"UserCollection"> | string
   seasonId?: Prisma.IntFilter<"UserCollection"> | number
   spriteVariantId?: Prisma.IntFilter<"UserCollection"> | number
   status?: Prisma.EnumCollectionStatusFilter<"UserCollection"> | $Enums.CollectionStatus
 }
 
 export type UserCollectionCreateWithoutSpriteVariantInput = {
+  userId: string
   status: $Enums.CollectionStatus
   season: Prisma.SeasonCreateNestedOneWithoutUserCollectionsInput
 }
 
 export type UserCollectionUncheckedCreateWithoutSpriteVariantInput = {
   id?: number
+  userId: string
   seasonId: number
   status: $Enums.CollectionStatus
 }
@@ -524,46 +557,54 @@ export type UserCollectionUpdateManyWithWhereWithoutSpriteVariantInput = {
 
 export type UserCollectionCreateManySeasonInput = {
   id?: number
+  userId: string
   spriteVariantId: number
   status: $Enums.CollectionStatus
 }
 
 export type UserCollectionUpdateWithoutSeasonInput = {
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumCollectionStatusFieldUpdateOperationsInput | $Enums.CollectionStatus
   spriteVariant?: Prisma.SpriteVariantUpdateOneRequiredWithoutUserCollectionsNestedInput
 }
 
 export type UserCollectionUncheckedUpdateWithoutSeasonInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
   spriteVariantId?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumCollectionStatusFieldUpdateOperationsInput | $Enums.CollectionStatus
 }
 
 export type UserCollectionUncheckedUpdateManyWithoutSeasonInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
   spriteVariantId?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumCollectionStatusFieldUpdateOperationsInput | $Enums.CollectionStatus
 }
 
 export type UserCollectionCreateManySpriteVariantInput = {
   id?: number
+  userId: string
   seasonId: number
   status: $Enums.CollectionStatus
 }
 
 export type UserCollectionUpdateWithoutSpriteVariantInput = {
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumCollectionStatusFieldUpdateOperationsInput | $Enums.CollectionStatus
   season?: Prisma.SeasonUpdateOneRequiredWithoutUserCollectionsNestedInput
 }
 
 export type UserCollectionUncheckedUpdateWithoutSpriteVariantInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
   seasonId?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumCollectionStatusFieldUpdateOperationsInput | $Enums.CollectionStatus
 }
 
 export type UserCollectionUncheckedUpdateManyWithoutSpriteVariantInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
   seasonId?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumCollectionStatusFieldUpdateOperationsInput | $Enums.CollectionStatus
 }
@@ -572,6 +613,7 @@ export type UserCollectionUncheckedUpdateManyWithoutSpriteVariantInput = {
 
 export type UserCollectionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  userId?: boolean
   seasonId?: boolean
   spriteVariantId?: boolean
   status?: boolean
@@ -581,6 +623,7 @@ export type UserCollectionSelect<ExtArgs extends runtime.Types.Extensions.Intern
 
 export type UserCollectionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  userId?: boolean
   seasonId?: boolean
   spriteVariantId?: boolean
   status?: boolean
@@ -590,6 +633,7 @@ export type UserCollectionSelectCreateManyAndReturn<ExtArgs extends runtime.Type
 
 export type UserCollectionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  userId?: boolean
   seasonId?: boolean
   spriteVariantId?: boolean
   status?: boolean
@@ -599,12 +643,13 @@ export type UserCollectionSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
 
 export type UserCollectionSelectScalar = {
   id?: boolean
+  userId?: boolean
   seasonId?: boolean
   spriteVariantId?: boolean
   status?: boolean
 }
 
-export type UserCollectionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "seasonId" | "spriteVariantId" | "status", ExtArgs["result"]["userCollection"]>
+export type UserCollectionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "seasonId" | "spriteVariantId" | "status", ExtArgs["result"]["userCollection"]>
 export type UserCollectionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   season?: boolean | Prisma.SeasonDefaultArgs<ExtArgs>
   spriteVariant?: boolean | Prisma.SpriteVariantDefaultArgs<ExtArgs>
@@ -626,6 +671,7 @@ export type $UserCollectionPayload<ExtArgs extends runtime.Types.Extensions.Inte
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
+    userId: string
     seasonId: number
     spriteVariantId: number
     status: $Enums.CollectionStatus
@@ -1055,6 +1101,7 @@ export interface Prisma__UserCollectionClient<T, Null = never, ExtArgs extends r
  */
 export interface UserCollectionFieldRefs {
   readonly id: Prisma.FieldRef<"UserCollection", 'Int'>
+  readonly userId: Prisma.FieldRef<"UserCollection", 'String'>
   readonly seasonId: Prisma.FieldRef<"UserCollection", 'Int'>
   readonly spriteVariantId: Prisma.FieldRef<"UserCollection", 'Int'>
   readonly status: Prisma.FieldRef<"UserCollection", 'CollectionStatus'>

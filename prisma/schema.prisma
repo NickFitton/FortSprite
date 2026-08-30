@@ -46,19 +46,25 @@ model SpriteVariant {
   seasonId        Int
   variantId       Int
   spriteId        Int
+  imageUrl        String?
+  imageStorageId  String?
   season          Season           @relation(fields: [seasonId], references: [id])
   variant         Variant          @relation(fields: [variantId], references: [id])
   sprite          Sprite           @relation(fields: [spriteId], references: [id])
+  isReleased      Boolean
   userCollections UserCollection[]
 }
 
 model UserCollection {
   id              Int              @id @default(autoincrement())
+  userId          String
   seasonId        Int
   spriteVariantId Int
   season          Season           @relation(fields: [seasonId], references: [id])
   spriteVariant   SpriteVariant    @relation(fields: [spriteVariantId], references: [id])
   status          CollectionStatus
+
+  @@unique([userId, spriteVariantId])
 }
 
 enum CollectionStatus {

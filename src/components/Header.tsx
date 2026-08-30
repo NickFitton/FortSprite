@@ -1,96 +1,157 @@
-import { Link } from "@tanstack/react-router";
+import { useUser } from "@clerk/tanstack-react-start";
+import { Link, useMatchRoute } from "@tanstack/react-router";
 import {
-	CircleAlertIcon,
-	CircleCheckIcon,
-	CircleDashedIcon,
+  BookOpenIcon,
+  CalendarDaysIcon,
+  CircleHelpIcon,
+  FlaskConicalIcon,
+  FolderCogIcon,
+  HomeIcon,
+  LeafIcon,
 } from "lucide-react";
-import type { ComponentProps } from "react";
 import ClerkHeader from "../integrations/clerk/header-user.tsx";
 import ThemeToggle from "./ThemeToggle";
 import {
-	NavigationMenu,
-	NavigationMenuContent,
-	NavigationMenuItem,
-	NavigationMenuLink,
-	NavigationMenuList,
-	NavigationMenuTrigger,
-	navigationMenuTriggerStyle,
-} from "./ui/navigation-menu.tsx";
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarRail,
+  SidebarTrigger,
+} from "./ui/sidebar";
 
-function ListItem({
-	title,
-	children,
-	href,
-	...props
-}: React.ComponentPropsWithoutRef<"li"> & {
-	href: ComponentProps<typeof Link>["to"];
+const navigation = [
+  { title: "Home", to: "/", icon: HomeIcon },
+  { title: "About", to: "/about", icon: CircleHelpIcon },
+  { title: "Docs", to: "/", icon: BookOpenIcon },
+  { title: "Clerk demo", to: "/demo/clerk", icon: FlaskConicalIcon },
+  { title: "Prisma demo", to: "/demo/prisma", icon: FlaskConicalIcon },
+] as const;
+
+const adminNavigation = {
+  title: "Admin",
+  to: "/admin/seasons",
+  icon: FolderCogIcon,
+} as const;
+
+export default function Header({
+  seasons,
+}: {
+  seasons: Array<{
+    id: number;
+    name: string;
+    chapterNumber: number;
+    seasonNumber: number;
+  }>;
 }) {
-	return (
-		<li {...props}>
-			<NavigationMenuLink
-				render={
-					<Link to={href}>
-						<div className="flex flex-col gap-1 text-sm">
-							<div className="leading-none font-medium">{title}</div>
-							<div className="line-clamp-2 text-muted-foreground">
-								{children}
-							</div>
-						</div>
-					</Link>
-				}
-			/>
-		</li>
-	);
-}
+  const matchRoute = useMatchRoute();
+  const { user } = useUser();
+  const visibleNavigation =
+    user?.publicMetadata.isAdmin === true
+      ? [...navigation, adminNavigation]
+      : navigation;
 
-export default function Header() {
-	return (
-		<header className="border-b border-[var(--line)] bg-[var(--header-bg)] px-4 backdrop-blur-lg p-2 flex flex-row gap-2 justify-between">
-			<NavigationMenu>
-				<NavigationMenuList>
-					<NavigationMenuItem>
-						<NavigationMenuLink
-							className={navigationMenuTriggerStyle()}
-							render={<Link to="/">Home</Link>}
-						/>
-					</NavigationMenuItem>
-					<NavigationMenuItem>
-						<NavigationMenuLink
-							className={navigationMenuTriggerStyle()}
-							render={<Link to="/about">About</Link>}
-						/>
-					</NavigationMenuItem>
-					<NavigationMenuItem>
-						<NavigationMenuLink
-							className={navigationMenuTriggerStyle()}
-							render={<Link to="/">Docs</Link>}
-						/>
-					</NavigationMenuItem>
-					<NavigationMenuItem>
-						<NavigationMenuTrigger>Demos</NavigationMenuTrigger>
-						<NavigationMenuContent>
-							<ul className="w-96">
-								<ListItem href="/demo/clerk" title="Introduction">
-									Clerk
-								</ListItem>
-								<ListItem href="/demo/prisma" title="Installation">
-									Prisma
-								</ListItem>
-							</ul>
-						</NavigationMenuContent>
-					</NavigationMenuItem>
-					<NavigationMenuItem>
-						<NavigationMenuLink
-							className={navigationMenuTriggerStyle()}
-							render={<Link to="/admin/seasons">Admin</Link>}
-						/>
-					</NavigationMenuItem>
-				</NavigationMenuList>
-			</NavigationMenu>
-			<div className="flex flex-row align-center gap-2">
-				<ClerkHeader />
-				<ThemeToggle />
-			</div>
-		</header>
-	);
+  return (
+    <Sidebar collapsible="icon" className="border-[var(--line)]">
+      <SidebarHeader className="flex-row items-center justify-between p-3 group-data-[collapsible=icon]:justify-center">
+        <Link
+          to="/"
+          className="flex min-w-0 items-center gap-2 rounded-lg px-2 py-2 text-[var(--sea-ink)] no-underline transition hover:bg-sidebar-accent group-data-[collapsible=icon]:hidden"
+        >
+          <span className="flex size-7 items-center justify-center rounded-md bg-[var(--lagoon-deep)] text-[var(--foam)]">
+            <LeafIcon className="size-4" />
+          </span>
+          <span className="font-semibold group-data-[collapsible=icon]:hidden">
+            Fort Sprite
+          </span>
+        </Link>
+        <SidebarTrigger className="shrink-0" />
+      </SidebarHeader>
+
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {visibleNavigation.map((item) => {
+                const isActive = Boolean(
+                  matchRoute({
+                    to: item.to,
+                    fuzzy: item.to === "/admin/seasons",
+                  }),
+                );
+
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      isActive={isActive}
+                      tooltip={item.title}
+                      render={<Link to={item.to} />}
+                    >
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Seasons</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {seasons.map((season) => (
+                <SidebarMenuItem key={season.id}>
+                  <SidebarMenuButton
+                    isActive={Boolean(
+                      matchRoute({
+                        to: "/seasons/$seasonId",
+                        params: { seasonId: String(season.id) },
+                      }),
+                    )}
+                    tooltip={season.name}
+                    render={
+                      <Link
+                        to="/seasons/$seasonId"
+                        params={{ seasonId: String(season.id) }}
+                      />
+                    }
+                  >
+                    <CalendarDaysIcon />
+                    <span>
+                      C{season.chapterNumber}:S{season.seasonNumber} -{" "}
+                      {season.name}
+                    </span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+
+      <SidebarFooter className="border-t border-[var(--line)] p-3">
+        <div className="flex items-center justify-between gap-2 group-data-[collapsible=icon]:justify-center">
+          <div className="group-data-[collapsible=icon]:hidden">
+            <ThemeToggle />
+          </div>
+          <div className="group-data-[collapsible=icon]:hidden">
+            <ClerkHeader />
+          </div>
+          <div className="hidden group-data-[collapsible=icon]:block">
+            <ClerkHeader />
+          </div>
+        </div>
+      </SidebarFooter>
+      <SidebarRail />
+    </Sidebar>
+  );
 }

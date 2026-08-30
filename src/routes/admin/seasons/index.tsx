@@ -26,6 +26,7 @@ import {
 } from "#/components/ui/item";
 import { toast } from "#/components/ui/toast";
 import { prisma } from "#/db";
+import { requireAdmin } from "#/integrations/clerk/admin";
 import {
   Dialog,
   DialogContent,
@@ -42,6 +43,8 @@ import {
 import { Input } from "@/components/ui/input";
 
 const getSeasons = createServerFn({ method: "GET" }).handler(async () => {
+  await requireAdmin();
+
   return prisma.season.findMany({
     select: {
       id: true,
@@ -62,6 +65,8 @@ const createSeasonFormSchema = z.object({
 const createSeason = createServerFn({ method: "POST" })
   .validator(createSeasonFormSchema)
   .handler(async ({ data }) => {
+    await requireAdmin();
+
     return prisma.season.create({
       data: {
         name: data.name,

@@ -45,6 +45,9 @@ export type SpriteVariantMinAggregateOutputType = {
   seasonId: number | null
   variantId: number | null
   spriteId: number | null
+  imageUrl: string | null
+  imageStorageId: string | null
+  isReleased: boolean | null
 }
 
 export type SpriteVariantMaxAggregateOutputType = {
@@ -52,6 +55,9 @@ export type SpriteVariantMaxAggregateOutputType = {
   seasonId: number | null
   variantId: number | null
   spriteId: number | null
+  imageUrl: string | null
+  imageStorageId: string | null
+  isReleased: boolean | null
 }
 
 export type SpriteVariantCountAggregateOutputType = {
@@ -59,6 +65,9 @@ export type SpriteVariantCountAggregateOutputType = {
   seasonId: number
   variantId: number
   spriteId: number
+  imageUrl: number
+  imageStorageId: number
+  isReleased: number
   _all: number
 }
 
@@ -82,6 +91,9 @@ export type SpriteVariantMinAggregateInputType = {
   seasonId?: true
   variantId?: true
   spriteId?: true
+  imageUrl?: true
+  imageStorageId?: true
+  isReleased?: true
 }
 
 export type SpriteVariantMaxAggregateInputType = {
@@ -89,6 +101,9 @@ export type SpriteVariantMaxAggregateInputType = {
   seasonId?: true
   variantId?: true
   spriteId?: true
+  imageUrl?: true
+  imageStorageId?: true
+  isReleased?: true
 }
 
 export type SpriteVariantCountAggregateInputType = {
@@ -96,6 +111,9 @@ export type SpriteVariantCountAggregateInputType = {
   seasonId?: true
   variantId?: true
   spriteId?: true
+  imageUrl?: true
+  imageStorageId?: true
+  isReleased?: true
   _all?: true
 }
 
@@ -190,6 +208,9 @@ export type SpriteVariantGroupByOutputType = {
   seasonId: number
   variantId: number
   spriteId: number
+  imageUrl: string | null
+  imageStorageId: string | null
+  isReleased: boolean
   _count: SpriteVariantCountAggregateOutputType | null
   _avg: SpriteVariantAvgAggregateOutputType | null
   _sum: SpriteVariantSumAggregateOutputType | null
@@ -220,6 +241,9 @@ export type SpriteVariantWhereInput = {
   seasonId?: Prisma.IntFilter<"SpriteVariant"> | number
   variantId?: Prisma.IntFilter<"SpriteVariant"> | number
   spriteId?: Prisma.IntFilter<"SpriteVariant"> | number
+  imageUrl?: Prisma.StringNullableFilter<"SpriteVariant"> | string | null
+  imageStorageId?: Prisma.StringNullableFilter<"SpriteVariant"> | string | null
+  isReleased?: Prisma.BoolFilter<"SpriteVariant"> | boolean
   season?: Prisma.XOR<Prisma.SeasonScalarRelationFilter, Prisma.SeasonWhereInput>
   variant?: Prisma.XOR<Prisma.VariantScalarRelationFilter, Prisma.VariantWhereInput>
   sprite?: Prisma.XOR<Prisma.SpriteScalarRelationFilter, Prisma.SpriteWhereInput>
@@ -231,6 +255,9 @@ export type SpriteVariantOrderByWithRelationInput = {
   seasonId?: Prisma.SortOrder
   variantId?: Prisma.SortOrder
   spriteId?: Prisma.SortOrder
+  imageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  imageStorageId?: Prisma.SortOrderInput | Prisma.SortOrder
+  isReleased?: Prisma.SortOrder
   season?: Prisma.SeasonOrderByWithRelationInput
   variant?: Prisma.VariantOrderByWithRelationInput
   sprite?: Prisma.SpriteOrderByWithRelationInput
@@ -245,6 +272,9 @@ export type SpriteVariantWhereUniqueInput = Prisma.AtLeast<{
   seasonId?: Prisma.IntFilter<"SpriteVariant"> | number
   variantId?: Prisma.IntFilter<"SpriteVariant"> | number
   spriteId?: Prisma.IntFilter<"SpriteVariant"> | number
+  imageUrl?: Prisma.StringNullableFilter<"SpriteVariant"> | string | null
+  imageStorageId?: Prisma.StringNullableFilter<"SpriteVariant"> | string | null
+  isReleased?: Prisma.BoolFilter<"SpriteVariant"> | boolean
   season?: Prisma.XOR<Prisma.SeasonScalarRelationFilter, Prisma.SeasonWhereInput>
   variant?: Prisma.XOR<Prisma.VariantScalarRelationFilter, Prisma.VariantWhereInput>
   sprite?: Prisma.XOR<Prisma.SpriteScalarRelationFilter, Prisma.SpriteWhereInput>
@@ -256,6 +286,9 @@ export type SpriteVariantOrderByWithAggregationInput = {
   seasonId?: Prisma.SortOrder
   variantId?: Prisma.SortOrder
   spriteId?: Prisma.SortOrder
+  imageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  imageStorageId?: Prisma.SortOrderInput | Prisma.SortOrder
+  isReleased?: Prisma.SortOrder
   _count?: Prisma.SpriteVariantCountOrderByAggregateInput
   _avg?: Prisma.SpriteVariantAvgOrderByAggregateInput
   _max?: Prisma.SpriteVariantMaxOrderByAggregateInput
@@ -271,9 +304,15 @@ export type SpriteVariantScalarWhereWithAggregatesInput = {
   seasonId?: Prisma.IntWithAggregatesFilter<"SpriteVariant"> | number
   variantId?: Prisma.IntWithAggregatesFilter<"SpriteVariant"> | number
   spriteId?: Prisma.IntWithAggregatesFilter<"SpriteVariant"> | number
+  imageUrl?: Prisma.StringNullableWithAggregatesFilter<"SpriteVariant"> | string | null
+  imageStorageId?: Prisma.StringNullableWithAggregatesFilter<"SpriteVariant"> | string | null
+  isReleased?: Prisma.BoolWithAggregatesFilter<"SpriteVariant"> | boolean
 }
 
 export type SpriteVariantCreateInput = {
+  imageUrl?: string | null
+  imageStorageId?: string | null
+  isReleased: boolean
   season: Prisma.SeasonCreateNestedOneWithoutSpriteVariantsInput
   variant: Prisma.VariantCreateNestedOneWithoutSpriteVariantsInput
   sprite: Prisma.SpriteCreateNestedOneWithoutSpriteVariantsInput
@@ -285,10 +324,16 @@ export type SpriteVariantUncheckedCreateInput = {
   seasonId: number
   variantId: number
   spriteId: number
+  imageUrl?: string | null
+  imageStorageId?: string | null
+  isReleased: boolean
   userCollections?: Prisma.UserCollectionUncheckedCreateNestedManyWithoutSpriteVariantInput
 }
 
 export type SpriteVariantUpdateInput = {
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageStorageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isReleased?: Prisma.BoolFieldUpdateOperationsInput | boolean
   season?: Prisma.SeasonUpdateOneRequiredWithoutSpriteVariantsNestedInput
   variant?: Prisma.VariantUpdateOneRequiredWithoutSpriteVariantsNestedInput
   sprite?: Prisma.SpriteUpdateOneRequiredWithoutSpriteVariantsNestedInput
@@ -300,6 +345,9 @@ export type SpriteVariantUncheckedUpdateInput = {
   seasonId?: Prisma.IntFieldUpdateOperationsInput | number
   variantId?: Prisma.IntFieldUpdateOperationsInput | number
   spriteId?: Prisma.IntFieldUpdateOperationsInput | number
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageStorageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isReleased?: Prisma.BoolFieldUpdateOperationsInput | boolean
   userCollections?: Prisma.UserCollectionUncheckedUpdateManyWithoutSpriteVariantNestedInput
 }
 
@@ -308,10 +356,15 @@ export type SpriteVariantCreateManyInput = {
   seasonId: number
   variantId: number
   spriteId: number
+  imageUrl?: string | null
+  imageStorageId?: string | null
+  isReleased: boolean
 }
 
 export type SpriteVariantUpdateManyMutationInput = {
-
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageStorageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isReleased?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type SpriteVariantUncheckedUpdateManyInput = {
@@ -319,6 +372,9 @@ export type SpriteVariantUncheckedUpdateManyInput = {
   seasonId?: Prisma.IntFieldUpdateOperationsInput | number
   variantId?: Prisma.IntFieldUpdateOperationsInput | number
   spriteId?: Prisma.IntFieldUpdateOperationsInput | number
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageStorageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isReleased?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type SpriteVariantListRelationFilter = {
@@ -336,6 +392,9 @@ export type SpriteVariantCountOrderByAggregateInput = {
   seasonId?: Prisma.SortOrder
   variantId?: Prisma.SortOrder
   spriteId?: Prisma.SortOrder
+  imageUrl?: Prisma.SortOrder
+  imageStorageId?: Prisma.SortOrder
+  isReleased?: Prisma.SortOrder
 }
 
 export type SpriteVariantAvgOrderByAggregateInput = {
@@ -350,6 +409,9 @@ export type SpriteVariantMaxOrderByAggregateInput = {
   seasonId?: Prisma.SortOrder
   variantId?: Prisma.SortOrder
   spriteId?: Prisma.SortOrder
+  imageUrl?: Prisma.SortOrder
+  imageStorageId?: Prisma.SortOrder
+  isReleased?: Prisma.SortOrder
 }
 
 export type SpriteVariantMinOrderByAggregateInput = {
@@ -357,6 +419,9 @@ export type SpriteVariantMinOrderByAggregateInput = {
   seasonId?: Prisma.SortOrder
   variantId?: Prisma.SortOrder
   spriteId?: Prisma.SortOrder
+  imageUrl?: Prisma.SortOrder
+  imageStorageId?: Prisma.SortOrder
+  isReleased?: Prisma.SortOrder
 }
 
 export type SpriteVariantSumOrderByAggregateInput = {
@@ -512,6 +577,9 @@ export type SpriteVariantUpdateOneRequiredWithoutUserCollectionsNestedInput = {
 }
 
 export type SpriteVariantCreateWithoutSeasonInput = {
+  imageUrl?: string | null
+  imageStorageId?: string | null
+  isReleased: boolean
   variant: Prisma.VariantCreateNestedOneWithoutSpriteVariantsInput
   sprite: Prisma.SpriteCreateNestedOneWithoutSpriteVariantsInput
   userCollections?: Prisma.UserCollectionCreateNestedManyWithoutSpriteVariantInput
@@ -521,6 +589,9 @@ export type SpriteVariantUncheckedCreateWithoutSeasonInput = {
   id?: number
   variantId: number
   spriteId: number
+  imageUrl?: string | null
+  imageStorageId?: string | null
+  isReleased: boolean
   userCollections?: Prisma.UserCollectionUncheckedCreateNestedManyWithoutSpriteVariantInput
 }
 
@@ -558,9 +629,15 @@ export type SpriteVariantScalarWhereInput = {
   seasonId?: Prisma.IntFilter<"SpriteVariant"> | number
   variantId?: Prisma.IntFilter<"SpriteVariant"> | number
   spriteId?: Prisma.IntFilter<"SpriteVariant"> | number
+  imageUrl?: Prisma.StringNullableFilter<"SpriteVariant"> | string | null
+  imageStorageId?: Prisma.StringNullableFilter<"SpriteVariant"> | string | null
+  isReleased?: Prisma.BoolFilter<"SpriteVariant"> | boolean
 }
 
 export type SpriteVariantCreateWithoutVariantInput = {
+  imageUrl?: string | null
+  imageStorageId?: string | null
+  isReleased: boolean
   season: Prisma.SeasonCreateNestedOneWithoutSpriteVariantsInput
   sprite: Prisma.SpriteCreateNestedOneWithoutSpriteVariantsInput
   userCollections?: Prisma.UserCollectionCreateNestedManyWithoutSpriteVariantInput
@@ -570,6 +647,9 @@ export type SpriteVariantUncheckedCreateWithoutVariantInput = {
   id?: number
   seasonId: number
   spriteId: number
+  imageUrl?: string | null
+  imageStorageId?: string | null
+  isReleased: boolean
   userCollections?: Prisma.UserCollectionUncheckedCreateNestedManyWithoutSpriteVariantInput
 }
 
@@ -600,6 +680,9 @@ export type SpriteVariantUpdateManyWithWhereWithoutVariantInput = {
 }
 
 export type SpriteVariantCreateWithoutSpriteInput = {
+  imageUrl?: string | null
+  imageStorageId?: string | null
+  isReleased: boolean
   season: Prisma.SeasonCreateNestedOneWithoutSpriteVariantsInput
   variant: Prisma.VariantCreateNestedOneWithoutSpriteVariantsInput
   userCollections?: Prisma.UserCollectionCreateNestedManyWithoutSpriteVariantInput
@@ -609,6 +692,9 @@ export type SpriteVariantUncheckedCreateWithoutSpriteInput = {
   id?: number
   seasonId: number
   variantId: number
+  imageUrl?: string | null
+  imageStorageId?: string | null
+  isReleased: boolean
   userCollections?: Prisma.UserCollectionUncheckedCreateNestedManyWithoutSpriteVariantInput
 }
 
@@ -639,6 +725,9 @@ export type SpriteVariantUpdateManyWithWhereWithoutSpriteInput = {
 }
 
 export type SpriteVariantCreateWithoutUserCollectionsInput = {
+  imageUrl?: string | null
+  imageStorageId?: string | null
+  isReleased: boolean
   season: Prisma.SeasonCreateNestedOneWithoutSpriteVariantsInput
   variant: Prisma.VariantCreateNestedOneWithoutSpriteVariantsInput
   sprite: Prisma.SpriteCreateNestedOneWithoutSpriteVariantsInput
@@ -649,6 +738,9 @@ export type SpriteVariantUncheckedCreateWithoutUserCollectionsInput = {
   seasonId: number
   variantId: number
   spriteId: number
+  imageUrl?: string | null
+  imageStorageId?: string | null
+  isReleased: boolean
 }
 
 export type SpriteVariantCreateOrConnectWithoutUserCollectionsInput = {
@@ -668,6 +760,9 @@ export type SpriteVariantUpdateToOneWithWhereWithoutUserCollectionsInput = {
 }
 
 export type SpriteVariantUpdateWithoutUserCollectionsInput = {
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageStorageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isReleased?: Prisma.BoolFieldUpdateOperationsInput | boolean
   season?: Prisma.SeasonUpdateOneRequiredWithoutSpriteVariantsNestedInput
   variant?: Prisma.VariantUpdateOneRequiredWithoutSpriteVariantsNestedInput
   sprite?: Prisma.SpriteUpdateOneRequiredWithoutSpriteVariantsNestedInput
@@ -678,15 +773,24 @@ export type SpriteVariantUncheckedUpdateWithoutUserCollectionsInput = {
   seasonId?: Prisma.IntFieldUpdateOperationsInput | number
   variantId?: Prisma.IntFieldUpdateOperationsInput | number
   spriteId?: Prisma.IntFieldUpdateOperationsInput | number
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageStorageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isReleased?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type SpriteVariantCreateManySeasonInput = {
   id?: number
   variantId: number
   spriteId: number
+  imageUrl?: string | null
+  imageStorageId?: string | null
+  isReleased: boolean
 }
 
 export type SpriteVariantUpdateWithoutSeasonInput = {
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageStorageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isReleased?: Prisma.BoolFieldUpdateOperationsInput | boolean
   variant?: Prisma.VariantUpdateOneRequiredWithoutSpriteVariantsNestedInput
   sprite?: Prisma.SpriteUpdateOneRequiredWithoutSpriteVariantsNestedInput
   userCollections?: Prisma.UserCollectionUpdateManyWithoutSpriteVariantNestedInput
@@ -696,6 +800,9 @@ export type SpriteVariantUncheckedUpdateWithoutSeasonInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   variantId?: Prisma.IntFieldUpdateOperationsInput | number
   spriteId?: Prisma.IntFieldUpdateOperationsInput | number
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageStorageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isReleased?: Prisma.BoolFieldUpdateOperationsInput | boolean
   userCollections?: Prisma.UserCollectionUncheckedUpdateManyWithoutSpriteVariantNestedInput
 }
 
@@ -703,15 +810,24 @@ export type SpriteVariantUncheckedUpdateManyWithoutSeasonInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   variantId?: Prisma.IntFieldUpdateOperationsInput | number
   spriteId?: Prisma.IntFieldUpdateOperationsInput | number
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageStorageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isReleased?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type SpriteVariantCreateManyVariantInput = {
   id?: number
   seasonId: number
   spriteId: number
+  imageUrl?: string | null
+  imageStorageId?: string | null
+  isReleased: boolean
 }
 
 export type SpriteVariantUpdateWithoutVariantInput = {
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageStorageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isReleased?: Prisma.BoolFieldUpdateOperationsInput | boolean
   season?: Prisma.SeasonUpdateOneRequiredWithoutSpriteVariantsNestedInput
   sprite?: Prisma.SpriteUpdateOneRequiredWithoutSpriteVariantsNestedInput
   userCollections?: Prisma.UserCollectionUpdateManyWithoutSpriteVariantNestedInput
@@ -721,6 +837,9 @@ export type SpriteVariantUncheckedUpdateWithoutVariantInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   seasonId?: Prisma.IntFieldUpdateOperationsInput | number
   spriteId?: Prisma.IntFieldUpdateOperationsInput | number
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageStorageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isReleased?: Prisma.BoolFieldUpdateOperationsInput | boolean
   userCollections?: Prisma.UserCollectionUncheckedUpdateManyWithoutSpriteVariantNestedInput
 }
 
@@ -728,15 +847,24 @@ export type SpriteVariantUncheckedUpdateManyWithoutVariantInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   seasonId?: Prisma.IntFieldUpdateOperationsInput | number
   spriteId?: Prisma.IntFieldUpdateOperationsInput | number
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageStorageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isReleased?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type SpriteVariantCreateManySpriteInput = {
   id?: number
   seasonId: number
   variantId: number
+  imageUrl?: string | null
+  imageStorageId?: string | null
+  isReleased: boolean
 }
 
 export type SpriteVariantUpdateWithoutSpriteInput = {
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageStorageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isReleased?: Prisma.BoolFieldUpdateOperationsInput | boolean
   season?: Prisma.SeasonUpdateOneRequiredWithoutSpriteVariantsNestedInput
   variant?: Prisma.VariantUpdateOneRequiredWithoutSpriteVariantsNestedInput
   userCollections?: Prisma.UserCollectionUpdateManyWithoutSpriteVariantNestedInput
@@ -746,6 +874,9 @@ export type SpriteVariantUncheckedUpdateWithoutSpriteInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   seasonId?: Prisma.IntFieldUpdateOperationsInput | number
   variantId?: Prisma.IntFieldUpdateOperationsInput | number
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageStorageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isReleased?: Prisma.BoolFieldUpdateOperationsInput | boolean
   userCollections?: Prisma.UserCollectionUncheckedUpdateManyWithoutSpriteVariantNestedInput
 }
 
@@ -753,6 +884,9 @@ export type SpriteVariantUncheckedUpdateManyWithoutSpriteInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
   seasonId?: Prisma.IntFieldUpdateOperationsInput | number
   variantId?: Prisma.IntFieldUpdateOperationsInput | number
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageStorageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isReleased?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 
@@ -791,6 +925,9 @@ export type SpriteVariantSelect<ExtArgs extends runtime.Types.Extensions.Interna
   seasonId?: boolean
   variantId?: boolean
   spriteId?: boolean
+  imageUrl?: boolean
+  imageStorageId?: boolean
+  isReleased?: boolean
   season?: boolean | Prisma.SeasonDefaultArgs<ExtArgs>
   variant?: boolean | Prisma.VariantDefaultArgs<ExtArgs>
   sprite?: boolean | Prisma.SpriteDefaultArgs<ExtArgs>
@@ -803,6 +940,9 @@ export type SpriteVariantSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   seasonId?: boolean
   variantId?: boolean
   spriteId?: boolean
+  imageUrl?: boolean
+  imageStorageId?: boolean
+  isReleased?: boolean
   season?: boolean | Prisma.SeasonDefaultArgs<ExtArgs>
   variant?: boolean | Prisma.VariantDefaultArgs<ExtArgs>
   sprite?: boolean | Prisma.SpriteDefaultArgs<ExtArgs>
@@ -813,6 +953,9 @@ export type SpriteVariantSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   seasonId?: boolean
   variantId?: boolean
   spriteId?: boolean
+  imageUrl?: boolean
+  imageStorageId?: boolean
+  isReleased?: boolean
   season?: boolean | Prisma.SeasonDefaultArgs<ExtArgs>
   variant?: boolean | Prisma.VariantDefaultArgs<ExtArgs>
   sprite?: boolean | Prisma.SpriteDefaultArgs<ExtArgs>
@@ -823,9 +966,12 @@ export type SpriteVariantSelectScalar = {
   seasonId?: boolean
   variantId?: boolean
   spriteId?: boolean
+  imageUrl?: boolean
+  imageStorageId?: boolean
+  isReleased?: boolean
 }
 
-export type SpriteVariantOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "seasonId" | "variantId" | "spriteId", ExtArgs["result"]["spriteVariant"]>
+export type SpriteVariantOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "seasonId" | "variantId" | "spriteId" | "imageUrl" | "imageStorageId" | "isReleased", ExtArgs["result"]["spriteVariant"]>
 export type SpriteVariantInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   season?: boolean | Prisma.SeasonDefaultArgs<ExtArgs>
   variant?: boolean | Prisma.VariantDefaultArgs<ExtArgs>
@@ -857,6 +1003,9 @@ export type $SpriteVariantPayload<ExtArgs extends runtime.Types.Extensions.Inter
     seasonId: number
     variantId: number
     spriteId: number
+    imageUrl: string | null
+    imageStorageId: string | null
+    isReleased: boolean
   }, ExtArgs["result"]["spriteVariant"]>
   composites: {}
 }
@@ -1288,6 +1437,9 @@ export interface SpriteVariantFieldRefs {
   readonly seasonId: Prisma.FieldRef<"SpriteVariant", 'Int'>
   readonly variantId: Prisma.FieldRef<"SpriteVariant", 'Int'>
   readonly spriteId: Prisma.FieldRef<"SpriteVariant", 'Int'>
+  readonly imageUrl: Prisma.FieldRef<"SpriteVariant", 'String'>
+  readonly imageStorageId: Prisma.FieldRef<"SpriteVariant", 'String'>
+  readonly isReleased: Prisma.FieldRef<"SpriteVariant", 'Boolean'>
 }
     
 

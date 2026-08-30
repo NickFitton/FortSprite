@@ -868,7 +868,10 @@ export const SpriteVariantScalarFieldEnum = {
   id: 'id',
   seasonId: 'seasonId',
   variantId: 'variantId',
-  spriteId: 'spriteId'
+  spriteId: 'spriteId',
+  imageUrl: 'imageUrl',
+  imageStorageId: 'imageStorageId',
+  isReleased: 'isReleased'
 } as const
 
 export type SpriteVariantScalarFieldEnum = (typeof SpriteVariantScalarFieldEnum)[keyof typeof SpriteVariantScalarFieldEnum]
@@ -876,6 +879,7 @@ export type SpriteVariantScalarFieldEnum = (typeof SpriteVariantScalarFieldEnum)
 
 export const UserCollectionScalarFieldEnum = {
   id: 'id',
+  userId: 'userId',
   seasonId: 'seasonId',
   spriteVariantId: 'spriteVariantId',
   status: 'status'
