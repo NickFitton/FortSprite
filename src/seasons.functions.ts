@@ -19,7 +19,7 @@ export const getSidebarSeasons = createServerFn({ method: "GET" }).handler(
 
 export const getLatestSeason = createServerFn({ method: "GET" }).handler(
   async () => {
-    return prisma.season.findFirstOrThrow({
+    return prisma.season.findFirst({
       select: { id: true },
       orderBy: [{ chapterNumber: "desc" }, { seasonNumber: "desc" }],
     });
