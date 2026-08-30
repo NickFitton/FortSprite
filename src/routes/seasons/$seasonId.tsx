@@ -106,6 +106,11 @@ function SeasonPage() {
             <p className="m-0 text-base leading-8 text-[var(--sea-ink-soft)]">
               Season details will appear here.
             </p>
+            {season.chapterNumber === 7 && season.seasonNumber === 3 && (
+              <p className="mt-2 text-base leading-8 text-[var(--sea-ink-soft)]">
+                Historic chapter progress will be displayed here soon.
+              </p>
+            )}
           </div>
           <Tabs
             value={overviewView}
