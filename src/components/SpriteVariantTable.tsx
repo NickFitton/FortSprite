@@ -55,6 +55,7 @@ type SpriteVariantTableProps<
   variants: TVariant[];
   spriteVariants: TSpriteVariant[];
   userCollections?: UserCollection[];
+  hideReleasedStatus?: boolean;
   onClick: (
     selection: SpriteVariantTableSelection<TSprite, TVariant, TSpriteVariant>,
   ) => void;
@@ -69,6 +70,7 @@ export function SpriteVariantTable<
   variants,
   spriteVariants,
   userCollections = [],
+  hideReleasedStatus = false,
   onClick,
 }: SpriteVariantTableProps<TSprite, TVariant, TSpriteVariant>) {
   const byVariantBySprite = useMemo(() => {
@@ -136,7 +138,11 @@ export function SpriteVariantTable<
                       <SpriteVariantCell
                         imageStorageId={spriteVariant?.imageStorageId}
                         label={`${sprite.name} ${variant.name}`}
-                        status={status}
+                        status={
+                          hideReleasedStatus && status === "Released"
+                            ? undefined
+                            : status
+                        }
                       />
                     </button>
                   </TableCell>
@@ -157,7 +163,7 @@ function SpriteVariantCell({
 }: {
   imageStorageId: string | null | undefined;
   label: string;
-  status: string;
+  status: string | undefined;
 }) {
   const imageRef = useRef<HTMLImageElement>(null);
   const storedImageUrl = useQuery(
@@ -194,9 +200,11 @@ function SpriteVariantCell({
         } ${imageStorageId ? "" : "brightness-0"}`}
         onLoad={() => setLoadedImageUrl(imageUrl)}
       />
-      <span className="absolute right-2 bottom-2 rounded-full bg-background/90 px-2 py-1 text-xs font-medium shadow-sm">
-        {status}
-      </span>
+      {status && (
+        <span className="absolute right-2 bottom-2 rounded-full bg-background/90 px-2 py-1 text-xs font-medium shadow-sm">
+          {status}
+        </span>
+      )}
     </div>
   );
 }

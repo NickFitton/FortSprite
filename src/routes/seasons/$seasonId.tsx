@@ -226,6 +226,7 @@ function SeasonPage() {
               variants={season.variants}
               spriteVariants={season.spriteVariants}
               userCollections={season.userCollections}
+              hideReleasedStatus
               onClick={async ({ sprite, variant, spriteVariant }) => {
                 if (!spriteVariant || isRecordingExtraction) {
                   return;
