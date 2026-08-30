@@ -39,6 +39,26 @@ To build this application for production:
 npm run build
 ```
 
+## Production deployment
+
+Pushing to `main` runs `.github/workflows/deploy-production.yml`. The workflow
+applies Prisma migrations, deploys Convex functions, and then builds and deploys
+the app to Vercel. Vercel's Git-triggered deployments are disabled in
+`vercel.json` so it cannot deploy ahead of the database migration.
+
+Create a protected GitHub `production` environment and add these secrets:
+
+- `DATABASE_URL`: the Prisma Postgres production connection string.
+- `CONVEX_DEPLOY_KEY`: a production deploy key with the `deployment:deploy`
+  permission.
+- `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID`: credentials for the
+  existing Vercel project.
+
+Set the application runtime variables in Vercel's **Production** environment:
+`DATABASE_URL`, `VITE_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`, and
+`VITE_CONVEX_URL`. The production Convex URL is
+`https://canny-firefly-580.eu-west-1.convex.cloud`.
+
 ## Styling
 
 This project uses [Tailwind CSS](https://tailwindcss.com/) for styling.
