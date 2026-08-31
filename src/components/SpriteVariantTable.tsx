@@ -56,6 +56,7 @@ type SpriteVariantTableProps<
   spriteVariants: TSpriteVariant[];
   userCollections?: UserCollection[];
   hideReleasedStatus?: boolean;
+  hideMissingSpriteVariantDetails?: boolean;
   onClick: (
     selection: SpriteVariantTableSelection<TSprite, TVariant, TSpriteVariant>,
   ) => void;
@@ -71,6 +72,7 @@ export function SpriteVariantTable<
   spriteVariants,
   userCollections = [],
   hideReleasedStatus = false,
+  hideMissingSpriteVariantDetails = false,
   onClick,
 }: SpriteVariantTableProps<TSprite, TVariant, TSpriteVariant>) {
   const byVariantBySprite = useMemo(() => {
@@ -95,7 +97,6 @@ export function SpriteVariantTable<
   return (
     <div className="sprite-variant-table">
       <Table className="w-fit">
-        <TableCaption>A list of all possible sprites.</TableCaption>
         <TableHeader>
           <TableRow>
             <TableHead className="w-[100px]">Sprite</TableHead>
@@ -143,9 +144,14 @@ export function SpriteVariantTable<
                           imageStorageId={spriteVariant?.imageStorageId}
                           label={`${sprite.name} ${variant.name}`}
                           status={
-                            hideReleasedStatus && status === "Released"
+                            (hideReleasedStatus && status === "Released") ||
+                            (hideMissingSpriteVariantDetails &&
+                              status === "Undefined")
                               ? undefined
                               : status
+                          }
+                          hideMissingSpriteVariantFallback={
+                            hideMissingSpriteVariantDetails
                           }
                         />
                       </button>
@@ -165,25 +171,32 @@ function SpriteVariantCell({
   imageStorageId,
   label,
   status,
+  hideMissingSpriteVariantFallback,
 }: {
   imageStorageId: string | null | undefined;
   label: string;
   status: string | undefined;
+  hideMissingSpriteVariantFallback: boolean;
 }) {
   const imageRef = useRef<HTMLImageElement>(null);
+  const isMissingSpriteVariant = imageStorageId === undefined;
   const storedImageUrl = useQuery(
     api.storage.getUrl,
     imageStorageId ? { storageId: imageStorageId as Id<"_storage"> } : "skip",
   );
-  const imageUrl = storedImageUrl ?? "/Default.webp";
+  const imageUrl =
+    isMissingSpriteVariant && hideMissingSpriteVariantFallback
+      ? null
+      : (storedImageUrl ?? "/Default.webp");
   const [loadedImageUrl, setLoadedImageUrl] = useState<string | null>(null);
 
   const isImageLoading =
-    (Boolean(imageStorageId) && storedImageUrl === undefined) ||
-    loadedImageUrl !== imageUrl;
+    imageUrl !== null &&
+    ((Boolean(imageStorageId) && storedImageUrl === undefined) ||
+      loadedImageUrl !== imageUrl);
 
   useEffect(() => {
-    if (imageRef.current?.complete) {
+    if (imageUrl && imageRef.current?.complete) {
       setLoadedImageUrl(imageUrl);
     }
   }, [imageUrl]);
@@ -196,15 +209,17 @@ function SpriteVariantCell({
           className="absolute inset-0 size-full rounded-none"
         />
       )}
-      <img
-        ref={imageRef}
-        src={imageUrl}
-        alt={label}
-        className={`absolute inset-0 size-full object-contain transition-opacity duration-150 ${
-          isImageLoading ? "opacity-0" : "opacity-100"
-        } ${imageStorageId ? "" : "brightness-0"}`}
-        onLoad={() => setLoadedImageUrl(imageUrl)}
-      />
+      {imageUrl && (
+        <img
+          ref={imageRef}
+          src={imageUrl}
+          alt={label}
+          className={`absolute inset-0 size-full object-contain transition-opacity duration-150 ${
+            isImageLoading ? "opacity-0" : "opacity-100"
+          } ${imageStorageId ? "" : "brightness-0"}`}
+          onLoad={() => setLoadedImageUrl(imageUrl)}
+        />
+      )}
       {status && (
         <span className="absolute right-2 bottom-2 rounded-full bg-background/90 px-2 py-1 text-xs font-medium shadow-sm">
           {status}

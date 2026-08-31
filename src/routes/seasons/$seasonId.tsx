@@ -353,6 +353,7 @@ function SeasonPage() {
               spriteVariants={season.spriteVariants}
               userCollections={season.userCollections}
               hideReleasedStatus
+              hideMissingSpriteVariantDetails
               onClick={async ({ sprite, variant, spriteVariant }) => {
                 if (
                   !spriteVariant ||
