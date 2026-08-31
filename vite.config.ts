@@ -10,6 +10,11 @@ import { nitro } from 'nitro/vite'
 
 const config = defineConfig({
   resolve: { tsconfigPaths: true },
+  ssr: {
+    // `pg` optionally loads `pg-native` via a guarded CommonJS require. Keep it
+    // in Node's module loader so Vite does not resolve that optional package.
+    external: ['pg'],
+  },
   plugins: [
     devtools(),
     nitro({ rollupConfig: { external: [/^@sentry\//] } }),
