@@ -1,10 +1,21 @@
 import { auth } from "@clerk/tanstack-react-start/server";
 import { createServerFn } from "@tanstack/react-start";
+import { setResponseHeader } from "@tanstack/react-start/server";
 import * as z from "zod";
 import { prisma } from "#/db";
 
+function setPublicResponseCache() {
+  setResponseHeader("Cache-Control", "public, max-age=0, must-revalidate");
+  setResponseHeader(
+    "Vercel-CDN-Cache-Control",
+    "public, s-maxage=300, stale-while-revalidate=60",
+  );
+}
+
 export const getSidebarSeasons = createServerFn({ method: "GET" }).handler(
   async () => {
+    setPublicResponseCache();
+
     return prisma.season.findMany({
       where: { isPublic: true },
       select: {
@@ -20,6 +31,8 @@ export const getSidebarSeasons = createServerFn({ method: "GET" }).handler(
 
 export const getLatestSeason = createServerFn({ method: "GET" }).handler(
   async () => {
+    setPublicResponseCache();
+
     return prisma.season.findFirst({
       where: { isPublic: true },
       select: { id: true },
@@ -28,10 +41,10 @@ export const getLatestSeason = createServerFn({ method: "GET" }).handler(
   },
 );
 
-export const getSeasonById = createServerFn({ method: "GET" })
+export const getPublicSeasonById = createServerFn({ method: "GET" })
   .validator(z.coerce.number().int().positive())
   .handler(async ({ data: seasonId }) => {
-    const { userId } = await auth();
+    setPublicResponseCache();
 
     const season = await prisma.season.findFirst({
       where: { id: seasonId, isPublic: true },
@@ -64,13 +77,6 @@ export const getSeasonById = createServerFn({ method: "GET" })
             variant: { select: { id: true } },
           },
         },
-        userCollections: {
-          where: { userId: userId ?? "" },
-          select: {
-            spriteVariantId: true,
-            status: true,
-          },
-        },
       },
     });
 
@@ -79,6 +85,27 @@ export const getSeasonById = createServerFn({ method: "GET" })
     }
 
     return season;
+  });
+
+export const getUserCollectionsForSeason = createServerFn({ method: "GET" })
+  .validator(z.coerce.number().int().positive())
+  .handler(async ({ data: seasonId }) => {
+    const { userId } = await auth();
+
+    setResponseHeader("Cache-Control", "private, no-store");
+    setResponseHeader("Vary", "Cookie, Authorization");
+
+    if (!userId) {
+      return [];
+    }
+
+    return prisma.userCollection.findMany({
+      where: { userId, seasonId },
+      select: {
+        spriteVariantId: true,
+        status: true,
+      },
+    });
   });
 
 const advanceCollectionStatusSchema = z.object({

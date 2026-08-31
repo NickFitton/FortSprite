@@ -1,5 +1,5 @@
 import { useUser } from "@clerk/tanstack-react-start";
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { Download } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -18,12 +18,30 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs";
 import { toast } from "#/components/ui/toast";
 import {
   advanceSpriteVariantCollection,
-  getSeasonById,
+  getPublicSeasonById,
+  getUserCollectionsForSeason,
 } from "#/seasons.functions";
 
+const publicSeasonCacheHeaders = {
+  "Cache-Control": "public, max-age=0, must-revalidate",
+  "Vercel-CDN-Cache-Control":
+    "public, s-maxage=300, stale-while-revalidate=60",
+};
+
+type UserCollection = {
+  spriteVariantId: number;
+  status: string;
+};
+
 export const Route = createFileRoute("/seasons/$seasonId")({
-  loader: ({ params }) => getSeasonById({ data: params.seasonId }),
+  loader: ({ params }) => getPublicSeasonById({ data: params.seasonId }),
+  staleTime: 5 * 60 * 1000,
+  headers: () => publicSeasonCacheHeaders,
   head: ({ loaderData }) => {
+    if (!loaderData) {
+      return {};
+    }
+
     const seasonLabel = `Chapter ${loaderData.chapterNumber}, Season ${loaderData.seasonNumber}`;
     const title = `${loaderData.name} — ${seasonLabel} | Fort Sprite`;
     const description = `Track released sprite variants for ${loaderData.name}, ${seasonLabel}, in Fort Sprite.`;
@@ -47,20 +65,55 @@ export const Route = createFileRoute("/seasons/$seasonId")({
 
 function SeasonPage() {
   const season = Route.useLoaderData();
-  const router = useRouter();
-  const { isSignedIn } = useUser();
+  const { isLoaded, isSignedIn, user } = useUser();
   const recordingSpriteVariantIdsRef = useRef(new Set<number>());
+  const [userCollections, setUserCollections] = useState<UserCollection[]>([]);
+  const [isUserCollectionsLoading, setIsUserCollectionsLoading] =
+    useState(false);
   const [isSavingProgressImage, setIsSavingProgressImage] = useState(false);
   const [overviewView, setOverviewView] = useState<"stats" | "chart">("stats");
   const [overviewContentHeight, setOverviewContentHeight] = useState<number>();
   const progressCaptureRef = useRef<HTMLElement>(null);
   const overviewContentRef = useRef<HTMLDivElement>(null);
   const collectionStatusBySpriteVariantId = new Map(
-    season.userCollections.map((collection) => [
+    userCollections.map((collection) => [
       collection.spriteVariantId,
       collection.status,
     ]),
   );
+
+  useEffect(() => {
+    let cancelled = false;
+
+    if (!isLoaded || !isSignedIn) {
+      setUserCollections([]);
+      setIsUserCollectionsLoading(false);
+      return;
+    }
+
+    setIsUserCollectionsLoading(true);
+    void getUserCollectionsForSeason({ data: season.id })
+      .then((collections) => {
+        if (!cancelled) {
+          setUserCollections(collections);
+        }
+      })
+      .catch((error) => {
+        console.error("Failed to load collection progress:", error);
+        if (!cancelled) {
+          setUserCollections([]);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setIsUserCollectionsLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isLoaded, isSignedIn, season.id, user?.id]);
   const releasedSpriteOverview = season.spriteVariants.reduce(
     (overview, spriteVariant) => {
       if (!spriteVariant.isReleased) {
@@ -367,7 +420,7 @@ function SeasonPage() {
               sprites={season.sprites}
               variants={season.variants}
               spriteVariants={season.spriteVariants}
-              userCollections={season.userCollections}
+              userCollections={userCollections}
               hideReleasedStatus
               hideMissingSpriteVariantDetails
               onClick={async ({ sprite, variant, spriteVariant }) => {
@@ -375,6 +428,15 @@ function SeasonPage() {
                   !spriteVariant ||
                   recordingSpriteVariantIdsRef.current.has(spriteVariant.id)
                 ) {
+                  return;
+                }
+
+                if (!isLoaded || isUserCollectionsLoading) {
+                  toast.add({
+                    title: "Loading collection progress",
+                    description:
+                      "Please wait a moment before updating a sprite.",
+                  });
                   return;
                 }
 
@@ -395,7 +457,22 @@ function SeasonPage() {
                       spriteVariantId: spriteVariant.id,
                     },
                   });
-                  await router.invalidate();
+                  setUserCollections((currentCollections) => {
+                    const withoutUpdatedSprite = currentCollections.filter(
+                      (currentCollection) =>
+                        currentCollection.spriteVariantId !== spriteVariant.id,
+                    );
+
+                    return collection
+                      ? [
+                          ...withoutUpdatedSprite,
+                          {
+                            spriteVariantId: collection.spriteVariantId,
+                            status: collection.status,
+                          },
+                        ]
+                      : withoutUpdatedSprite;
+                  });
                   let title = "Sprite removed";
                   let descriptionSuffix = "was removed from your collection.";
                   switch (collection?.status) {

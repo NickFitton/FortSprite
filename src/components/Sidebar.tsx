@@ -1,5 +1,5 @@
 import { useUser } from "@clerk/tanstack-react-start";
-import { Link, useMatchRoute } from "@tanstack/react-router";
+import { ClientOnly, Link, useMatchRoute } from "@tanstack/react-router";
 import {
   CalendarDaysIcon,
   FolderCogIcon,
@@ -42,11 +42,6 @@ export default function Sidebar({
   }>;
 }) {
   const matchRoute = useMatchRoute();
-  const { user } = useUser();
-  const visibleNavigation =
-    user?.publicMetadata.isAdmin === true
-      ? [...navigation, adminNavigation]
-      : navigation;
 
   return (
     <BaseSidebar collapsible="icon" className="border-[var(--line)]">
@@ -69,29 +64,9 @@ export default function Sidebar({
         <SidebarGroup>
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
-              {visibleNavigation.map((item) => {
-                const isActive = Boolean(
-                  matchRoute({
-                    to: item.to,
-                    fuzzy: item.to === "/admin/seasons",
-                  }),
-                );
-
-                return (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
-                      isActive={isActive}
-                      tooltip={item.title}
-                      render={<Link to={item.to} />}
-                    >
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
+            <ClientOnly fallback={<NavigationMenu items={navigation} />}>
+              <AuthenticatedNavigation />
+            </ClientOnly>
           </SidebarGroupContent>
         </SidebarGroup>
 
@@ -135,14 +110,62 @@ export default function Sidebar({
             <ThemeToggle />
           </div>
           <div className="group-data-[collapsible=icon]:hidden">
-            <ClerkHeader />
+            <ClientOnly fallback={null}>
+              <ClerkHeader />
+            </ClientOnly>
           </div>
           <div className="hidden group-data-[collapsible=icon]:block">
-            <ClerkHeader />
+            <ClientOnly fallback={null}>
+              <ClerkHeader />
+            </ClientOnly>
           </div>
         </div>
       </SidebarFooter>
       <SidebarRail />
     </BaseSidebar>
+  );
+}
+
+function AuthenticatedNavigation() {
+  const { user } = useUser();
+  const items =
+    user?.publicMetadata.isAdmin === true
+      ? [...navigation, adminNavigation]
+      : navigation;
+
+  return <NavigationMenu items={items} />;
+}
+
+function NavigationMenu({
+  items,
+}: {
+  items: ReadonlyArray<(typeof navigation)[number] | typeof adminNavigation>;
+}) {
+  const matchRoute = useMatchRoute();
+
+  return (
+    <SidebarMenu>
+      {items.map((item) => {
+        const isActive = Boolean(
+          matchRoute({
+            to: item.to,
+            fuzzy: item.to === "/admin/seasons",
+          }),
+        );
+
+        return (
+          <SidebarMenuItem key={item.title}>
+            <SidebarMenuButton
+              isActive={isActive}
+              tooltip={item.title}
+              render={<Link to={item.to} />}
+            >
+              <item.icon />
+              <span>{item.title}</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        );
+      })}
+    </SidebarMenu>
   );
 }
