@@ -11,7 +11,9 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as SeasonsRouteImport } from './routes/seasons'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SeasonsSeasonIdRouteImport } from './routes/seasons/$seasonId'
 import { Route as AdminSeasonsIndexRouteImport } from './routes/admin/seasons/index'
 import { Route as AdminSeasonsSeasonIdRouteImport } from './routes/admin/seasons/$seasonId'
@@ -26,9 +28,19 @@ const AdminRoute = AdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
+  id: '/robots.txt',
+  path: '/robots.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SeasonsRoute = SeasonsRouteImport.update({
   id: '/seasons',
   path: '/seasons',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SeasonsSeasonIdRoute = SeasonsSeasonIdRouteImport.update({
@@ -50,7 +62,9 @@ const AdminSeasonsSeasonIdRoute = AdminSeasonsSeasonIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/robots.txt': typeof RobotsDottxtRoute
   '/seasons': typeof SeasonsRouteWithChildren
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/seasons/$seasonId': typeof SeasonsSeasonIdRoute
   '/admin/seasons/$seasonId': typeof AdminSeasonsSeasonIdRoute
   '/admin/seasons/': typeof AdminSeasonsIndexRoute
@@ -58,7 +72,9 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/robots.txt': typeof RobotsDottxtRoute
   '/seasons': typeof SeasonsRouteWithChildren
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/seasons/$seasonId': typeof SeasonsSeasonIdRoute
   '/admin/seasons/$seasonId': typeof AdminSeasonsSeasonIdRoute
   '/admin/seasons': typeof AdminSeasonsIndexRoute
@@ -67,7 +83,9 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
+  '/robots.txt': typeof RobotsDottxtRoute
   '/seasons': typeof SeasonsRouteWithChildren
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/seasons/$seasonId': typeof SeasonsSeasonIdRoute
   '/admin/seasons/$seasonId': typeof AdminSeasonsSeasonIdRoute
   '/admin/seasons/': typeof AdminSeasonsIndexRoute
@@ -77,7 +95,9 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/robots.txt'
     | '/seasons'
+    | '/sitemap.xml'
     | '/seasons/$seasonId'
     | '/admin/seasons/$seasonId'
     | '/admin/seasons/'
@@ -85,7 +105,9 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
+    | '/robots.txt'
     | '/seasons'
+    | '/sitemap.xml'
     | '/seasons/$seasonId'
     | '/admin/seasons/$seasonId'
     | '/admin/seasons'
@@ -93,7 +115,9 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/robots.txt'
     | '/seasons'
+    | '/sitemap.xml'
     | '/seasons/$seasonId'
     | '/admin/seasons/$seasonId'
     | '/admin/seasons/'
@@ -102,7 +126,9 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
+  RobotsDottxtRoute: typeof RobotsDottxtRoute
   SeasonsRoute: typeof SeasonsRouteWithChildren
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -121,11 +147,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/robots.txt': {
+      id: '/robots.txt'
+      path: '/robots.txt'
+      fullPath: '/robots.txt'
+      preLoaderRoute: typeof RobotsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/seasons': {
       id: '/seasons'
       path: '/seasons'
       fullPath: '/seasons'
       preLoaderRoute: typeof SeasonsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/seasons/$seasonId': {
@@ -178,7 +218,9 @@ const SeasonsRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
+  RobotsDottxtRoute: RobotsDottxtRoute,
   SeasonsRoute: SeasonsRouteWithChildren,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

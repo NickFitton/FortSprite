@@ -3,6 +3,14 @@ import { checkAdminAccess } from "#/integrations/clerk/admin";
 
 export const Route = createFileRoute("/admin")({
   component: AdminLayout,
+  head: () => ({
+    meta: [
+      {
+        name: "robots",
+        content: "noindex, nofollow, noarchive",
+      },
+    ],
+  }),
   beforeLoad: async () => {
     const { isAdmin } = await checkAdminAccess();
 

@@ -23,6 +23,25 @@ import {
 
 export const Route = createFileRoute("/seasons/$seasonId")({
   loader: ({ params }) => getSeasonById({ data: params.seasonId }),
+  head: ({ loaderData }) => {
+    const seasonLabel = `Chapter ${loaderData.chapterNumber}, Season ${loaderData.seasonNumber}`;
+    const title = `${loaderData.name} — ${seasonLabel} | Fort Sprite`;
+    const description = `Track released sprite variants for ${loaderData.name}, ${seasonLabel}, in Fort Sprite.`;
+    const canonicalPath = `/seasons/${loaderData.id}`;
+
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "website" },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: description },
+      ],
+      links: [{ rel: "canonical", href: canonicalPath }],
+    };
+  },
   component: SeasonPage,
 });
 

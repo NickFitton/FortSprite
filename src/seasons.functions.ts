@@ -21,6 +21,7 @@ export const getSidebarSeasons = createServerFn({ method: "GET" }).handler(
 export const getLatestSeason = createServerFn({ method: "GET" }).handler(
   async () => {
     return prisma.season.findFirst({
+      where: { isPublic: true },
       select: { id: true },
       orderBy: [{ chapterNumber: "desc" }, { seasonNumber: "desc" }],
     });
@@ -32,8 +33,8 @@ export const getSeasonById = createServerFn({ method: "GET" })
   .handler(async ({ data: seasonId }) => {
     const { userId } = await auth();
 
-    return prisma.season.findUniqueOrThrow({
-      where: { id: seasonId },
+    const season = await prisma.season.findFirst({
+      where: { id: seasonId, isPublic: true },
       select: {
         id: true,
         name: true,
@@ -72,6 +73,12 @@ export const getSeasonById = createServerFn({ method: "GET" })
         },
       },
     });
+
+    if (!season) {
+      throw new Response("Season not found", { status: 404 });
+    }
+
+    return season;
   });
 
 const advanceCollectionStatusSchema = z.object({

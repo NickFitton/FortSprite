@@ -28,7 +28,24 @@ export const Route = createRootRoute({
         content: "width=device-width, initial-scale=1",
       },
       {
-        title: "FortSprite",
+        title: "Fort Sprite — Sprite collection tracker",
+      },
+      {
+        name: "description",
+        content:
+          "Track released Fort Sprite variants and build your collection season by season.",
+      },
+      {
+        property: "og:site_name",
+        content: "Fort Sprite",
+      },
+      {
+        property: "og:type",
+        content: "website",
+      },
+      {
+        name: "twitter:card",
+        content: "summary",
       },
     ],
     links: [
