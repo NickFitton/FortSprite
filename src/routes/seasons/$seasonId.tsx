@@ -125,14 +125,16 @@ function SeasonPage() {
       // the user was viewing the optional chart on screen.
       setOverviewView("stats");
       await new Promise<void>((resolve) => {
-        requestAnimationFrame(() => requestAnimationFrame(resolve));
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
       });
       await document.fonts?.ready;
 
       const captureContent = progressCapture.cloneNode(true) as HTMLElement;
       captureContent
         .querySelectorAll<HTMLElement>("[data-save-progress-image-control]")
-        .forEach((control) => control.remove());
+        .forEach((control) => {
+          control.remove();
+        });
       const overviewContent = captureContent.querySelector<HTMLElement>(
         "[data-progress-image-overview-content]",
       );
@@ -165,7 +167,7 @@ function SeasonPage() {
         ),
       );
       await new Promise<void>((resolve) => {
-        requestAnimationFrame(() => requestAnimationFrame(resolve));
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
       });
 
       const { toPng } = await import("html-to-image");
@@ -215,11 +217,6 @@ function SeasonPage() {
             <p className="m-0 text-base leading-8 text-[var(--sea-ink-soft)]">
               Season details will appear here.
             </p>
-            {season.chapterNumber === 7 && season.seasonNumber === 3 && (
-              <p className="mt-2 text-base leading-8 text-[var(--sea-ink-soft)]">
-                Historic chapter progress will be displayed here soon.
-              </p>
-            )}
             <Button
               type="button"
               variant="outline"
@@ -380,19 +377,21 @@ function SeasonPage() {
                     },
                   });
                   await router.invalidate();
+                  let title = "Sprite removed";
+                  let descriptionSuffix = "was removed from your collection.";
+                  switch (collection?.status) {
+                    case "EXTRACTED":
+                      title = "Sprite mastered";
+                      descriptionSuffix = "is mastered.";
+                      break;
+                    case "MASTERED":
+                      title = "Sprite extracted";
+                      descriptionSuffix = "was added to your collection.";
+                      break;
+                  }
                   toast.add({
-                    title:
-                      collection === null
-                        ? "Sprite removed"
-                        : collection.status === "MASTERED"
-                          ? "Sprite mastered"
-                          : "Sprite extracted",
-                    description:
-                      collection === null
-                        ? `${sprite.name} · ${variant.name} was removed from your collection.`
-                        : collection.status === "MASTERED"
-                          ? `${sprite.name} · ${variant.name} is mastered.`
-                          : `${sprite.name} · ${variant.name} was added to your collection.`,
+                    title,
+                    description: `${variant.name} ${sprite.name} ${descriptionSuffix}`,
                   });
                 } catch (error) {
                   console.error("Failed to record sprite extraction:", error);

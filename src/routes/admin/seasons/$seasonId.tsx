@@ -244,7 +244,10 @@ function RouteComponent() {
                       <ItemTitle>{name}</ItemTitle>
                       <ItemDescription>
                         {description.split("\n").map((line) => (
-                          <p key={`${id}-${line}`}>{line}</p>
+                          <>
+                            <span key={`${id}-${line}`}>{line}</span>
+                            <br key={`${id}-${line}-br`} />
+                          </>
                         ))}
                       </ItemDescription>
                     </ItemContent>
