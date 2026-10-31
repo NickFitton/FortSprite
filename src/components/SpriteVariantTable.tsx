@@ -129,11 +129,12 @@ export function SpriteVariantTable<
                     >
                       <button
                         type="button"
+                        data-collection-status={collectionStatus}
                         className={`flex min-h-10 cursor-pointer items-center text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset ${
                           collectionStatus === "MASTERED"
-                            ? "bg-yellow-200 hover:bg-yellow-300 dark:bg-yellow-400/30 dark:hover:bg-yellow-400/40"
+                            ? "bg-yellow-300 hover:bg-yellow-400"
                             : collectionStatus === "EXTRACTED"
-                              ? "bg-green-200 hover:bg-green-300 dark:bg-green-400/30 dark:hover:bg-green-400/40"
+                              ? "bg-blue-200 hover:bg-blue-300"
                               : "hover:bg-muted/50"
                         }`}
                         onClick={() =>

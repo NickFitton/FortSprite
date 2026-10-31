@@ -610,6 +610,11 @@ h1, .demo-title, .demo-section-title {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
+.sprite-variant-table td > button[data-collection-status="EXTRACTED"],
+.sprite-variant-table td > button[data-collection-status="MASTERED"] {
+  background-image: none;
+}
+
 .sprite-variant-table td > button:hover {
   transform: translateY(-3px);
   outline: 2px solid #ffffff;
@@ -636,8 +641,8 @@ h1, .demo-title, .demo-section-title {
   }
 }
 
-.season-detail .text-green-700 {
-  color: #75ffbd;
+.season-detail .text-blue-700 {
+  color: #93c5fd;
 }
 
 .season-detail .text-yellow-700 {
