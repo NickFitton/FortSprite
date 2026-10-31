@@ -148,7 +148,7 @@ function SeasonPage() {
     {
       name: "Extracted",
       value: releasedSpriteOverview.extracted,
-      color: "#16a34a",
+      color: "#2563eb",
     },
     {
       name: "Mastered",
@@ -345,7 +345,7 @@ function SeasonPage() {
                       </div>
                       <div>
                         <dt className="text-muted-foreground">Extracted</dt>
-                        <dd className="font-semibold text-green-700 dark:text-green-300">
+                        <dd className="font-semibold text-blue-700 dark:text-blue-300">
                           {releasedSpriteOverview.extracted}
                         </dd>
                       </div>
@@ -477,12 +477,12 @@ function SeasonPage() {
                   let descriptionSuffix = "was removed from your collection.";
                   switch (collection?.status) {
                     case "EXTRACTED":
-                      title = "Sprite mastered";
-                      descriptionSuffix = "is mastered.";
+                      title = "Sprite extracted";
+                      descriptionSuffix = "is extracted.";
                       break;
                     case "MASTERED":
-                      title = "Sprite extracted";
-                      descriptionSuffix = "was added to your collection.";
+                      title = "Sprite mastered";
+                      descriptionSuffix = "is mastered.";
                       break;
                   }
                   toast.add({
