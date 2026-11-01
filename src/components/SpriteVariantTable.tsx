@@ -132,7 +132,7 @@ export function SpriteVariantTable<
                         data-collection-status={collectionStatus}
                         className={`flex min-h-10 cursor-pointer items-center text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset ${
                           collectionStatus === "MASTERED"
-                            ? "bg-yellow-300 hover:bg-yellow-400"
+                            ? "bg-[#dfcf94] hover:bg-[#d3bf7a]"
                             : collectionStatus === "EXTRACTED"
                               ? "bg-blue-200 hover:bg-blue-300"
                               : "hover:bg-muted/50"
