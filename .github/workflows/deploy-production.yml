@@ -114,6 +114,9 @@ jobs:
           --
           env NITRO_PRESET=vercel pnpm run build
 
+      - name: Verify production server can load
+        run: node -e "import('./.vercel/output/functions/__server.func/index.mjs').then(() => process.exit(0)).catch(error => { console.error(error); process.exit(1) })"
+
       - name: Apply Prisma migrations
         run: pnpm exec prisma migrate deploy
         env:
