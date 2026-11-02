@@ -1,4 +1,5 @@
 import { createRouter as createTanStackRouter } from '@tanstack/react-router'
+import * as Sentry from '@sentry/tanstackstart-react'
 import { routeTree } from './routeTree.gen'
 
 export function getRouter() {
@@ -8,6 +9,10 @@ export function getRouter() {
     defaultPreload: 'intent',
     defaultPreloadStaleTime: 0,
   })
+
+  if (!router.isServer) {
+    Sentry.addIntegration(Sentry.tanstackRouterBrowserTracingIntegration(router))
+  }
 
   return router
 }

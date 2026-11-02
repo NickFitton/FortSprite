@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite'
+import { sentryTanstackStart } from '@sentry/tanstackstart-react/vite'
 import { devtools } from '@tanstack/devtools-vite'
 
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
@@ -9,6 +10,9 @@ import tailwindcss from '@tailwindcss/vite'
 import { nitro } from 'nitro/vite'
 
 const config = defineConfig({
+  define: {
+    'import.meta.env.VITE_SENTRY_RELEASE': JSON.stringify(process.env.GITHUB_SHA || process.env.VERCEL_GIT_COMMIT_SHA || 'local'),
+  },
   resolve: { tsconfigPaths: true },
   ssr: {
     // `pg` optionally loads `pg-native` via a guarded CommonJS require. Keep it
@@ -26,6 +30,15 @@ const config = defineConfig({
     }),
     rsc(),
     viteReact(),
+    sentryTanstackStart({
+      org: 'independent-dev-r0',
+      project: 'fort-sprite-tan',
+      authToken: process.env.SENTRY_AUTH_TOKEN,
+      telemetry: false,
+      sourcemaps: {
+        filesToDeleteAfterUpload: ['.output/**/*.map', '.vercel/output/**/*.map', 'dist/**/*.map'],
+      },
+    }),
   ],
 })
 

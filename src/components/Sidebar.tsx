@@ -7,7 +7,6 @@ import {
   LeafIcon,
 } from "lucide-react";
 import ClerkHeader from "../integrations/clerk/header-user.tsx";
-import ThemeToggle from "./ThemeToggle.tsx";
 import {
   Sidebar as BaseSidebar,
   SidebarContent,
@@ -106,9 +105,6 @@ export default function Sidebar({
 
       <SidebarFooter className="border-t border-[var(--line)] p-3">
         <div className="flex items-center justify-between gap-2 group-data-[collapsible=icon]:justify-center">
-          <div className="group-data-[collapsible=icon]:hidden">
-            <ThemeToggle />
-          </div>
           <div className="group-data-[collapsible=icon]:hidden">
             <ClientOnly fallback={null}>
               <ClerkHeader />
